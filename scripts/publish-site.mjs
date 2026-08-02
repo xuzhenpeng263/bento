@@ -26,6 +26,7 @@ import { dirname, join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { gatePackIndex } from './sign-packs.mjs'
+import { walk, plannedDeletions, groupDeletions } from './site-inventory.mjs'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const site = join(root, 'site')
@@ -110,6 +111,66 @@ if (existsSync(packIndex)) {
   die(`language packs are staged at ${packsDir.slice(site.length + 1)} but packs.json is MISSING — an unsigned pack must never be published.\n  Fix: node scripts/sign-packs.mjs ${packsDir} --out ${packIndex}`)
 }
 
+// ---- the release channel may never go BACKWARDS ----------------------------
+//
+// `site/` is local staging, and the thing that fills its `releases/` is a
+// DIFFERENT process — release.mjs, run from a clean checkout of the tag, per
+// RELEASING.md. So an everyday working tree can easily hold a months-old
+// manifest while the live site serves something much newer. Mirroring that
+// with --delete republishes the old signed shell and manifest on top of the
+// new one.
+//
+// That is not a cosmetic regression. Every shipped deck checks this manifest
+// and enforces version monotonicity, so a downgrade takes the whole update
+// channel offline for files already in the world, and hands new visitors an
+// older app. It is the same lesson as the guestbook deletion above — "this
+// build didn't produce it" is not evidence it should be replaced — applied to
+// the one artifact nobody can repair from their side.
+//
+// Caught before it happened: a publish from a tree staged at 1.0.11 while
+// bento.page served 1.0.13.
+const manifestVersion = (file) => {
+  try {
+    const outer = JSON.parse(readFileSync(file, 'utf8'))
+    return JSON.parse(outer.payload).version ?? null
+  } catch { return null }
+}
+/** semver-ish compare, matching kernel/src/update.ts compareVersions */
+const cmpVersion = (a, b) => {
+  const pa = String(a).split('.').map(Number)
+  const pb = String(b).split('.').map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pa[i] ?? 0) - (pb[i] ?? 0)
+    if (d) return d < 0 ? -1 : 1
+  }
+  return 0
+}
+{
+  const localManifest = join(site, 'releases/slides/manifest.json')
+  const liveManifest = join(dest, 'releases/slides/manifest.json')
+  const local = manifestVersion(localManifest)
+  const live = manifestVersion(liveManifest)
+  if (local && live && cmpVersion(local, live) < 0) {
+    if (!args.includes('--allow-release-downgrade')) {
+      die(
+        `this tree would PUBLISH AN OLDER RELEASE than the one already live:\n` +
+        `    staged in site/ : ${local}\n` +
+        `    live on the site: ${live}\n` +
+        `  Every shipped deck checks this manifest and enforces version\n` +
+        `  monotonicity, so publishing ${local} over ${live} breaks updates for\n` +
+        `  files already in the world.\n\n` +
+        `  Releases are assembled from a clean checkout of the tag (RELEASING.md),\n` +
+        `  so this working tree's site/ is simply stale — it is not the release.\n` +
+        `  Publish from the release checkout, or refresh site/releases/ from the\n` +
+        `  live tree first. Deliberate rollback: --allow-release-downgrade.`,
+      )
+    }
+    console.log(`⚠ publishing ${local} OVER live ${live} — downgrade allowed explicitly`)
+  } else if (local && live && cmpVersion(local, live) > 0) {
+    console.log(`• release channel: ${live} → ${local}`)
+  }
+}
+
 // ---- mirror site/ → dest (authoritative; never touches dest/.git) ----------
 // NEVER DELETE WHAT THIS BUILD DID NOT PRODUCE.
 //
@@ -123,10 +184,74 @@ if (existsSync(packIndex)) {
 // The landing page is now written unconditionally (release.mjs), so only the
 // deck needs protecting, and only when this build has none to offer.
 const rsyncFlags = ['-a', '--delete', '--exclude', '.git']
+const excluded = ['.git']
 if (!existsSync(join(site, 'guestbook.bento.html'))) {
   rsyncFlags.push('--exclude', 'guestbook.bento.html')
+  excluded.push('guestbook.bento.html')
   console.log('• no guestbook deck in this build (no local epoch) — leaving the published one untouched')
 }
+
+// ---- gate: a publish may not DELETE what is already published --------------
+//
+// The exclusion above is one hardcoded filename. It is not a mechanism, and
+// the failure it patches is general: `site/` is assembled by a process that
+// knows about ONE app, and the mirror is authoritative, so anything the
+// assembler did not write is removed from the live site.
+//
+// Measured, not theorised. A cloned `release.mjs --app spaces` staged a spaces
+// site and this script mirrored it against a copy of the real bento-site:
+// 52 deletions, every existing gate green, nothing refused — including
+// `releases/slides/manifest.json`, all 22 signed language packs, the shell,
+// `slides/index.html`, all four gallery decks and `guestbook/index.html`.
+// Shipped slides files would then 404 on both their launch update check and
+// their pack channel, permanently, with no way to repair it from their side.
+//
+// The existing gates could not catch it because they are FAIL-OPEN: the
+// shell-consistency gate and the pack-index gate are both `if (existsSync(…))`
+// over a path in `site/`, so an artifact that is *missing* — exactly the
+// dangerous case — skips the check rather than tripping it. This gate is
+// fail-CLOSED: it inventories the destination, and anything it cannot account
+// for stops the publish.
+//
+// Deletions are singled out from changes deliberately. A changed file is a
+// release doing its job, and the manifest downgrade above already guards the
+// one change nobody can repair. A deletion is unrecoverable from the client
+// side and is never what a publish means to do.
+{
+  let published
+  try {
+    published = walk(dest)
+  } catch (e) {
+    // Fail CLOSED. An unreadable destination is the case where we know least
+    // about what we are about to overwrite, so it is the last place to guess.
+    die(`cannot inventory the published site at ${dest} — refusing to mirror over it.\n  ${e.message}`)
+  }
+  const deletions = plannedDeletions(published, walk(site), excluded)
+
+  if (deletions.length) {
+    if (!args.includes('--allow-deletions')) {
+      die(
+        `this publish would DELETE ${deletions.length} file(s) that are live on bento.page:\n` +
+        groupDeletions(deletions).map(([g, n]) => `    · ${g}${n > 1 ? `  (${n} files)` : ''}`).join('\n') +
+        '\n\n' +
+        `  Full list: ${deletions.slice(0, 40).join(', ')}${deletions.length > 40 ? ', …' : ''}\n\n` +
+        `  A publish assembles site/ for ONE app and mirrors it authoritatively,\n` +
+        `  so every artifact another app or an earlier build produced is missing\n` +
+        `  from site/ and would be removed from the live site. Files already in\n` +
+        `  the world check their manifest and pack channel at those paths; a\n` +
+        `  deletion takes them offline permanently and cannot be repaired from\n` +
+        `  the client side.\n\n` +
+        `  If site/ is simply incomplete, rebuild it (release.mjs) or restore the\n` +
+        `  missing artifacts from the published tree before publishing.\n` +
+        `  Deliberate removal: --allow-deletions.`,
+      )
+    }
+    console.log(`⚠ deleting ${deletions.length} published file(s) — allowed explicitly`)
+  } else {
+    console.log(`• deletion gate: ${published.length} published file(s), none would be removed ✓`)
+  }
+}
+
 if (dry) rsyncFlags.push('-n', '-v', '--itemize-changes')
 console.log(`• ${dry ? 'DRY-RUN ' : ''}mirroring ${site}/ → ${dest}/`)
 run('rsync', [...rsyncFlags, `${site}/`, `${dest}/`])

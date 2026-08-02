@@ -75,9 +75,25 @@ verify the manifest signature against the public key embedded in every shell.
    including scratch ones (a `backup/…` tag from a history rewrite escaped this
    way and had to be deleted from the remote).
 
-4. `node scripts/release.mjs` — builds, signs, assembles `./site/`
-   (CNAME, landing page, live demo, download, signed manifest, language packs
-   + their signed index).
+4. `node scripts/release.mjs [--app slides|spaces]` — builds, signs, assembles
+   `./site/` (CNAME, landing page, live demo, download, signed manifest,
+   language packs + their signed index). `--app` defaults to `slides`.
+
+   **One release builds one app.** `site/` is mirrored authoritatively, so the
+   script SEEDS it from the published tree first and overwrites only what this
+   build produces — that is what stops a spaces release from deleting slides'
+   signed shell, manifest and 22 language packs, which shipped files fetch by
+   frozen URL and cannot recover.
+
+   It therefore needs the published tree beside this repo (`../bento-site`, or
+   `BENTO_SITE_DIR`) and **refuses without one**. Pull it before releasing, or
+   you will restore a stale copy of every app you are not building. The very
+   first release of a brand-new site is the one exception:
+   `--allow-missing-published`.
+
+   The shared site — landing, gallery, agent guide, skills, `/help`, `/q`, 404,
+   guestbook — is slides-derived and rebuilt only by a slides release. Every
+   other app leaves the published copies untouched.
 5. Publish `./site/` to the public site repo — one step:
 
    ```sh
@@ -111,6 +127,19 @@ verify the manifest signature against the public key embedded in every shell.
    Preview any publish first with `--dry`. `publish-site.mjs` also re-seeds the
    live **guestbook daemon** onto the freshly-published shell as a best-effort
    final step (see below) — no separate command needed.
+
+   > **Publish site-only changes from a tree whose `site/releases/` is current.**
+   > `site/` is local staging, and releases are assembled from a clean checkout
+   > of the tag (step 3) — so an everyday working tree can hold a months-old
+   > manifest while bento.page serves something far newer. Mirroring that would
+   > republish the older signed shell over the newer one and break the update
+   > channel for every deck already in the world.
+   >
+   > `publish-site.mjs` refuses this: it compares the staged manifest version
+   > against the live one and dies if the staged one is older. If you hit that,
+   > you are publishing from the wrong tree — use the release checkout, or
+   > refresh `site/releases/` from the live site first. `--allow-release-downgrade`
+   > exists only for a deliberate rollback.
 
 6. **The GitHub release is created for you** by `publish-site.mjs` — it makes
    the release for the tag, attaches

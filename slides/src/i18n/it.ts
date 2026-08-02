@@ -728,4 +728,13 @@ export const it: Catalog = {
   "Opened {name} — ⌘S will save a copy": "{name} aperto — ⌘S salverà una copia",
   "⌘S asks where to save, then rewrites that file in place": "⌘S chiede dove salvare, poi riscrive quel file sul posto",
   "{name} is an empty copy of Bento, not a saved deck. Open it on its own to start one.": "{name} è una copia vuota di Bento, non una presentazione salvata. Aprila da sola per iniziarne una.",
+  "Fit height to text": "Adatta altezza al testo",
+  "The text needs {need}px and the box is {have}px": "Il testo richiede {need}px e la casella è di {have}px",
+  "Canvas": "Area di lavoro",
+  "Middle-drag": "Trascina col tasto centrale",
+  "scroll": "scorrimento",
+  "Pan the canvas, including past the edges of the slide": "Sposta l’area di lavoro, anche oltre i bordi della diapositiva",
+  "Zoom in and out": "Ingrandisci e riduci",
+  "Space-drag": "Spazio + trascina",
+  "Pan as well, if your mouse has a middle button": "Sposta anche, se il mouse ha il tasto centrale",
 }

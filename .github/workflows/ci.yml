@@ -122,6 +122,82 @@ jobs:
         # file carrying a script tag.
         run: node scripts/test-preview.ts
 
+      - name: WebExtension bridge rig
+        # tray/webext decides, per save, whether to write in place or hand back
+        # to the browser's own picker. Wrong in the permissive direction it
+        # overwrites the open document with no dialog — which it did once. The
+        # decision is pure logic over an options bag, so it is checkable here
+        # rather than by reloading an extension and pressing Cmd-S.
+        run: node scripts/test-webext-bridge.ts
+
+      - name: Save-intent rig
+        # A host polyfilling showSaveFilePicker sees only the options bag, and
+        # must tell "overwrite the open document" from "make a second file" from
+        # that alone. It could not, and a browser extension overwrote a deck.
+        # `id` is the signal; if the three purposes ever collapse to one value
+        # every host silently loses the distinction.
+        run: node scripts/test-savepurpose.ts
+
+      - name: Guarded storage rig
+        # localStorage's absence is hostile: reading the PROPERTY throws, so
+        # `if (localStorage)` is itself the crash and one bare read at module
+        # scope takes the whole file down before it paints. Measured in a
+        # sandboxed iframe. The rig simulates each failure mode and pins the
+        # regression: importing a module that reads storage on load must not
+        # throw when storage does.
+        run: node scripts/test-storage.ts
+
+      - name: App registry rig
+        # scripts/apps.mjs drives what a release builds, stages and signs. A
+        # release SIGNS, and the key never reaches CI, so the pipeline itself
+        # cannot be tested here — but the registry drifting from the tree can,
+        # and a wrong appId is silent: shipped shells verify it against their
+        # own configureApp() id and just stop updating.
+        run: node scripts/test-release-apps.mjs
+
+      - name: Autosave per-app database rig
+        # Every app shared one IndexedDB database AND one DB_VERSION, so spaces
+        # has been writing into slides' store, and a version bump by any new app
+        # would make every SHIPPED shell of every other app throw VersionError
+        # and lose autosave. Renaming without carrying the data over would empty
+        # a visible feature, so the migration is tested in both directions.
+        run: |
+          slides/node_modules/.bin/esbuild scripts/test-autosave.ts --bundle --platform=node --format=esm \
+            --alias:fake-indexeddb/auto=./slides/node_modules/fake-indexeddb/auto/index.js \
+            --outfile="$RUNNER_TEMP/test-autosave.mjs"
+          BENTO_TEST_APP=bento-slides node "$RUNNER_TEMP/test-autosave.mjs"
+          BENTO_TEST_APP=bento-spaces node "$RUNNER_TEMP/test-autosave.mjs"
+
+      - name: Publish deletion-gate rig
+        # A publish assembles site/ for ONE app and mirrors it authoritatively.
+        # Measured: a spaces-shaped site/ deleted 47 live files — the signed
+        # shell, the manifest, all 22 packs — with every other gate green,
+        # because those gates are `if (existsSync(...))` and skip when the
+        # artifact is missing. Shipped files cannot recover from that.
+        run: node scripts/test-publish-gate.mjs
+
+      - name: Model key tables match the format
+        # slides/src/modelkeys.generated.ts is derived from model.ts and drives
+        # validate()'s unknown-key check. A stale copy would report real
+        # properties as unknown, and an agent acting on that deletes working
+        # configuration — so the generated file is committed and pinned here.
+        run: node scripts/build-modelkeys.mjs --check
+
+      - name: Document validation rig
+        # validate() is only useful if it is trusted: the rig proves the starter
+        # deck and a realistic chart stay silent, and that a deliberately broken
+        # deck trips every check.
+        run: |
+          slides/node_modules/.bin/esbuild scripts/test-validate.ts --bundle --platform=node --format=esm --outfile="$RUNNER_TEMP/test-validate.mjs"
+          node "$RUNNER_TEMP/test-validate.mjs"
+
+      - name: Built-in layout geometry rig
+        # The built-ins are drawn against 1600x900 while the model default is
+        # 1280x720, so they used to hang 200px off the right edge of a default
+        # deck. Nothing structural could see it — the fix is arithmetic, and so
+        # is the regression.
+        run: node scripts/test-layouts.ts
+
       - name: Clipboard embedded-font rig
         run: |
           slides/node_modules/.bin/esbuild scripts/test-clipboard.ts --bundle --platform=node --format=esm --outfile="$RUNNER_TEMP/test-clipboard.mjs"

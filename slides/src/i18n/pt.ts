@@ -726,4 +726,13 @@ export const pt: Catalog = {
   "Slide number": "Número do slide",
   "Progress bar": "Barra de progresso",
   "Corner arrows": "Setas de canto",
+  "Fit height to text": "Ajustar altura ao texto",
+  "The text needs {need}px and the box is {have}px": "O texto precisa de {need}px e a caixa tem {have}px",
+  "Canvas": "Tela",
+  "Middle-drag": "Arrastar com o botão do meio",
+  "scroll": "rolagem",
+  "Pan the canvas, including past the edges of the slide": "Deslocar a tela, inclusive para além das bordas do slide",
+  "Zoom in and out": "Ampliar e reduzir",
+  "Space-drag": "Espaço + arrastar",
+  "Pan as well, if your mouse has a middle button": "Também desloca, se o rato tiver botão do meio",
 }

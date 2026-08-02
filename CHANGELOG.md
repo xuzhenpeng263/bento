@@ -11,6 +11,109 @@ pre-1.0.
 
 ## [Unreleased]
 
+- **"Save a copy…" and share exports remember their own folder.** The save
+  picker used one identity for every kind of save, so it opened wherever you
+  last put a view-only copy even when you were saving your working file.
+  In-place saves, copies and share exports now each remember their own last
+  location.
+
+  Underneath, this makes the *intent* of a save visible to anything hosting
+  Bento — `tray/ios`, and browser hosts — which previously could not tell ⌘S
+  from "Save a copy…" at all, because both arrived with identical arguments.
+
+- **Fix: the topbar came back in the wrong order after the window narrowed and
+  widened again.** Below 700px the bar folds its buttons into two menus, and
+  unfolding put them back by a rule rather than by memory — everything except
+  Redo went into the right-hand group, immediately before Format. So Comment
+  migrated out of the insert tools it belongs to, and Save ended up sitting
+  after Help. Each button now returns to the group it was authored into, in the
+  order the bar was built with.
+
+- **Fix: a deck opens where the browser refuses it storage.** With site data
+  blocked, inside some embedded webviews, or in any sandboxed frame, a Bento
+  file showed *"This file could not start"* and nothing else — because reading
+  the `localStorage` property (not calling a method on it, merely reading it)
+  throws in those contexts, and the very first thing the app did was read your
+  saved language. One unreadable preference cost you the whole document.
+
+  Preferences now fall back to their defaults instead: the deck opens and
+  behaves as it would for a first-time visitor. Anything you change during the
+  session works normally; it just is not remembered.
+
+## [1.0.14] — 2026-08-02
+
+- **Pan the canvas by dragging, and past the slide's edges.** The scrollbars
+  were the only way to move a zoomed slide, which puts the control at the edge
+  of the screen while the work is in the middle of it. **Hold space and drag**
+  to pan — the gesture nearly every canvas tool uses — or drag with the middle
+  mouse button if yours has one. On a trackpad a two-finger scroll already
+  panned once you were zoomed in, and still does.
+
+  Scrolling also used to stop dead at the slide's edges, so at high zoom a
+  corner element could never be moved off the corner of the screen to work on
+  it. There is now half a screen of room beyond every edge once you zoom past
+  fit — enough for any point on the slide to reach the middle — and none at all
+  while the whole slide fits, so a view that needs no scrollbars still has
+  none. Asked for by gcgbarbosa.
+
+- **Fit a text box to its text, in one click.** A box that is too short lets its
+  content spill over whatever sits below it, and one that is too tall throws off
+  its alignment against everything beside it — neither is visible in the numbers.
+  The Typography panel now has a button that sets the box to exactly the height
+  its text needs, and tells you what that is before you press it.
+
+  Underneath is `window.bento.measure()`, which answers the question the format
+  could not: how tall is this string at this width, in this font? Ask it with a
+  spec and you can size a box *before* creating the element, which is what turns
+  generating a deck from guess-then-correct into laying it out right the first
+  time. Requested by thinkbig1979.
+
+- **Entrances and count-ups now run on morph slides.** Both were skipped
+  wholesale on any slide reached by `transition:"morph"`, which the authoring
+  guide actively encourages — so a headline statistic rendered as a static
+  number, and an element told to sweep in from the right got a small upward
+  nudge instead.
+
+  The rule is now per element. One that morphs in from the previous slide is
+  already in motion and still ignores both. One that is **new** to the slide has
+  nothing to fight, so it counts up, and enters the way you asked — direction,
+  duration and order included. Elements with no `fx.enter` keep the automatic
+  fade-and-rise, so nothing changes in a deck that did not ask for it.
+
+- **Fix: the built-in layouts fit the slide.** They were drawn for a 1600×900
+  stage while the default deck is 1280×720, so applying *Title* put the title
+  box 160 px off the right edge and *Title + content* overflowed the bottom by
+  88 px. They are now scaled to the deck's own page size, which also makes them
+  correct for the custom sizes the slide panel offers.
+
+- **Check a deck for what the runtime silently swallows.** Almost everything
+  that goes wrong in a generated deck fails quietly: a typo'd property is
+  ignored, a `dash-march` loop on a solid stroke animates nothing, a typeface
+  the file never carried falls back to something else, and text overflows its
+  box while the JSON looks perfect. `window.bento.validate()` reports all of it
+  in one structured pass, including text overflow measured against the real
+  renderer. It only reads — it never changes the document.
+
+  Its first run found dead configuration in our own starter deck: three charts
+  carrying a chart option the renderer has never read, and two entrance
+  animations that could never play. Requested by thinkbig1979.
+
+- **Fix: two gallery templates asked for a typeface they did not carry.** The
+  Orbital and Pixel Picnic templates set their text in Instrument Sans but
+  embedded no font at all, so every viewer without that typeface installed
+  silently got Helvetica Neue instead. They now carry the face — and only the
+  face they use, rather than every font the gallery has. The failure was
+  invisible to us for the worst possible reason: whoever builds a template is
+  the person most likely to have its typeface installed.
+
+- **The agent authoring guide describes what the runtime actually does.**
+  `agents.md` gained the download URL, the real `fx.loop` parameters (and the
+  `strokeStyle` a dash-march needs to be visible), the chart option keys
+  charts-lite honours, `morphId`, layouts and `role`, column arithmetic for the
+  1280×720 canvas, and an accurate account of embedded fonts. Every gap here
+  was found by an agent authoring a deck from the guide alone, and every one of
+  them failed silently. Reported in detail by thinkbig1979.
+
 ## [1.0.13] — 2026-08-02
 
 - **Fix: fade, slide and zoom transitions animate again.** They had been

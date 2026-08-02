@@ -469,8 +469,40 @@ const hasFsAccess = () => typeof (window as any).showSaveFilePicker === 'functio
  */
 export const canWriteInPlace = () => hasFsAccess()
 
+/**
+ * What a save is FOR. The three cases want different files in different places,
+ * and until now the picker could not tell them apart.
+ *
+ * · `in-place` — ⌘S. Overwrite the document being edited.
+ * · `copy`     — "Save a copy…". A second file, chosen by the author.
+ * · `share`    — a suffixed export: view-only, presentation package, invite,
+ *                template. Deliberately a new file, and never the ⌘S target.
+ */
+export type SavePurpose = 'in-place' | 'copy' | 'share'
+
+/**
+ * The picker `id` for a purpose — and, incidentally, the only signal a HOST has
+ * about what it is being asked to do.
+ *
+ * Browsers remember the last directory used per `id`, so distinct ids are worth
+ * having on their own: exports and working files usually live in different
+ * places, and one shared id made the picker open wherever you last put a
+ * view-only copy.
+ *
+ * The other reason is not incidental. A host that polyfills
+ * `showSaveFilePicker` (tray/ios over UIDocument, tray/webext over a directory
+ * grant) sees ONLY the options bag. `saveFile(doc, forcePicker)` used to reach
+ * this function with byte-identical arguments for ⌘S and for "Save a copy…",
+ * so a host could not distinguish them — and one that guessed wrong overwrote
+ * the open document instead of copying it. Measured, in a browser extension,
+ * 2026-08-02. Intent has to be explicit in the call, because it cannot be
+ * recovered from anything else in it.
+ */
+export const pickerIdFor = (purpose: SavePurpose): string =>
+  purpose === 'in-place' ? 'bento-doc' : purpose === 'copy' ? 'bento-copy' : 'bento-share'
+
 async function pickHandle(
-  doc: KernelDoc, suffix = '', suggestedName?: string,
+  doc: KernelDoc, suffix = '', suggestedName?: string, purpose: SavePurpose = 'in-place',
 ): Promise<FsFileHandle | null> {
   try {
     // The name to offer is the file the user is ALREADY looking at, when we know
@@ -489,7 +521,7 @@ async function pickHandle(
       // browser remembers the last directory used under this id, so the second
       // update onwards opens where the first one saved.
       ...(fileHandle ? { startIn: fileHandle } : {}),
-      id: 'bento-doc',
+      id: pickerIdFor(purpose),
       types: [{ description: appConfig().appName, accept: { 'text/html': ['.html'] } }],
     })
   } catch (err: any) {
@@ -524,7 +556,9 @@ export function downloadFile(html: string, name: string) {
 export async function saveFile(doc: KernelDoc, forcePicker = false): Promise<SaveResult> {
   if (hasFsAccess()) {
     if (forcePicker || !fileHandle) {
-      const handle = await pickHandle(doc)
+      // forcePicker is only ever "Save a copy…"; a first save of an unsaved
+      // document is in-place by intent even though it must also pick.
+      const handle = await pickHandle(doc, '', undefined, forcePicker ? 'copy' : 'in-place')
       if (!handle) return 'cancelled'
       fileHandle = handle
       await writeHandle(handle, await serializeAuto(doc))
@@ -632,7 +666,7 @@ export async function writeUpdatedFileAs(
     downloadFile(html, opts.suggestedName ?? suggestedFileName(doc, opts.suffix))
     return true
   }
-  const handle = await pickHandle(doc, opts.suffix, opts.suggestedName)
+  const handle = await pickHandle(doc, opts.suffix, opts.suggestedName, 'share')
   if (!handle) return false
   // Share/export artifacts must NOT become the ⌘S target — otherwise the next
   // save would overwrite e.g. a view-only copy with the FULL document (owner
