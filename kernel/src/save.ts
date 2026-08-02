@@ -516,21 +516,32 @@ export function downloadFile(html: string, name: string) {
 /**
  * Save the document. Chrome/Edge: File System Access API (picker on first
  * save, silent rewrite after). Firefox/Safari: download a copy.
+ *
+ * Format-aware: when the held handle is a .bento.json file we write plain
+ * JSON instead of the full HTML shell. A new picker always defaults to HTML;
+ * use saveDocJson() for an explicit JSON save.
  */
 export async function saveFile(doc: KernelDoc, forcePicker = false): Promise<SaveResult> {
-  const html = await serializeAuto(doc)
   if (hasFsAccess()) {
     if (forcePicker || !fileHandle) {
       const handle = await pickHandle(doc)
       if (!handle) return 'cancelled'
       fileHandle = handle
-      await writeHandle(handle, html)
+      await writeHandle(handle, await serializeAuto(doc))
       return 'saved-as'
     }
-    await writeHandle(fileHandle, html)
+    // If the handle is a .json file, write JSON; otherwise write full HTML
+    if (/\.json$/i.test(fileHandle.name)) {
+      const json = JSON.stringify(doc)
+      const writable = await fileHandle.createWritable()
+      await writable.write(new Blob([json], { type: 'application/json' }))
+      await writable.close()
+    } else {
+      await writeHandle(fileHandle, await serializeAuto(doc))
+    }
     return 'saved'
   }
-  downloadFile(html, suggestedFileName(doc))
+  downloadFile(await serializeAuto(doc), suggestedFileName(doc))
   return 'downloaded'
 }
 
@@ -584,6 +595,23 @@ export const fileBase = (name: string) => name.replace(/\.bento\.html$/i, '').re
 /** Whether we hold a writable handle to the file (in-place update possible). */
 export const hasFileHandle = () => fileHandle !== null
 
+/**
+ * Overwrite the held file with the current document, in the format that
+ * matches the handle's extension. Use this for autosave and any silent
+ * write-back (NOT for the self-update flow, which replaces the shell).
+ */
+export async function writeUpdatedDoc(doc: KernelDoc): Promise<void> {
+  if (!fileHandle) throw new Error('no file handle')
+  if (/\.json$/i.test(fileHandle.name)) {
+    const json = JSON.stringify(doc)
+    const writable = await fileHandle.createWritable()
+    await writable.write(new Blob([json], { type: 'application/json' }))
+    await writable.close()
+  } else {
+    await writeHandle(fileHandle, await serializeAuto(doc))
+  }
+}
+
 /** Overwrite the held file with arbitrary html (the freshly updated shell). */
 export async function writeUpdatedFile(html: string): Promise<void> {
   if (!fileHandle) throw new Error('no file handle')
@@ -612,4 +640,138 @@ export async function writeUpdatedFileAs(
   if (opts.keepHandle) fileHandle = handle
   await writeHandle(handle, html)
   return true
+}
+
+// --- file open & JSON-only save (static editor mode) --------------------------
+
+/**
+ * Open a file picker for Bento files, requesting write permission at open time.
+ *
+ * Chrome/Edge: File System Access API. The handle's readwrite permission is
+ * requested INSIDE the same user gesture as the open — without that a later
+ * save would need its own picker (exactly the problem this feature exists to
+ * avoid).
+ *
+ * Other browsers: falls back to a plain `<input type="file">`; the returned
+ * handle is null and saves will download instead.
+ */
+export async function openFilePicker(): Promise<{
+  handle: FsFileHandle | null
+  content: string
+  name: string
+} | null> {
+  if (hasFsAccess()) {
+    try {
+      const [handle] = await (window as any).showOpenFilePicker({
+        types: [
+          {
+            description: 'Bento files',
+            accept: { 'text/html': ['.html'], 'application/json': ['.json'] },
+          },
+        ],
+        id: 'bento-open',
+      })
+      const name: string = handle.name
+      // ORDER MATTERS: requestPermission needs the live user gesture, and the
+      // open picker IS that gesture. Reading the file (>600KB for a full
+      // .bento.html) could spend the activation, so request first.
+      let writable = false
+      if (handle.requestPermission) {
+        try {
+          writable = (await handle.requestPermission({ mode: 'readwrite' })) === 'granted'
+        } catch {
+          /* denied, or activation already spent — opens read-only */
+        }
+      }
+      const content: string = await handle.getFile().then((f: File) => f.text())
+      if (writable) adoptFileHandle(handle as FsFileHandle)
+      return { handle: writable ? (handle as unknown as FsFileHandle) : null, content, name }
+    } catch (err: any) {
+      if (err?.name === 'AbortError') return null
+      throw err
+    }
+  }
+  // Fallback: traditional file input (read-only — no write-back possible)
+  return new Promise((resolve) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.bento.html,.bento.json,application/json,text/html'
+    const cleanup = () => input.remove()
+    input.addEventListener('change', async () => {
+      const file = input.files?.[0]
+      cleanup()
+      if (!file) { resolve(null); return }
+      resolve({ handle: null, content: await file.text(), name: file.name })
+    })
+    input.addEventListener('cancel', () => { cleanup(); resolve(null) })
+    // If the user clicks away without choosing, the dialog closes and we
+    // never hear about it. A focus-return catches the common case.
+    const onFocus = () => {
+      window.removeEventListener('focus', onFocus)
+      setTimeout(() => {
+        if (!input.files?.length) { cleanup(); resolve(null) }
+      }, 300)
+    }
+    window.addEventListener('focus', onFocus)
+    input.click()
+  })
+}
+
+/**
+ * Extract document JSON from a file's raw text content.
+ *
+ * - `.bento.json` files: the whole file IS the document JSON.
+ * - `.bento.html` files: the document lives in `<script id="bento-doc">`.
+ *   An empty block means the file is a pristine Bento shell, not a saved deck.
+ */
+export function extractDocJson(content: string, name: string): string | null {
+  if (/\.json$/i.test(name)) {
+    try { JSON.parse(content); return content } catch { return null }
+  }
+  // .bento.html: extract from the data block
+  const el = new DOMParser().parseFromString(content, 'text/html').querySelector(`#${DATA_BLOCK_ID}`)
+  return el?.textContent?.trim() || null
+}
+
+/**
+ * Download the document as a standalone JSON file (no HTML shell).
+ *
+ * This is the lightweight interchange format: small enough for AI chats,
+ * version-control friendly, and still a valid Bento document that any
+ * Bento editor can open.
+ */
+export function downloadDocJson(doc: KernelDoc, name?: string): void {
+  const json = JSON.stringify(doc, null, 2)
+  const base = name
+    ? fileBase(name)
+    : (doc.title || 'Untitled').replace(/[^\w\d-]+/g, '_').replace(/^_+|_+$/g, '')
+  const filename = `${base || 'Untitled'}.bento.json`
+  const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  setTimeout(() => URL.revokeObjectURL(url), 5000)
+}
+
+/**
+ * Save only the document JSON to disk.
+ *
+ * When the open file was itself a `.bento.json` AND we hold a writable
+ * handle, we rewrite it in place. Otherwise we download a copy — mixing
+ * JSON content into a `.bento.html` handle would break the format the
+ * user chose at open time.
+ */
+export async function saveDocJson(doc: KernelDoc): Promise<SaveResult> {
+  const json = JSON.stringify(doc)
+  if (hasFsAccess() && fileHandle) {
+    if (/\.json$/i.test(fileHandle.name)) {
+      const writable = await fileHandle.createWritable()
+      await writable.write(new Blob([json], { type: 'application/json' }))
+      await writable.close()
+      return 'saved'
+    }
+  }
+  downloadDocJson(doc, currentFileName() ?? undefined)
+  return 'downloaded'
 }

@@ -9,19 +9,19 @@ import { configureApp, appConfig } from '../../kernel/src/app.ts'
 import {
   capturePristine, readEmbeddedDoc, serializeFile, serializeAuto, downloadFile,
   suggestedFileName, parseEnvelope, decryptEnvelope, setEncryptionPassword,
-  registerPreview,
+  registerPreview, extractDocJson,
 } from './save'
 import { buildSlidePreview } from './preview'
 import { APP_VERSION, checkForUpdates, buildUpdatedFile, applyUpdate } from './update'
 import { i18nApi, t, applyDirection } from './i18n'
 import { parseDoc, type BentoDoc } from './model'
-import { starterDoc } from './starterdeck'
 import { injectFonts } from './fonts'
 import { Store } from './store'
 import { Editor } from './editor/editor'
 import { startPresentation } from './present'
 import { SyncSession } from './sync/session'
 import { onlineTransport, startSharing, stopSharing } from './sync/online'
+import { renderWelcome, type WelcomeResult } from './welcome'
 
 // Tell the kernel who this app is — must precede any kernel module use
 // (window title suffix, save-picker label, update manifest + its `app` check).
@@ -53,7 +53,15 @@ const envelope = embedded ? parseEnvelope(embedded) : null
 if (envelope) {
   void passwordGate()
 } else {
-  bootWith((embedded && parseDoc(embedded)) || starterDoc())
+  const doc = embedded ? parseDoc(embedded) : null
+  if (doc) {
+    bootWith(doc)
+  } else {
+    // No embedded document — show the welcome page (static web deployment).
+    // The welcome page offers file-open, new-deck, and drag-and-drop;
+    // on selection it calls bootWith through the ready callback.
+    showWelcome()
+  }
 }
 
 /** Encrypted file: ask for the password (looping on failure), then boot. */
@@ -98,9 +106,61 @@ async function passwordGate() {
   input.focus()
 }
 
-function bootWith(doc: BentoDoc) {
+/**
+ * No embedded document: show the welcome page.
+ *
+ * The welcome page offers three paths into the editor:
+ * 1. Open a .bento.html or .bento.json file (with write-permission request)
+ * 2. Start a new blank deck from the starter template
+ * 3. Drag-and-drop a file (handled by the editor's existing drop listener)
+ *
+ * The drag-and-drop path is special: the welcome page stays up until a file
+ * is dropped, at which point the editor's openDroppedDeck loads it and the
+ * welcome page is dismissed by the editor's existing file-chip logic.
+ */
+function showWelcome() {
+  let cleanup = () => {}
+  const dismiss = renderWelcome((result: WelcomeResult) => {
+    cleanup()
+    bootWith(result.doc, result.openedAs)
+  })
+
+  // Drag-and-drop during the welcome screen: the editor isn't mounted yet,
+  // so there is no openDroppedDeck listener. Listen here and forward.
+  const onDrop = async (ev: DragEvent) => {
+    const item = [...(ev.dataTransfer?.items ?? [])].find((i) => i.kind === 'file')
+    const named = ev.dataTransfer?.files?.[0]?.name ?? ''
+    if (!item || !/\.(bento\.html|json)$/i.test(named)) return
+    ev.preventDefault()
+    const file = ev.dataTransfer?.files?.[0]
+    if (!file) return
+    const content = await file.text()
+    const json = extractDocJson(content, named)
+    if (!json) return
+    const doc = parseDoc(json)
+    if (!doc) return
+    cleanup()
+    bootWith(doc, named)
+  }
+  const onDragOver = (ev: DragEvent) => {
+    if ([...ev.dataTransfer?.items ?? []].some((i) => i.kind === 'file')) {
+      ev.preventDefault()
+    }
+  }
+  document.addEventListener('drop', onDrop)
+  document.addEventListener('dragover', onDragOver)
+
+  // Cleanup removes the welcome DOM and the temporary drag listeners
+  cleanup = () => {
+    document.removeEventListener('drop', onDrop)
+    document.removeEventListener('dragover', onDragOver)
+    dismiss()
+  }
+}
+
+function bootWith(doc: BentoDoc, openedAs?: string) {
   if (doc.readonly) playerMode(doc)
-  else editorMode(doc)
+  else editorMode(doc, openedAs)
 }
 
 /**
@@ -133,7 +193,7 @@ function playerMode(doc: BentoDoc) {
   start()
 }
 
-function editorMode(doc: BentoDoc) {
+function editorMode(doc: BentoDoc, openedAs?: string) {
 
 document.title = `${doc.title} — ${appConfig().appName}`
 
@@ -143,6 +203,7 @@ if (doc.fonts?.length) injectFonts(doc)
 
 const store = new Store(doc)
 const editor = new Editor(document.getElementById('app')!, store)
+if (openedAs) editor.openedAs = openedAs
 
 // Live collaboration (bento-sync): same-machine tabs sync automatically over
 // BroadcastChannel; the online relay transport joins via the Share UI.

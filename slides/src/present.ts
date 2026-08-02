@@ -969,16 +969,25 @@ export function startPresentation(
     updateSpeaker()
   }) as any)
 
-  // Clicking an element with a link jumps to its target slide.
+  // Click-to-advance: clicking the slide area goes to the next slide.
+  // Linked elements jump to their target; media/video controls let the
+  // browser handle the click natively.
   slidesEl.addEventListener('click', (ev) => {
     const target = (ev.target as HTMLElement).closest<HTMLElement>('[data-link]')
-    if (!target) return
-    const idx = doc.slides.findIndex((s) => s.id === target.dataset.link)
-    if (idx >= 0) {
-      ev.preventDefault()
-      ev.stopPropagation()
-      deck.slide(idx, 0)
+    if (target) {
+      const idx = doc.slides.findIndex((s) => s.id === target.dataset.link)
+      if (idx >= 0) {
+        ev.preventDefault()
+        ev.stopPropagation()
+        deck.slide(idx, 0)
+      }
+      return
     }
+    // Let native controls (video/audio) and other interactive elements
+    // handle their own clicks — don't advance past them.
+    const interactive = (ev.target as HTMLElement).closest('video,audio,button,a,input,select,textarea,[contenteditable="true"]')
+    if (interactive) return
+    if (hasNext()) goNext()
   })
 
   deck.initialize().then(() => {

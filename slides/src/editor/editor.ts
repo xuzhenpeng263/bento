@@ -17,7 +17,7 @@ import { renderSlide, renderThumbnail } from '../render'
 import { SlideCanvas } from './canvas'
 import { PropsPanel } from './panels'
 import { startPresentation } from '../present'
-import { adoptFileHandle, canWriteInPlace, currentFileName, fileBase, hasFileHandle, isEncryptionActive, openedFileName, saveFile, serializeAuto, serializeFile, setEncryptionPassword, writeUpdatedFile, writeUpdatedFileAs } from '../save'
+import { adoptFileHandle, canWriteInPlace, currentFileName, downloadFile, fileBase, hasFileHandle, isEncryptionActive, openFilePicker, extractDocJson, openedFileName, saveDocJson, saveFile, serializeAuto, serializeFile, setEncryptionPassword, suggestedFileName, writeUpdatedDoc, writeUpdatedFileAs } from '../save'
 import { addVersion, clearRecovery, clearVersions, docContentKey, getRecovery, listVersions, pruneOld, putRecovery, type Snapshot } from '../autosave'
 import { insertElements, insertSlides, parseClip, serializeElements, serializeSlides } from './clipboard'
 import { openSpeakerWindow, speakerIdleBody } from '../screens'
@@ -63,7 +63,8 @@ export class Editor {
   private dirtyDot!: HTMLElement
   private fileChip?: HTMLElement
   /** Name of a deck opened by DROP when no writable handle came with it. */
-  private openedAs?: string
+  /** File name this document was opened as (set on file open/drop). */
+  openedAs?: string
   private thumbTimer = 0
   private presenting = false
   private updatesB!: HTMLElement
@@ -674,6 +675,19 @@ export class Editor {
     {
       // FILE operations only — everything that goes to OTHER PEOPLE lives in
       // the Share panel (one mental model: Save = for me, Share = for others).
+      item(ICONS.code, t('Open File…'),
+        t('Open a .bento.html or .bento.json file — replaces the current deck (⌘Z undoes).'),
+        () => void this.openFileIntoEditor())
+      into.appendChild(tag(div('ed-menu-sep')))
+      // Save in either format — the main ⌘S button saves in the current file's
+      // format; these always produce the named format regardless.
+      item(ICONS.save, t('Save as HTML…'),
+        t('Save the full .bento.html file — self-contained, double-click to open.'),
+        () => void this.saveAsHtml())
+      item(ICONS.code, t('Save as JSON…'),
+        t('Save only the document data as .bento.json — lightweight, git-friendly, ideal for AI tools.'),
+        () => void this.saveJsonOnly())
+      into.appendChild(tag(div('ed-menu-sep')))
       item(ICONS.copy, t('Save a copy…'),
         t('A backup of this deck for yourself — same deck, same live session.'),
         () => void this.save(true))
@@ -932,6 +946,28 @@ export class Editor {
     })
   }
 
+  /** Open a Bento file and replace the current document (undoable). */
+  private async openFileIntoEditor() {
+    if (this.store.dirty && !confirm(t('Open another file? Unsaved changes will be lost.'))) return
+    try {
+      const picked = await openFilePicker()
+      if (!picked) return
+      const { content, name } = picked
+      const json = extractDocJson(content, name)
+      if (!json) { this.toast(t('{name} doesn\'t contain a Bento document.', { name })); return }
+      const next = parseDoc(json)
+      if (!next) { this.toast(t('{name} isn\'t a valid Bento document.', { name })); return }
+      this.openedAs = name
+      this.store.replaceDoc(next)
+      this.canvas.render()
+      this.syncWindowTitle()
+      this.flashSaved(hasFileHandle() ? t('Opened {name}', { name }) : t('Opened {name} — ⌘S will save a copy', { name }))
+    } catch (err) {
+      console.error('bento: open file failed', err)
+      this.toast(t('Couldn\'t open that file — see console'))
+    }
+  }
+
   private async saveAsNewDeck() {
     const clone = JSON.parse(JSON.stringify(this.store.doc)) as import('../model').BentoDoc
     clone.docId = newDocId()
@@ -939,6 +975,57 @@ export class Editor {
     this.store.replaceDoc(clone)
     this.toast(t('This is now a new deck — save it under a new name'))
     void this.save(true)
+  }
+
+  /** Save as a self-contained .bento.html file — always full HTML.
+   *  If a .bento.json file is also open, it is kept in sync. */
+  private async saveAsHtml() {
+    this.canvas.commitTextEdit()
+    this.session?.stampInto(this.store.doc)
+    try {
+      const html = await serializeAuto(this.store.doc)
+      const name = suggestedFileName(this.store.doc)
+      const jsonHandle = hasFileHandle() && /\.json$/i.test(currentFileName() ?? '')
+      if (canWriteInPlace()) {
+        await writeUpdatedFileAs(html, this.store.doc, {
+          keepHandle: !jsonHandle, // don't swap out the JSON handle
+          suggestedName: jsonHandle ? name : undefined,
+        })
+      } else {
+        downloadFile(html, name)
+      }
+      // Keep the paired .bento.json in sync
+      if (jsonHandle) {
+        try { await saveDocJson(this.store.doc) } catch { /* best-effort */ }
+      }
+      this.toast(t('Saved'))
+    } catch (err) {
+      console.error(err)
+      this.toast(t('Save failed — see console'))
+    }
+  }
+
+  /** Save only the document JSON (no HTML shell) — lightweight interchange.
+   *  If a .bento.html file is also open, it is kept in sync. */
+  private async saveJsonOnly() {
+    this.canvas.commitTextEdit()
+    this.session?.stampInto(this.store.doc)
+    try {
+      const htmlHandle = hasFileHandle() && !/\.json$/i.test(currentFileName() ?? '')
+      const result = await saveDocJson(this.store.doc)
+      // Keep the paired .bento.html in sync
+      if (htmlHandle) {
+        try { await writeUpdatedDoc(this.store.doc) } catch { /* best-effort */ }
+      }
+      if (result === 'downloaded' && !htmlHandle) {
+        this.toast(t('Document JSON downloaded — share it or bring it back with Open File'))
+      } else {
+        this.toast(t('Saved'))
+      }
+    } catch (err) {
+      console.error(err)
+      this.toast(t('Save failed — see console'))
+    }
   }
 
   private async saveAsTemplate() {
@@ -2040,7 +2127,7 @@ export class Editor {
     if (hasFileHandle()) {
       try {
         this.session?.stampInto(doc)
-        await writeUpdatedFile(await serializeAuto(doc))
+        await writeUpdatedDoc(doc)
         this.store.setDirty(false)
         markFileSaved() // the packs went out with those bytes too
         this.flashSaved()
@@ -2468,6 +2555,11 @@ export class Editor {
       if (mod && ev.key.toLowerCase() === 's') {
         ev.preventDefault()
         this.save(false)
+        return
+      }
+      if (mod && ev.key.toLowerCase() === 'o') {
+        ev.preventDefault()
+        void this.openFileIntoEditor()
         return
       }
       if (mod && (ev.key === '=' || ev.key === '+')) {

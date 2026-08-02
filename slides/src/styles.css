@@ -2268,3 +2268,125 @@ input.ed-toggle { width: 16px; height: 16px; accent-color: #5E7699; cursor: poin
 [dir="rtl"] .ed-chart-json {
   direction: ltr;
 }
+
+/* --- welcome page (static editor deployment) -----------------------------------
+   Shown when the editor boots without an embedded document. The aesthetic
+   matches the boot splash so the transition is seamless — the splash fades
+   out and the welcome card fades in over the same dark gradient. */
+
+#bento-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 26px;
+  background: radial-gradient(130% 90% at 50% 38%, #1c2c44 0%, #101c2c 58%, #0a1220 100%);
+  animation: bwIn .45s ease both;
+}
+@keyframes bwIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.bw-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  padding: 44px 48px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  box-shadow: 0 8px 40px rgba(0,0,0,.35);
+}
+
+/* Logo mark — same geometry as the splash */
+.bw-mark {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 18px;
+  background: #16273e;
+  box-shadow: 0 0 36px rgba(255,238,214,.18), 0 6px 20px rgba(0,0,0,.45);
+  overflow: hidden;
+}
+.bw-mark i {
+  position: absolute;
+  border-radius: 6px;
+  opacity: 0;
+  animation: bwTile .45s cubic-bezier(.25,1.5,.45,1) forwards;
+}
+.bw-mark .bw-b { left: 9px; top: 9px; width: 18px; height: 62px; background: #5e7699; animation-delay: .1s; }
+.bw-mark .bw-a { right: 9px; top: 9px; width: 38px; height: 28px; background: #ff9e8a; animation-delay: .22s; }
+.bw-mark .bw-c { right: 9px; bottom: 9px; width: 38px; height: 28px; background: #f0ebe0; animation-delay: .34s; }
+@keyframes bwTile {
+  from { opacity: 0; transform: scale(.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.bw-word {
+  font: 600 20px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  color: #e8edf4;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  text-indent: .32em;
+  margin: 0;
+}
+.bw-word b { color: #ff9e8a; font-weight: 800; }
+
+.bw-desc {
+  margin: 0;
+  max-width: 360px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(232,237,244,.6);
+}
+
+.bw-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  color: #c8d0da;
+  font: 600 14px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  cursor: pointer;
+  transition: background .18s, border-color .18s, transform .12s;
+}
+.bw-btn:hover {
+  background: rgba(255,255,255,.11);
+  border-color: rgba(255,255,255,.24);
+}
+.bw-btn:active { transform: scale(.97); }
+.bw-btn:disabled { opacity: .5; pointer-events: none; }
+
+.bw-btn-primary {
+  background: #ff9e8a;
+  border-color: #ff9e8a;
+  color: #1a1c2e;
+}
+.bw-btn-primary:hover {
+  background: #ffb09e;
+  border-color: #ffb09e;
+}
+
+.bw-hint {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(232,237,244,.35);
+}
+.bw-hint.bw-err {
+  color: #ff8a80;
+}
