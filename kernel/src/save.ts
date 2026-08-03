@@ -39,6 +39,20 @@ export function capturePristine() {
   pristine = document.cloneNode(true) as Document
 }
 
+/** The intent of a save call — tells a host polyfilling showSaveFilePicker
+ *  whether it is overwriting the open document or creating a new file. */
+export type SavePurpose = 'in-place' | 'copy' | 'share'
+
+/** Maps a SavePurpose to the picker id a host sees in the options bag, so it
+ *  can reliably distinguish an in-place overwrite from a "save a copy" export. */
+export function pickerIdFor(p: SavePurpose): string {
+  if (p === 'in-place') return DATA_BLOCK_ID
+  // Copy and share must both be distinguishable from in-place AND from each
+  // other — a collapse here would mean "Save a copy" overwrites the open deck.
+  if (p === 'share') return 'bento-share'
+  return 'bento-copy'
+}
+
 export function readEmbeddedDoc(): string | null {
   const block = document.getElementById(DATA_BLOCK_ID)
   const text = block?.textContent?.trim()
