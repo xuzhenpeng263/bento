@@ -747,12 +747,25 @@ export function mountChart(el: ChartLike, host: HTMLElement, fromOption?: Record
   let disposed = false
   const clock = { t: 0 } // tween target — killed via killTweensOf(clock)
 
+  let drawPending = false
+  let pendingOpt: Opt | null = null
   const draw = (opt: Opt, sweep = 1) => {
     if (disposed) return
     host.querySelector('svg')?.remove()
     const svg = renderChart(opt, w, h, sweep, view)
     host.prepend(svg)
     wireTooltips(svg, opt)
+  }
+  // rAF-throttled redraw for zoom/pan — collapses rapid wheel/mousemove
+  // events into at most one SVG rebuild per frame
+  const scheduleDraw = (opt: Opt) => {
+    pendingOpt = opt
+    if (drawPending) return
+    drawPending = true
+    requestAnimationFrame(() => {
+      drawPending = false
+      draw(pendingOpt!)
+    })
   }
 
   // tooltip overlay — FIXED to the viewport and parented to <body>, so it is
@@ -790,23 +803,30 @@ export function mountChart(el: ChartLike, host: HTMLElement, fromOption?: Record
     svg.addEventListener('mouseleave', () => { tipEl.style.display = 'none' })
   }
 
+  let lastTipHtml = ''
+  let lastTipW = 0
+  let lastTipH = 0
+
   function showTip(title: string, rows: Array<{ name: string; value?: string; color: string }>, x: number, y: number) {
-    // in fullscreen, only the fullscreened element's subtree paints — the
-    // tip must live inside it (fixed coords stay viewport-correct)
     const tipHost = document.fullscreenElement ?? document.body
     if (tipEl.parentElement !== tipHost) tipHost.appendChild(tipEl)
-    tipEl.innerHTML =
+    const html =
       (title ? `<b>${escapeHtml(title)}</b><br>` : '') +
       rows.map((r) =>
         `<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${r.color};margin-right:5px"></span>` +
         `${escapeHtml(r.name)}${r.value !== undefined ? `: <b>${escapeHtml(r.value)}</b>` : ''}`,
       ).join('<br>')
+    // Skip full update when content hasn't changed — avoids layout thrash
+    if (html !== lastTipHtml) {
+      tipEl.innerHTML = html
+      lastTipHtml = html
+      lastTipW = tipEl.offsetWidth
+      lastTipH = tipEl.offsetHeight
+    }
     tipEl.style.display = 'block'
     // clamp within the viewport; flip below the cursor near the top edge
-    const tw = tipEl.offsetWidth
-    const cx = Math.max(tw / 2 + 6, Math.min(window.innerWidth - tw / 2 - 6, x))
-    const th = tipEl.offsetHeight
-    const above = y - th - 14 >= 4
+    const cx = Math.max(lastTipW / 2 + 6, Math.min(window.innerWidth - lastTipW / 2 - 6, x))
+    const above = y - lastTipH - 14 >= 4
     tipEl.style.transform = above ? 'translate(-50%,-110%)' : 'translate(-50%,14px)'
     tipEl.style.left = `${cx}px`
     tipEl.style.top = `${y - (above ? 6 : 0)}px`
@@ -825,7 +845,7 @@ export function mountChart(el: ChartLike, host: HTMLElement, fromOption?: Record
       view.start = Math.max(0, anchor - newSpan * fx)
       view.end = Math.min(1, view.start + newSpan)
       view.start = Math.max(0, view.end - newSpan)
-      draw(option)
+      scheduleDraw(option)
     }, { passive: false })
     let panFrom: { x: number; s: number; e: number } | null = null
     host.addEventListener('mousedown', (ev) => { panFrom = { x: ev.clientX, s: view.start, e: view.end } })
@@ -838,7 +858,7 @@ export function mountChart(el: ChartLike, host: HTMLElement, fromOption?: Record
       s = Math.max(0, Math.min(1 - span, s))
       view.start = s
       view.end = s + span
-      draw(option)
+      scheduleDraw(option)
     })
     window.addEventListener('mouseup', () => { panFrom = null })
   }

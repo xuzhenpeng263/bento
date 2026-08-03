@@ -22,8 +22,8 @@ export class Store {
   /** editor-only: which showOnHover set the canvas previews (never saved) */
   hoverPreview: string | null = null
 
-  private undoStack: string[] = []
-  private redoStack: string[] = []
+  private undoStack: BentoDoc[] = []
+  private redoStack: BentoDoc[] = []
   private listeners = new Map<StoreEvent, Set<Listener>>()
 
   /** read-only viewer: block user edits (commit) while remote ops — which
@@ -49,14 +49,31 @@ export class Store {
     return this.doc.slides[this.currentIndex]
   }
 
+  private _elCacheSlide = -1
+  private _elMap = new Map<string, SlideElement>()
+
+  /** Build the per-slide element lookup — O(n) once, then O(1) per lookup. */
+  private ensureElMap(): Map<string, SlideElement> {
+    if (this._elCacheSlide !== this.currentIndex) {
+      this._elCacheSlide = this.currentIndex
+      this._elMap.clear()
+      for (const e of this.slide.elements) this._elMap.set(e.id, e)
+    }
+    return this._elMap
+  }
+
   element(id: string): SlideElement | undefined {
-    return this.slide.elements.find((e) => e.id === id)
+    return this.ensureElMap().get(id)
   }
 
   get selectedElements(): SlideElement[] {
-    return this.selection
-      .map((id) => this.element(id))
-      .filter((e): e is SlideElement => !!e)
+    const map = this.ensureElMap()
+    const out: SlideElement[] = []
+    for (const id of this.selection) {
+      const e = map.get(id)
+      if (e) out.push(e)
+    }
+    return out
   }
 
   /**
@@ -79,7 +96,7 @@ export class Store {
 
   /** Snapshot current doc state onto the undo stack. Call BEFORE a mutation. */
   checkpoint() {
-    this.undoStack.push(JSON.stringify(this.doc))
+    this.undoStack.push(structuredClone(this.doc))
     if (this.undoStack.length > MAX_UNDO) this.undoStack.shift()
     this.redoStack.length = 0
   }
@@ -94,6 +111,7 @@ export class Store {
 
   /** Mark dirty and notify after an in-place mutation (no checkpoint). */
   touch(event: StoreEvent = 'doc') {
+    this._elCacheSlide = -1 // element list may have changed
     this.doc.modified = new Date().toISOString()
     this.setDirty(true)
     this.emit('doc')
@@ -103,11 +121,11 @@ export class Store {
   undo() { this.restore(this.undoStack, this.redoStack) }
   redo() { this.restore(this.redoStack, this.undoStack) }
 
-  private restore(from: string[], to: string[]) {
+  private restore(from: BentoDoc[], to: BentoDoc[]) {
     const snapshot = from.pop()
     if (!snapshot) return
-    to.push(JSON.stringify(this.doc))
-    this.doc = JSON.parse(snapshot)
+    to.push(structuredClone(this.doc))
+    this.doc = snapshot
     this.currentIndex = Math.min(this.currentIndex, this.doc.slides.length - 1)
     this.selection = this.selection.filter((id) => this.element(id))
     this.setDirty(true)

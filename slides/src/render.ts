@@ -29,13 +29,32 @@ export interface FieldContext {
 }
 
 /** Field context for a slide: page = 1-based position among non-state slides. */
+let _pageCacheDoc: BentoDoc | null = null
+let _pageCachePages = 0
+let _pageCacheMap = new WeakMap<Slide, number>()
+
+function visiblePageCount(doc: BentoDoc): number {
+  if (_pageCacheDoc !== doc) {
+    _pageCacheDoc = doc
+    _pageCacheMap = new WeakMap()
+    let count = 0
+    for (const s of doc.slides) {
+      if (!s.stateOf) {
+        count++
+        _pageCacheMap.set(s, count)
+      }
+    }
+    _pageCachePages = count
+  }
+  return _pageCachePages
+}
+
 export function fieldContext(doc: BentoDoc, slide: Slide): FieldContext {
-  const idx = doc.slides.indexOf(slide)
-  const upto = idx < 0 ? doc.slides : doc.slides.slice(0, idx + 1)
+  const pages = visiblePageCount(doc)
   const m = doc.meta ?? {}
   return {
-    page: upto.filter((s) => !s.stateOf).length,
-    pages: doc.slides.filter((s) => !s.stateOf).length,
+    page: _pageCacheMap.get(slide) ?? 1,
+    pages,
     title: doc.title,
     date: new Date(),
     author: m.author ?? '',
@@ -416,7 +435,11 @@ export function resolveMath(html: string): string {
 const ALLOWED_TAGS = new Set(['B', 'I', 'U', 'BR', 'SPAN', 'DIV', 'P', 'STRONG', 'EM', 'S', 'CODE'])
 
 /** Keep pasted/edited rich text down to a safe inline subset. */
+const sanitizeCache = new Map<string, string>()
+
 export function sanitizeHtml(html: string): string {
+  const cached = sanitizeCache.get(html)
+  if (cached !== undefined) return cached
   const tpl = document.createElement('template')
   tpl.innerHTML = html
   const walk = (node: Node) => {
@@ -439,7 +462,14 @@ export function sanitizeHtml(html: string): string {
   walk(tpl.content)
   const out = document.createElement('div')
   out.appendChild(tpl.content.cloneNode(true))
-  return out.innerHTML
+  const result = out.innerHTML
+  if (sanitizeCache.size > 200) {
+    // evict oldest entry
+    const first = sanitizeCache.keys().next().value
+    if (first !== undefined) sanitizeCache.delete(first)
+  }
+  sanitizeCache.set(html, result)
+  return result
 }
 
 const VALIGN: Record<string, string> = { top: 'flex-start', middle: 'center', bottom: 'flex-end' }

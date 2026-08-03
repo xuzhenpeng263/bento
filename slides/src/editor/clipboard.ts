@@ -54,7 +54,7 @@ export function serializeElements(els: SlideElement[], doc: BentoDoc): string {
   const fonts = fontsFor(els, doc)
   const payload: ClipPayload = {
     __bento: 'clip', kind: 'elements',
-    elements: JSON.parse(JSON.stringify(els)),
+    elements: structuredClone(els),
     assets: collectAssets(els, fonts, doc),
     fonts,
   }
@@ -66,7 +66,7 @@ export function serializeSlides(slides: Slide[], doc: BentoDoc): string {
   const fonts = fontsFor(els, doc)
   const payload: ClipPayload = {
     __bento: 'clip', kind: 'slides',
-    slides: JSON.parse(JSON.stringify(slides)),
+    slides: structuredClone(slides),
     assets: collectAssets(els, fonts, doc),
     fonts,
   }
@@ -116,7 +116,7 @@ export function insertElements(payload: ClipPayload, doc: BentoDoc, slide: Slide
   const remap = mergeAssets(payload, doc)
   mergeFonts(payload, doc, remap)
   const els: SlideElement[] = (payload.elements ?? []).map((e) => ({
-    ...(JSON.parse(JSON.stringify(e)) as SlideElement),
+    ...(structuredClone(e) as SlideElement),
     id: uid(e.type[0]),
     x: (e.x ?? 0) + 20, y: (e.y ?? 0) + 20,
   }))
@@ -130,7 +130,7 @@ export function insertSlides(payload: ClipPayload, doc: BentoDoc, at: number): S
   const remap = mergeAssets(payload, doc)
   mergeFonts(payload, doc, remap)
   const slides: Slide[] = (payload.slides ?? []).map((s) => {
-    const copy = JSON.parse(JSON.stringify(s)) as Slide
+    const copy = structuredClone(s) as Slide
     copy.id = uid('slide')
     if (copy.stateOf) delete copy.stateOf // a pasted state becomes a normal slide
     rewriteRefs(copy.elements, remap)

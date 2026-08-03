@@ -6,7 +6,7 @@
 export const FORMAT = 'bento/slides'
 export const FORMAT_VERSION = 1
 
-export type TransitionKind = 'none' | 'fade' | 'slide' | 'zoom' | 'morph'
+export type TransitionKind = 'none' | 'fade' | 'slide' | 'zoom' | 'morph' | 'particle'
 
 export interface ElementBase {
   /** Stable per-slide identity: `data-el-id`, selection, connector/comment

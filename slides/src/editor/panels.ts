@@ -116,7 +116,7 @@ export class PropsPanel {
     // a focused input (skip + mark stale) and catch up when focus leaves.
     store.on('selection', () => this.rebuild(true))
     store.on('current', () => this.rebuild(true))
-    store.on('doc', () => this.rebuild())
+    store.on('doc', () => this.scheduleRebuild())
     this.host.addEventListener('focusout', () => {
       setTimeout(() => {
         if (this.stale && !this.host.matches(':focus-within')) this.rebuild()
@@ -126,6 +126,17 @@ export class PropsPanel {
   }
 
   private stale = false
+  private rebuildPending = false
+
+  /** rAF-debounced rebuild for rapid doc events (slider drag, Moveable resize). */
+  private scheduleRebuild() {
+    if (this.rebuildPending) return
+    this.rebuildPending = true
+    requestAnimationFrame(() => {
+      this.rebuildPending = false
+      this.rebuild()
+    })
+  }
 
   /**
    * True only while the user is mid-edit in a control a rebuild would

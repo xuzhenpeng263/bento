@@ -568,7 +568,7 @@ export class SlideCanvas {
     // steals focus and resets the caret (the #1 rough edge reported at launch).
     // Defer the repaint and catch up the instant the edit commits; a burst of
     // remote ops coalesces into a single repaint then.
-    if (this.editing) { this.pendingRender = true; return }
+    if (this.editing || this._committingFrames) { this.pendingRender = true; return }
     this.pendingRender = false
     if (this.pathEditor?.active) this.pathEditor.cancel() // doc changed under us
     const slide = this.store.slide
@@ -816,7 +816,7 @@ export class SlideCanvas {
         // duplicate-drag: snapshot the selection now; the stationary copies
         // are committed in one undo step together with the moved frames
         this.pendingCopy = this.store.selectedElements.map(
-          (el) => JSON.parse(JSON.stringify(el)) as SlideElement,
+          (el) => structuredClone(el) as SlideElement,
         )
       }
     }
@@ -942,6 +942,8 @@ export class SlideCanvas {
   }
 
   /** Read live DOM styles back into the model in one undo step. */
+  private _committingFrames = false
+
   private commitDomFrames(nodes: HTMLElement[]) {
     if (!nodes.length) return
     const frames = nodes.map((node) => {
@@ -955,6 +957,9 @@ export class SlideCanvas {
         rotation: rotation ? Math.round(parseFloat(rotation[1]) * 10) / 10 : 0,
       }
     })
+    // DOM is already at the correct positions — skip the full re-render
+    // that store.commit()'s doc event would otherwise trigger.
+    this._committingFrames = true
     this.store.commit(() => {
       for (const f of frames) {
         const el = this.store.element(f.id)
@@ -966,6 +971,7 @@ export class SlideCanvas {
         el.rotation = f.rotation
       }
     })
+    this._committingFrames = false
   }
 
   // --- selecto ----------------------------------------------------------------

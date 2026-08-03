@@ -13,7 +13,7 @@ import { morphKey } from './model'
 import { applyElementFrame, gradientLineCoords, renderSlide } from './render'
 import { paintSpeaker, setSpeakerWindow, speakerIdleBody, speakerWindow } from './screens'
 import { t } from './i18n'
-import { lsGet, lsSet } from '../../kernel/src/storage.ts'
+import { createParticleEngine, sampleText, type ParticleEngine, type TextSample } from '../../kernel/src/particles'
 
 const MORPH_DURATION = 0.65
 const MORPH_EASE = 'power2.inOut'
@@ -41,6 +41,23 @@ export function startPresentation(
   slidesEl.className = 'slides'
   revealEl.appendChild(slidesEl)
   overlay.appendChild(revealEl)
+
+  // Particle canvas — fullscreen overlay for slide transitions
+  const particleCanvas = document.createElement('canvas')
+  particleCanvas.className = 'bento-particle-canvas'
+  particleCanvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10;display:none'
+  overlay.appendChild(particleCanvas)
+  let particleEngine: ParticleEngine | null = null
+  // Lazy init on first use — WebGL context is expensive
+  const getParticleEngine = (): ParticleEngine | null => {
+    if (particleEngine) return particleEngine
+    try {
+      particleEngine = createParticleEngine(particleCanvas, doc.size.width, doc.size.height, 50000)
+      return particleEngine
+    } catch {
+      return null // WebGL not available — silently skip particle transitions
+    }
+  }
 
   doc.slides.forEach((slide) => {
     const section = document.createElement('section')
@@ -414,7 +431,7 @@ export function startPresentation(
   const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   const readMotionPref = (): boolean | null => {
     try {
-      const v = lsGet('bento-reduce-motion')
+      const v = localStorage.getItem('bento-reduce-motion')
       return v === 'on' ? true : v === 'off' ? false : null
     } catch { return null }
   }
@@ -565,7 +582,7 @@ export function startPresentation(
 
   const setReduceMotion = (on: boolean, persist = true) => {
     reduceMotion = on
-    if (persist) lsSet('bento-reduce-motion', on ? 'on' : 'off')
+    if (persist) { try { localStorage.setItem('bento-reduce-motion', on ? 'on' : 'off') } catch { /* storage off */ } }
     overlay.classList.toggle('reduce-motion', on)
     if (on) clearLaserTrail()
     // Toast only on an explicit toggle (M / speaker button), not the silent
@@ -949,11 +966,9 @@ export function startPresentation(
       from &&
       ((forward && doc.slides[toIdx]?.transition === 'morph') ||
         (!forward && doc.slides[fromIdx]?.transition === 'morph'))
-    if (morphing) {
-      if (!reduceMotion) {
-        runMorph(doc, from!, to, fromIdx, toIdx)
-        runMorphArrivalCountUps(doc.slides[fromIdx], doc.slides[toIdx], to)
-      }
+    if (morphing) { if (!reduceMotion) runMorph(doc, from!, to, fromIdx, toIdx) }
+    else if (doc.slides[toIdx]?.transition === 'particle' && from && !reduceMotion) {
+      void runParticleTransition(doc, from, to, fromIdx, toIdx, particleCanvas, getParticleEngine)
     }
     else if (!reduceMotion) runEnterFx(doc.slides[toIdx], to)
     if (!reduceMotion) {
@@ -1087,34 +1102,104 @@ function fxNodes(slide: Slide, section: HTMLElement): Array<[SlideElement, HTMLE
   return pairs
 }
 
-type EnterKind = NonNullable<NonNullable<SlideElement['fx']>['enter']>
-
 /**
- * The starting frame, duration and ease an `fx.enter` kind implies.
- *
- * Shared by the two places an element can enter — the plain entrance runner and
- * the morph path, which gives elements with no morph partner an entrance of
- * their own. Keeping ONE table means a new direction cannot work on ordinary
- * slides and quietly do nothing on morph arrivals.
- *
- * fade-* nudge 16px; slide-* sweep 120px in from an edge (slide-left starts to
- * the RIGHT and travels leftward). x needs the x transform channel in anim.ts.
+ * Particle transition: sample text from the old slide, explode it, then
+ * reassemble into the new slide's text.
  */
-function enterSpec(kind: EnterKind, enterDur?: number) {
-  const D = 120
-  const from = { opacity: 0, x: 0, y: 0 }
-  if (kind === 'fade-up') from.y = 16
-  else if (kind === 'fade-down') from.y = -16
-  else if (kind === 'slide-left') from.x = D
-  else if (kind === 'slide-right') from.x = -D
-  else if (kind === 'slide-up') from.y = D
-  else if (kind === 'slide-down') from.y = -D
-  const sliding = kind.startsWith('slide-')
-  return {
-    from,
-    duration: enterDur ?? (sliding ? 0.75 : 0.55),
-    ease: sliding ? 'power3.out' : 'power2.out',
+async function runParticleTransition(
+  doc: BentoDoc, from: HTMLElement, to: HTMLElement,
+  _fromIdx: number, _toIdx: number,
+  canvas: HTMLCanvasElement, getEngine: () => ParticleEngine | null,
+) {
+  const eng = getEngine()
+  if (!eng) return
+
+  const size = doc.size
+  canvas.width = size.width
+  canvas.height = size.height
+  canvas.style.display = ''
+
+  const fromSample = slideTextSample(from, size)
+  const toSample = slideTextSample(to, size)
+
+  // Spawn particles exactly where old text was
+  if (fromSample.count > 0) {
+    eng.emitAt(fromSample.positions, { color: '#e8edf4', size: 3, life: 1.6 })
   }
+  // Add some ambient sparks from center
+  if (fromSample.count > 0) {
+    eng.emit({ count: Math.min(Math.floor(fromSample.count * 0.3), 6000), x: size.width / 2, y: size.height / 2, spread: 350, color: '#ff9e8a', speed: 500, size: 2.5, life: 1.0 })
+  }
+
+  // Phase 1: scatter (350ms), then fly to target
+  let elapsed = 0
+  let last = performance.now()
+  let phase2Started = false
+
+  const tick = () => {
+    const now = performance.now()
+    const dt = Math.min((now - last) / 1000, 0.05)
+    last = now
+    elapsed += dt * 1000
+
+    // After 350ms, start flying to new text positions
+    if (!phase2Started && elapsed > 350 && toSample.count > 0) {
+      phase2Started = true
+      eng.flyTo(toSample.positions, { duration: 0.7 })
+    }
+
+    eng.update(dt)
+    eng.render()
+
+    if (elapsed < 1400) {
+      requestAnimationFrame(tick)
+    } else {
+      canvas.style.display = 'none'
+      // Don't dispose — keep engine for next transition
+      // WebGL context stays alive while the presentation is active
+    }
+  }
+  requestAnimationFrame(tick)
+}
+
+/** Sample text content from all text elements in a slide section. */
+function slideTextSample(section: HTMLElement, size: { width: number; height: number }): TextSample {
+  const texts = section.querySelectorAll<HTMLElement>('.bento-text-inner')
+  let allX: number[] = []
+  let allY: number[] = []
+
+  for (const el of texts) {
+    const text = el.textContent?.trim()
+    if (!text) continue
+    const rect = el.getBoundingClientRect()
+    const parentRect = section.getBoundingClientRect()
+    const scaleX = size.width / (parentRect.width || 1)
+    const scaleY = size.height / (parentRect.height || 1)
+    const sx = (rect.left - parentRect.left) * scaleX
+    const sy = (rect.top - parentRect.top) * scaleY
+    const sw = rect.width * scaleX
+    const sh = rect.height * scaleY
+
+    const cs = getComputedStyle(el)
+    const fontSize = parseFloat(cs.fontSize || '24')
+    const fontFamily = cs.fontFamily || 'sans-serif'
+    const sampled = sampleText(text, {
+      font: `bold ${fontSize}px ${fontFamily}`,
+      density: 0.3,
+      originX: sx + sw / 2,
+      originY: sy + sh / 2,
+    })
+    for (let i = 0; i < sampled.count; i++) {
+      allX.push(sampled.positions[i * 2])
+      allY.push(sampled.positions[i * 2 + 1])
+    }
+  }
+  const out = new Float32Array(allX.length * 2)
+  for (let i = 0; i < allX.length; i++) {
+    out[i * 2] = allX[i]
+    out[i * 2 + 1] = allY[i]
+  }
+  return { positions: out, count: allX.length, width: 0, height: 0 }
 }
 
 /** Staggered entrance animations + count-ups for the incoming slide. */
@@ -1132,46 +1217,33 @@ function runEnterFx(slide: Slide, section: HTMLElement) {
     // node would fight it and freeze the dot off its path
     if (fx.loop?.type === 'motion-path') return
     if (fx.enter) {
-      const spec = enterSpec(fx.enter, fx.enterDur)
+      // directional entrances: fade-* nudge 16px, slide-* sweep 120px from an
+      // edge. x needs the x transform channel (added to anim.ts).
+      const D = 120
+      const from = { opacity: 0, x: 0, y: 0 }
+      if (fx.enter === 'fade-up') from.y = 16
+      else if (fx.enter === 'fade-down') from.y = -16
+      else if (fx.enter === 'slide-left') from.x = D // starts to the right, slides in leftward
+      else if (fx.enter === 'slide-right') from.x = -D
+      else if (fx.enter === 'slide-up') from.y = D
+      else if (fx.enter === 'slide-down') from.y = -D
+      const slide = fx.enter.startsWith('slide-')
       anim.fromTo(
         node,
-        spec.from,
+        from,
         {
           opacity: el.opacity,
           x: 0,
           y: 0,
-          duration: spec.duration,
+          duration: fx.enterDur ?? (slide ? 0.75 : 0.55),
           delay: 0.12 + Math.min(step, 24) * 0.05,
-          ease: spec.ease,
+          ease: slide ? 'power3.out' : 'power2.out',
         },
       )
     }
     if (fx.countUp) runCountUp(node)
   })
   settleGuarantee(entering.map(([el, node]) => [node, el]))
-}
-
-/**
- * Count-ups on a MORPH arrival, for elements the morph did not carry over.
- *
- * Morph and entrance are mutually exclusive branches — an entrance tween on a
- * morphing element would fight the morph — and `runCountUp` lived only on the
- * entrance side, so `fx.countUp` on a slide reached by `transition:'morph'`
- * silently rendered a static number. That is a combination the authoring guide
- * actively recommends (a headline statistic on a slide that morphs its
- * furniture in), so it failed quietly and often.
- *
- * A count-up element WITH a morph partner is already on screen showing its
- * number as it flies in; restarting it from zero would be wrong. One with no
- * partner is new on this slide, has no transform to fight, and is exactly what
- * the author asked to count.
- */
-function runMorphArrivalCountUps(from: Slide | undefined, to: Slide, section: HTMLElement) {
-  const carried = new Set((from?.elements ?? []).map((el) => el.morphId || el.id))
-  for (const [el, node] of fxNodes(to, section)) {
-    if (!el.fx!.countUp || el.showOnHover) continue
-    if (!carried.has(el.morphId || el.id)) runCountUp(node)
-  }
 }
 
 /**
@@ -1576,25 +1648,12 @@ function runMorph(
       // motion-path loops own the transform — entrance limited to opacity
       const m = toModel.get(n.dataset.flipId!)
       const owns = m?.fx?.loop?.type === 'motion-path'
-      // An explicit fx.enter WINS over the default rise. This element has no
-      // morph partner — it is new to this slide, so there is no morph tween for
-      // an entrance to fight, and the author named a direction. Elements with a
-      // partner are excluded above and keep morphing; elements with no fx.enter
-      // keep the default, so no existing deck changes unless it asked to.
-      const kind = owns ? undefined : m?.fx?.enter
-      const spec = kind ? enterSpec(kind, m?.fx?.enterDur) : null
-      const step = m?.fx?.order ?? i
       anim.fromTo(n,
-        spec ? { ...spec.from } : owns ? { opacity: 0 } : { opacity: 0, y: 14 },
+        owns ? { opacity: 0 } : { opacity: 0, y: 14 },
         {
-          opacity,
-          ...(spec ? { x: 0, y: 0 } : owns ? {} : { y: 0 }),
-          duration: spec?.duration ?? 0.45,
-          // Both stagger from the same base — the morph is 40% done before
-          // anything new arrives, so the two motions read as one beat.
-          delay: MORPH_DURATION * 0.4 +
-            (spec ? Math.min(step, 24) * 0.05 : (spread * i) / entering.length),
-          ease: spec?.ease ?? 'power2.out',
+          opacity, ...(owns ? {} : { y: 0 }), duration: 0.45,
+          delay: MORPH_DURATION * 0.4 + (spread * i) / entering.length,
+          ease: 'power2.out',
         })
     })
     settleGuarantee(entering.map(([n]) => {

@@ -323,9 +323,31 @@ export class Tween {
     // per-channel overwrite: a newer tween on the same target owns its channels
     for (const other of tweensOf(this.target)) {
       if (other === this || other.dead) continue
-      if ([...this.channels].some((c) => other.channels.has(c))) other.kill()
+      let conflict = false
+      for (const c of this.channels) { if (other.channels.has(c)) { conflict = true; break } }
+      if (conflict) other.kill()
+    }
+    // GPU layer hint for transform/opacity tweens on elements
+    if (isEl && (this.channels.has('x') || this.channels.has('y') || this.channels.has('scale') || this.channels.has('opacity'))) {
+      ;(t as HTMLElement).style.willChange = 'transform, opacity'
     }
     this.applies.forEach((a) => a(0))
+  }
+
+  private clearWillChange() {
+    if (this.target instanceof HTMLElement || this.target instanceof SVGElement) {
+      // Only clear if no other live tweens on this target still need the hint
+      const others = tweensOf(this.target)
+      let stillNeeded = false
+      for (const o of others) {
+        if (o !== this && !o.dead && o.started) {
+          if (o.channels.has('x') || o.channels.has('y') || o.channels.has('scale') || o.channels.has('opacity')) {
+            stillNeeded = true; break
+          }
+        }
+      }
+      if (!stillNeeded) (this.target as HTMLElement).style.willChange = ''
+    }
   }
 
   /** 0..1 across the whole lifetime (repeats count as complete). */
@@ -364,6 +386,7 @@ export class Tween {
     if (done) {
       this.dead = true
       unregister(this)
+      this.clearWillChange()
       this.vars.onComplete?.()
       return false
     }
@@ -374,6 +397,7 @@ export class Tween {
     if (this.dead) return
     this.dead = true
     unregister(this)
+    this.clearWillChange()
   }
 }
 
@@ -381,9 +405,16 @@ export class Tween {
 
 const live = new Set<Tween>()
 const byTarget = new Map<unknown, Set<Tween>>()
+let liveArr: Tween[] = []
+let liveDirty = true
+
+function flushLive() {
+  if (liveDirty) { liveArr = Array.from(live); liveDirty = false }
+}
 
 function register(tw: Tween) {
   live.add(tw)
+  liveDirty = true
   let set = byTarget.get(tw.target)
   if (!set) byTarget.set(tw.target, (set = new Set()))
   set.add(tw)
@@ -391,13 +422,15 @@ function register(tw: Tween) {
 
 function unregister(tw: Tween) {
   live.delete(tw)
+  liveDirty = true
   const set = byTarget.get(tw.target)
   set?.delete(tw)
   if (set && !set.size) byTarget.delete(tw.target)
 }
 
 function tweensOf(target: unknown): Tween[] {
-  return [...(byTarget.get(target) ?? [])]
+  const set = byTarget.get(target)
+  return set ? Array.from(set) : []
 }
 
 let running = false
@@ -417,7 +450,8 @@ function loop(now: number) {
   // clamp long gaps (throttled tabs) so loops don't leap wildly
   const dt = Math.min((now - last) / 1000, 0.25) * timeScale
   last = now
-  for (const tw of [...live]) tw.tick(dt)
+  flushLive()
+  for (let i = 0; i < liveArr.length; i++) liveArr[i].tick(dt)
   if (live.size) requestAnimationFrame(loop)
   else running = false
 }
@@ -440,7 +474,8 @@ export const anim = {
     return tweensOf(target)
   },
   killAll() {
-    for (const tw of [...live]) tw.kill()
+    flushLive()
+    for (let i = 0; i < liveArr.length; i++) liveArr[i].kill()
   },
   /** global playback rate (diagnostics/tests) */
   setTimeScale(n: number) {
@@ -452,7 +487,8 @@ export const anim = {
     if (!on) tickerOn()
   },
   tick(seconds: number) {
-    for (const tw of [...live]) tw.tick(seconds * timeScale)
+    flushLive()
+    for (let i = 0; i < liveArr.length; i++) liveArr[i].tick(seconds * timeScale)
   },
   get activeCount() {
     return live.size
