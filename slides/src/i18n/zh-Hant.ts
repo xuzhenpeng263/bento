@@ -773,4 +773,15 @@ export const zhHant: Catalog = {
   "Open another file? Unsaved changes will be lost.": "開啟其他檔案？未儲存的變更將遺失。",
   "{name} doesn't contain a Bento document.": "{name} 不包含 Bento 文件。",
   "Couldn't open that file — see console": "無法開啟該檔案 — 詳情請查看主控台",
+
+  // Canvas / help overlay
+  "Fit height to text": "適應文字高度",
+  "The text needs {need}px and the box is {have}px": "文字需要 {need}px，文字框為 {have}px",
+  "Canvas": "畫布",
+  "Middle-drag": "中鍵拖動",
+  "scroll": "捲動",
+  "Pan the canvas, including past the edges of the slide": "平移畫布，可超出投影片邊緣",
+  "Zoom in and out": "縮放",
+  "Space-drag": "空白鍵+拖動",
+  "Pan as well, if your mouse has a middle button": "如果滑鼠有中鍵，也可用於平移",
 }

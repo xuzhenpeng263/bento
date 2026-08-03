@@ -773,4 +773,15 @@ export const zhHans: Catalog = {
   "Open another file? Unsaved changes will be lost.": "打开其他文件？未保存的更改将丢失。",
   "{name} doesn't contain a Bento document.": "{name} 不包含 Bento 文档。",
   "Couldn't open that file — see console": "无法打开该文件 — 详情请查看控制台",
+
+  // Canvas / help overlay
+  "Fit height to text": "适应文本高度",
+  "The text needs {need}px and the box is {have}px": "文本需要 {need}px，文本框为 {have}px",
+  "Canvas": "画布",
+  "Middle-drag": "中键拖动",
+  "scroll": "滚动",
+  "Pan the canvas, including past the edges of the slide": "平移画布，可超出幻灯片边缘",
+  "Zoom in and out": "缩放",
+  "Space-drag": "空格+拖动",
+  "Pan as well, if your mouse has a middle button": "如果鼠标有中键，也可用于平移",
 }
