@@ -46,7 +46,10 @@ export class Store {
   }
 
   get slide(): Slide {
-    return this.doc.slides[this.currentIndex]
+    // Empty decks are valid (AI often clears a deck before rebuilding it).
+    // A runtime-only sentinel keeps legacy editor code inert until a real page
+    // is inserted; it is never placed in doc.slides and therefore never saved.
+    return this.doc.slides[this.currentIndex] ?? EMPTY_SLIDE
   }
 
   private _elCacheSlide = -1
@@ -167,3 +170,7 @@ export class Store {
     this.emit('selection')
   }
 }
+
+const EMPTY_SLIDE: Slide = Object.freeze({
+  id: '__bento-empty__', background: '#FFFFFF', transition: 'none', notes: '', elements: [],
+}) as Slide

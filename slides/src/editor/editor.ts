@@ -28,6 +28,7 @@ import { availablePacks, fetchPack, markFileSaved, packCoverage, packsInFile, st
 import { injectFonts } from '../fonts'
 import { appConfig } from '../../../kernel/src/app.ts'
 import { disconnectOnline, joinFromDoc, mintCollab, mintInvite, onlineTransport, rotateKeys, sharingOn, startSharing, stopSharing } from '../sync/online'
+import { AiPanel } from './ai'
 
 const i18nT = t
 
@@ -60,6 +61,8 @@ export class Editor {
   private panel!: PropsPanel
   private sidebar!: HTMLElement
   private props!: HTMLElement
+  private aiHost!: HTMLElement
+  private aiPanel: AiPanel | null = null
   private dirtyDot!: HTMLElement
   private fileChip?: HTMLElement
   /** Name of a deck opened by DROP when no writable handle came with it. */
@@ -311,7 +314,9 @@ export class Editor {
     saveGroup.append(saveB, this.saveDropdown())
     const shareD = this.shareDropdown()
     const langD = this.languageDropdown()
-    actions.append(pdfB, this.avatarsBox, shareD, saveGroup, langD, helpB)
+    const aiB = btn('<b class="ed-ai-btnmark">✦</b>', t('AI'), () => this.toggleAi(), t('AI copilot — generate and refine slides'))
+    aiB.classList.add('ed-btn-ai')
+    actions.append(pdfB, this.avatarsBox, shareD, aiB, saveGroup, langD, helpB)
 
     // Phone chrome: two menus that stay EMPTY on a wide screen. Nothing is
     // duplicated — applyPhoneChrome moves the real buttons in and out, so every
@@ -392,7 +397,8 @@ export class Editor {
       if (zb) corner.appendChild(zb)
     })
     this.props = div('ed-props')
-    main.append(this.sidebar, this.makeResizer('left'), canvasWrap, this.makeResizer('right'), this.props)
+    this.aiHost = div('ed-ai')
+    main.append(this.sidebar, this.makeResizer('left'), canvasWrap, this.makeResizer('right'), this.props, this.aiHost)
 
     this.root.append(bar, main)
 
@@ -430,8 +436,17 @@ export class Editor {
     this.canvas.onCommentModeChange = (on) => commentB.classList.toggle('ed-btn-armed', on)
     this.canvas.onSlideNav = (dir) => this.store.goToLinear(dir)
     this.panel = new PropsPanel(this.props, this.store)
+    // The copilot is a first-class part of an editable file: open on load so
+    // the conversation belonging to this docId is immediately visible.
+    this.aiPanel = new AiPanel(this.aiHost, this.store, () => this.toggleAi(false))
 
     if (this.store.doc.collab?.role === 'reader') this.enterReaderMode()
+  }
+
+  private toggleAi(force?: boolean) {
+    const open = force ?? this.aiHost.classList.contains('ed-collapsed')
+    this.aiHost.classList.toggle('ed-collapsed', !open)
+    if (open) this.aiPanel?.focus()
   }
 
   /** Live viewer: block user edits (store.readOnly), hide editing chrome, and
@@ -1530,6 +1545,14 @@ export class Editor {
     )
     item.append(num, surface, tools)
     item.addEventListener('click', () => this.store.goTo(i))
+    item.addEventListener('dblclick', (ev) => {
+      // Tool buttons live inside the thumbnail; a fast double-click on copy or
+      // delete must never launch the show as a side effect.
+      if ((ev.target as Element).closest('.ed-thumb-tools')) return
+      ev.preventDefault()
+      this.store.goTo(i)
+      this.present(false, true)
+    })
     if (!isState) this.wireThumbDrag(item, i)
     return item
   }
@@ -1756,14 +1779,6 @@ export class Editor {
     // dependents: states of this slide, and element links pointing at it
     const states = this.store.doc.slides.filter((s) => s.stateOf === target.id)
     const doomedIds = new Set([target.id, ...states.map((s) => s.id)])
-    // "A deck needs at least one slide" has to be checked against what will
-    // SURVIVE, not against the current count: deleting a parent takes its
-    // interactive states with it, so one slide + one state (length 2) sailed
-    // past a `length <= 1` test and then deleted BOTH — leaving a deck with
-    // zero slides and an editor with nothing to render (issue #30). States
-    // don't count as survivors: they're unreachable except through a parent.
-    const survivesLinear = this.store.doc.slides.some((s) => !s.stateOf && !doomedIds.has(s.id))
-    if (!survivesLinear) return this.toast(t('A deck needs at least one slide'))
     let linkCount = 0
     for (const s of this.store.doc.slides) {
       if (doomedIds.has(s.id)) continue
@@ -1953,6 +1968,7 @@ export class Editor {
 
   present(fromStart = false, fullscreen = true) {
     if (this.presenting) return
+    if (this.store.doc.slides.length === 0) { this.toast(t('No pages yet')); return }
     // They've started a slideshow — retire the first-run nudge for good.
     try { localStorage.setItem('bento-slideshow-started', '1') } catch { /* storage off */ }
     document.querySelector('.ed-hint-pulse')?.classList.remove('ed-hint-pulse')

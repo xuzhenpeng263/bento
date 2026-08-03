@@ -334,6 +334,12 @@ export function shapeSvg(el: ShapeElement): SVGSVGElement {
       svg.appendChild(node)
       return svg
     }
+    default:
+      // Unknown additive/future shape kinds degrade to an empty group instead
+      // of dereferencing an uninitialised node. Validation prevents the AI from
+      // creating these now, but a page written by an older buggy copilot must
+      // still open so the user can repair or delete it.
+      node = document.createElementNS(SVG_NS, 'g')
   }
   node.setAttribute('fill', el.fillGradient?.stops.length ? gradientRef(svg, el.fillGradient) : el.fill)
   if (el.stroke && el.stroke !== 'transparent' && sw > 0) {

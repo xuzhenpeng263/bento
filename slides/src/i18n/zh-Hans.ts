@@ -4,6 +4,28 @@
 import type { Catalog } from '../i18n'
 
 export const zhHans: Catalog = {
+  "AI": "AI",
+  "AI copilot": "AI 助手",
+  "AI copilot — generate and refine slides": "AI 助手 — 生成并精调幻灯片",
+  "Creates one page at a time": "逐页创建",
+  "AI settings": "AI 设置",
+  "Close AI copilot": "关闭 AI 助手",
+  "Describe the presentation or the change you want…": "描述你想制作的演示文稿或需要调整的内容…",
+  "Send": "发送",
+  "Stop": "停止",
+  "Thinking": "思考过程",
+  "{n} tool calls": "{n} 次工具调用",
+  "Build with AI": "用 AI 创作",
+  "Ask for a deck, then watch each page appear. You can keep chatting to refine layout, copy, and animation.": "描述你想要的演示文稿，然后逐页查看生成结果。继续对话即可精调布局、文案和动画。",
+  "This API did not return a stream.": "此 API 未返回流式响应。",
+  "API base URL": "API 基础地址",
+  "API key": "API 密钥",
+  "Model name": "模型名称",
+  "Settings stay in this browser and are never saved into the presentation file.": "设置仅保存在此浏览器中，绝不会写入演示文稿文件。",
+  "No pages yet": "还没有页面",
+  "Create a page from the slide list or ask AI to build one.": "从幻灯片列表新建页面，或让 AI 创建。",
+  "Ask AI to create a presentation, or add a page from the slide list.": "让 AI 创建演示文稿，或从幻灯片列表添加页面。",
+
   "Insert — text, shapes, images, media, tables, charts": "插入 — 文本、形状、图片、媒体、表格、图表",
   "More actions": "更多操作",
   "Slides — show or hide the slide list": "幻灯片 — 显示或隐藏幻灯片列表",

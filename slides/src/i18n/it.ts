@@ -4,6 +4,28 @@
 import type { Catalog } from '../i18n'
 
 export const it: Catalog = {
+  "AI": "AI",
+  "AI copilot": "AI copilot",
+  "AI copilot — generate and refine slides": "AI copilot — generate and refine slides",
+  "Creates one page at a time": "Creates one page at a time",
+  "AI settings": "AI settings",
+  "Close AI copilot": "Close AI copilot",
+  "Describe the presentation or the change you want…": "Describe the presentation or the change you want…",
+  "Send": "Send",
+  "Stop": "Stop",
+  "Thinking": "Thinking",
+  "{n} tool calls": "{n} tool calls",
+  "Build with AI": "Build with AI",
+  "Ask for a deck, then watch each page appear. You can keep chatting to refine layout, copy, and animation.": "Ask for a deck, then watch each page appear. You can keep chatting to refine layout, copy, and animation.",
+  "This API did not return a stream.": "This API did not return a stream.",
+  "API base URL": "API base URL",
+  "API key": "API key",
+  "Model name": "Model name",
+  "Settings stay in this browser and are never saved into the presentation file.": "Settings stay in this browser and are never saved into the presentation file.",
+  "No pages yet": "No pages yet",
+  "Create a page from the slide list or ask AI to build one.": "Create a page from the slide list or ask AI to build one.",
+  "Ask AI to create a presentation, or add a page from the slide list.": "Ask AI to create a presentation, or add a page from the slide list.",
+
   "Insert — text, shapes, images, media, tables, charts": "Inserisci — testo, forme, immagini, media, tabelle, grafici",
   "More actions": "Altre azioni",
   "Slides — show or hide the slide list": "Diapositive — mostra o nascondi l’elenco",

@@ -571,6 +571,25 @@ export class SlideCanvas {
     if (this.editing || this._committingFrames) { this.pendingRender = true; return }
     this.pendingRender = false
     if (this.pathEditor?.active) this.pathEditor.cancel() // doc changed under us
+    if (this.store.doc.slides.length === 0) {
+      this.surface?.remove()
+      this.surface = null
+      // Never replace scaleHost.innerHTML: it also owns the persistent path,
+      // line, bezier, comments and presence layers. Destroying those nodes left
+      // their controllers holding detached/undefined SVG handles, so the first
+      // AI-created page crashed in setAttribute after it had already mutated
+      // the document. Empty state is just another removable overlay.
+      if (!this.scaleHost.querySelector('.ed-canvas-empty')) {
+        const empty = document.createElement('div')
+        empty.className = 'ed-canvas-empty'
+        empty.innerHTML = `<span>✦</span><b>${t('No pages yet')}</b><small>${t('Ask AI to create a presentation, or add a page from the slide list.')}</small>`
+        this.scaleHost.appendChild(empty)
+      }
+      this.moveable.target = null
+      this.relayout()
+      return
+    }
+    this.scaleHost.querySelector('.ed-canvas-empty')?.remove()
     const slide = this.store.slide
     const next = renderSlide(slide, this.store.doc)
     // hover-reveal slides: preview one set at a time; hidden sets are

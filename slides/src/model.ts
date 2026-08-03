@@ -1020,7 +1020,7 @@ export function newDoc(): BentoDoc {
 export function parseDoc(json: string): BentoDoc | null {
   try {
     const doc = JSON.parse(json)
-    if (doc && doc.format === FORMAT && Array.isArray(doc.slides) && doc.slides.length > 0) {
+    if (doc && doc.format === FORMAT && Array.isArray(doc.slides)) {
       // Documents from before docId existed get one minted here; it persists
       // on the next save and stays stable from then on.
       if (typeof doc.docId !== 'string' || !doc.docId) doc.docId = newDocId()

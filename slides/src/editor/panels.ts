@@ -175,6 +175,13 @@ export class PropsPanel {
     this.stale = false
     this.burst = false
     this.host.innerHTML = ''
+    if (this.store.doc.slides.length === 0) {
+      const empty = document.createElement('div')
+      empty.className = 'ed-props-empty'
+      empty.innerHTML = `<b>${t('No pages yet')}</b><p>${t('Create a page from the slide list or ask AI to build one.')}</p>`
+      this.host.appendChild(empty)
+      return
+    }
     const els = this.store.selectedElements
     if (els.length === 0) this.buildSlidePanel()
     else if (els.length === 1) this.buildElementPanel(els[0])
