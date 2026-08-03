@@ -11,13 +11,21 @@
 // double-clicking be written without a destination prompt, which no web page
 // can do for itself.
 //
-// THE MATCHING PROBLEM, and why it is not solved perfectly. A page gives us
-// `/Users/…/Decks/Q3.bento.html`; a `FileSystemDirectoryHandle` knows its own
-// NAME but not its path, and there is no API to ask. So the two cannot be
-// compared directly. This resolves it by searching the granted tree for a file
-// of that name and requiring EXACTLY ONE match: unambiguous in the ordinary
-// case, and when it is ambiguous the answer is to decline and let the native
-// picker handle it. Declining costs a prompt; guessing costs somebody's file.
+// TWO RULES SHAPE THIS FILE.
+//
+// 1. NO STATE BETWEEN MESSAGES. An MV3 service worker is evicted whenever the
+//    browser feels like it, and a save serialises the whole deck first —
+//    encryption, preview, ~900KB — so an eviction can easily land between
+//    "which file is this?" and "write it". Anything held in memory across that
+//    gap produces a failed save that looks random and reproduces on nobody's
+//    machine. So every message re-resolves from the grant; nothing is cached.
+//
+// 2. THE PAGE DOES NOT GET TO SAY WHICH FILE IT IS. `sender.url` is set by the
+//    browser, not by the content script, so it cannot be forged by the document
+//    — whereas anything in the message payload can. A local HTML file is
+//    untrusted content; if it could name its own target it could name somebody
+//    else's deck in the granted folder and overwrite it. The path comes from
+//    the sender, and a payload path is ignored even if present.
 
 const DB = 'bento-tray'
 const STORE = 'grant'
@@ -39,10 +47,27 @@ async function readGrant() {
   })
 }
 
+/**
+ * The file this message is about, according to the BROWSER.
+ *
+ * Not according to the page: a content script's `sender.url` is stamped by
+ * Chrome. Only `file:` is accepted — the bridge exists for local documents, and
+ * an http page has no business claiming one.
+ */
+export function pathFromSender(sender) {
+  try {
+    const u = new URL(sender?.url ?? '')
+    if (u.protocol !== 'file:') return null
+    return decodeURIComponent(u.pathname)
+  } catch {
+    return null
+  }
+}
+
 /** Every file of this name in the granted tree. Depth-limited: a Decks folder
  *  is not a filesystem, and an unbounded walk on a mistakenly-granted home
  *  directory would hang the save the user is waiting on. */
-async function findByName(dir, name, depth = 0, found = []) {
+export async function findByName(dir, name, depth = 0, found = []) {
   if (depth > 4 || found.length > 1) return found
   for await (const [entryName, handle] of dir.entries()) {
     if (handle.kind === 'file' && entryName === name) found.push(handle)
@@ -54,38 +79,56 @@ async function findByName(dir, name, depth = 0, found = []) {
   return found
 }
 
-/** token → file handle, for the life of this service-worker instance. */
-const claims = new Map()
+/**
+ * Resolve the writable handle for a sender's own file, or say why not.
+ *
+ * THE MATCHING PROBLEM. A page is at `/Users/…/Decks/Q3.bento.html`; a
+ * `FileSystemDirectoryHandle` knows its own NAME but not its path, and no API
+ * exposes one, so the two cannot be compared directly. This searches the
+ * granted tree for that file name and requires EXACTLY ONE match — unambiguous
+ * in the ordinary case, and when it is ambiguous the answer is to decline and
+ * let the browser's own picker handle it. Declining costs a prompt; guessing
+ * costs somebody's file.
+ */
+export async function resolve(sender, deps = {}) {
+  const grant = deps.readGrant ?? readGrant
+  const search = deps.findByName ?? findByName
 
-async function claim(path) {
-  const dir = await readGrant()
+  const path = pathFromSender(sender)
+  if (!path) return { ok: false, reason: 'not a local file' }
+
+  const dir = await grant()
   if (!dir) return { ok: false, reason: 'no folder granted' }
-  // queryPermission only — never prompt from here. A service worker has no
-  // user gesture, so a request would be refused, and a save is the wrong
-  // moment to discover that. The options page is where granting happens.
+  // queryPermission only — never prompt from here. A service worker has no user
+  // gesture, so a request would be refused, and a save is the wrong moment to
+  // discover that. The options page is where granting happens.
   const perm = await dir.queryPermission({ mode: 'readwrite' })
   if (perm !== 'granted') return { ok: false, reason: 'folder grant needs renewing' }
 
-  const name = decodeURIComponent(path.split('/').pop() || '')
+  const name = path.split('/').pop() || ''
   if (!name) return { ok: false, reason: 'no file name' }
-  const hits = await findByName(dir, name)
+  const hits = await search(dir, name)
   if (hits.length !== 1) {
-    return { ok: false, reason: hits.length ? `${name} is ambiguous in the granted folder` : 'not in the granted folder' }
+    return {
+      ok: false,
+      reason: hits.length ? `${name} is ambiguous in the granted folder` : 'not in the granted folder',
+    }
   }
-  const token = crypto.randomUUID()
-  claims.set(token, hits[0])
-  return { ok: true, token, name }
+  return { ok: true, name, handle: hits[0] }
 }
 
-async function write({ token, text }) {
-  const handle = claims.get(token)
-  if (!handle) return { ok: false, reason: 'stale claim' }
+/** Can this sender's file be written in place? Resolves; writes nothing. */
+export async function claim(sender, deps) {
+  const r = await resolve(sender, deps)
+  return r.ok ? { ok: true, name: r.name } : { ok: false, reason: r.reason }
+}
+
+/** Write the sender's own file. Re-resolves, so no state is carried. */
+export async function write(sender, text, deps) {
+  const r = await resolve(sender, deps)
+  if (!r.ok) return { ok: false, reason: r.reason }
   try {
-    // The open question this scaffold cannot settle without being loaded:
-    // whether an MV3 service worker may createWritable() on a stored handle,
-    // or whether the write must move to an offscreen document. Kept as ONE
-    // call so that answer changes this function and nothing else.
-    const w = await handle.createWritable()
+    const w = await r.handle.createWritable()
     await w.write(text)
     await w.close()
     return { ok: true, bytes: text.length }
@@ -94,10 +137,14 @@ async function write({ token, text }) {
   }
 }
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  const run = msg?.op === 'claim' ? claim(msg.payload?.path)
-    : msg?.op === 'write' ? write(msg.payload ?? {})
-    : Promise.resolve({ ok: false, reason: 'unknown op' })
-  run.then(sendResponse, (e) => sendResponse({ ok: false, reason: String(e?.message || e) }))
-  return true // async response
-})
+// `chrome` is absent when this module is loaded by the test rig, which imports
+// the logic above and never needs the listener.
+if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    const run = msg?.op === 'claim' ? claim(sender)
+      : msg?.op === 'write' ? write(sender, msg.payload?.text ?? '')
+      : Promise.resolve({ ok: false, reason: 'unknown op' })
+    run.then(sendResponse, (e) => sendResponse({ ok: false, reason: String(e?.message || e) }))
+    return true // async response
+  })
+}

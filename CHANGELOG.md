@@ -11,6 +11,21 @@ pre-1.0.
 
 ## [Unreleased]
 
+## [1.0.15] — 2026-08-03
+
+- **Fix: removing a formatting option no longer disconnects the people you are
+  working with.** While a live session was running, taking something *away* —
+  switching a gradient fill back to solid, turning an outline off, ungrouping,
+  unlinking a chart from its table, clearing a click target — crashed everyone
+  else's copy of the deck. The person doing it saw nothing wrong; their
+  collaborators' sessions stopped applying changes.
+
+  Removing a property is sent as an instruction with no value attached, and one
+  line of diagnostic code assumed a value was always there. Adding things was
+  always safe, which is why this survived: the convergence tests only ever
+  added, so an op that takes a property away had never once occurred in 45,000
+  checks. They generate removals now.
+
 - **"Save a copy…" and share exports remember their own folder.** The save
   picker used one identity for every kind of save, so it opened wherever you
   last put a view-only copy even when you were saving your working file.

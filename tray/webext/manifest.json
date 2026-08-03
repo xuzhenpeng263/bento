@@ -4,7 +4,9 @@
   "version": "0.0.1",
   "description": "Save a Bento document back to the file you opened, without a destination prompt.",
   "minimum_chrome_version": "116",
-  "permissions": ["storage", "offscreen"],
+  "permissions": [
+    "storage"
+  ],
   "options_page": "src/options.html",
   "background": {
     "service_worker": "src/background.js",
@@ -12,14 +14,22 @@
   },
   "content_scripts": [
     {
-      "matches": ["file:///*.html"],
-      "js": ["src/page-bridge.js"],
+      "matches": [
+        "file:///*.bento.html"
+      ],
+      "js": [
+        "src/page-bridge.js"
+      ],
       "world": "MAIN",
       "run_at": "document_start"
     },
     {
-      "matches": ["file:///*.html"],
-      "js": ["src/relay.js"],
+      "matches": [
+        "file:///*.bento.html"
+      ],
+      "js": [
+        "src/relay.js"
+      ],
       "world": "ISOLATED",
       "run_at": "document_start"
     }

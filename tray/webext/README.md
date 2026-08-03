@@ -18,6 +18,19 @@ The last row is the one that matters: the copy and the export went elsewhere
 rather than overwriting the document being edited. An earlier build got that
 wrong and silently destroyed it.
 
+## Distribution
+
+**The app stores are the main channel** — Chrome Web Store, Edge Add-ons, and
+the others as they come. The unpacked folder here stays supported for anyone who
+prefers it.
+
+A store install needs **no Developer mode** and no unpacked folder. What it
+still needs is **Allow access to file URLs**: a per-extension user toggle, off by
+default, required for content scripts on `file://`, and grantable by no manifest
+permission. It is detectable (`chrome.extension.isAllowedFileSchemeAccess()`),
+so it should become a guided one-time setup step rather than a silent failure —
+not yet built, and that API's MV3 behaviour is unverified.
+
 ## Operating it
 
 **The folder grant lapses when the extension reloads.** A reload resets the
@@ -127,7 +140,10 @@ file.
 
 ## Trying it
 
-1. `chrome://extensions` → Developer mode → **Load unpacked** → `tray/webext/`
+1. **From a store:** install, then enable **Allow access to file URLs** on its
+   card in `chrome://extensions`.
+   **Unpacked:** `chrome://extensions` → Developer mode → **Load unpacked** →
+   `tray/webext/`, then the same file-URL toggle.
 2. Open its **options** and grant the folder your decks live in
 3. Double-click a `.bento.html` in that folder, edit something, press ⌘S
 

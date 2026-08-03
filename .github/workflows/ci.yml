@@ -122,6 +122,14 @@ jobs:
         # file carrying a script tag.
         run: node scripts/test-preview.ts
 
+      - name: WebExtension background rig
+        # The half that WRITES, and previously the untested half. Two properties
+        # it must hold: the target file comes from sender.url (browser-stamped)
+        # and never from the page, and nothing is carried between messages,
+        # because an MV3 service worker is evicted mid-save and state across that
+        # gap fails intermittently on nobody's machine but the user's.
+        run: node scripts/test-webext-background.ts
+
       - name: WebExtension bridge rig
         # tray/webext decides, per save, whether to write in place or hand back
         # to the browser's own picker. Wrong in the permissive direction it
@@ -202,6 +210,15 @@ jobs:
         run: |
           slides/node_modules/.bin/esbuild scripts/test-clipboard.ts --bundle --platform=node --format=esm --outfile="$RUNNER_TEMP/test-clipboard.mjs"
           node "$RUNNER_TEMP/test-clipboard.mjs"
+
+      - name: CRDT property-removal rig
+        # Removing a property travels as a `set` op with `v` ABSENT, and the
+        # receiving replica threw on it: JSON.stringify(undefined) is undefined,
+        # and a debug line sliced it. Live in shipped files. The convergence rig
+        # missed it through 300 seeds because its generator assigns properties
+        # and never removes one — a property-based rig only explores the
+        # mutations it was taught.
+        run: node scripts/test-crdt-delprop.ts
 
       - name: CRDT convergence rig
         # 40 seeds locally; deeper on CI where the seconds are free.

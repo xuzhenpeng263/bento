@@ -129,7 +129,11 @@
       if (native) return native(forNative(opts))
       throw new DOMException('No file picker available', 'AbortError')
     }
-    const claim = await ask('claim', { path: decodeURIComponent(window.location.pathname) })
+    // No path is sent: the extension takes it from `sender.url`, which the
+    // browser stamps and this page cannot forge. A local HTML file is untrusted
+    // content, and one that could name its own target could name someone else's
+    // deck in the granted folder.
+    const claim = await ask('claim')
     if (!claim?.ok) {
       // Say WHY. Falling through to the native picker is the safe outcome, but
       // an unexplained dialog is indistinguishable from the extension not being
@@ -156,7 +160,7 @@
               ? chunks[0]
               : new Blob(chunks)
             const text = await blob.text()
-            const res = await ask('write', { token: claim.token, text })
+            const res = await ask('write', { text })
             if (!res?.ok) throw new DOMException(res?.reason || 'write failed', 'NotAllowedError')
             console.info('[bento-tray] wrote', claim.name, `(${res.bytes} bytes) in place`)
           },
