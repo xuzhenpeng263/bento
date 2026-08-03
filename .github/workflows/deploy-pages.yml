@@ -1,0 +1,78 @@
+# Deploy the Bento Slides editor to GitHub Pages.
+#
+# Triggered by version tags (v*) — push a tag like v1.0.16 and the editor
+# at https://xuzhenpeng263.github.io/bento/ updates automatically.
+# Also runnable manually from the Actions tab.
+
+name: Deploy to Pages
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+# Only one deploy at a time; a new tag supersedes an in-flight deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: slides/package-lock.json
+
+      - name: Install
+        working-directory: slides
+        run: npm ci
+
+      - name: Build single-file shell
+        working-directory: slides
+        run: npm run build:single
+
+      - name: Prepare Pages root
+        # Builds the landing page that links to the editor. The editor file
+        # itself is placed alongside so it works offline if saved.
+        run: |
+          mkdir -p pages-root
+          cp slides/dist-single/Bento_Slides.bento.html pages-root/Bento_Slides.bento.html
+          cp slides/dist-single/Bento_Slides.bento.html pages-root/index.html
+
+          # A small landing hint for first-time visitors. The editor is the
+          # index — opening the page lands straight in the app.
+          cat > pages-root/README.txt << 'EOF'
+          Bento Slides — https://xuzhenpeng263.github.io/bento/
+
+          Visit the page to open the editor. From there you can:
+          - Start editing the built-in starter deck
+          - File → Open to edit a local .bento.html file
+          - File → Save to download your work
+
+          The same Bento_Slides.bento.html file works as a local copy too —
+          download it and open it in any browser.
+          EOF
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages-root
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
