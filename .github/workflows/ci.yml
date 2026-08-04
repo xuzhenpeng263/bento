@@ -50,6 +50,7 @@ jobs:
           cache-dependency-path: |
             slides/package-lock.json
             spaces/package-lock.json
+            dash/package-lock.json
 
       - name: Install
         working-directory: slides
@@ -108,6 +109,49 @@ jobs:
 
       - name: Splice conformance gate (spaces)
         run: node scripts/shell-gate.mjs spaces/dist-single/Bento_Spaces.bento.html
+
+      - name: Spaces i18n packed table is current
+        # The per-locale catalogs are the source of truth; packed.ts is
+        # generated and is what ships inside every saved file. A core catalog
+        # cannot be corrected without a release, so an incomplete one fails the
+        # build rather than shipping a half-translated interface.
+        run: node scripts/build-spaces-i18n.mjs --check
+
+      - name: Spaces model rig
+        # Properties that fail SILENTLY, and that a shipped file cannot be
+        # talked out of once it exists:
+        #   · the load contract — an unreadable document must never be replaced
+        #     by an empty one;
+        #   · format additivity, and id repair derived from the BYTES, so two
+        #     readers of one file agree on every id (links key on them);
+        #   · untrusted html is parsed INERT — a detached div still loads what
+        #     it creates, which made the sanitizer its own vector on the OPEN
+        #     path;
+        #   · opening a document touches no network, so a mailed space cannot
+        #     carry a tracking pixel;
+        #   · an encrypted space is never snapshotted to IndexedDB in the clear;
+        #   · find and replace quote ONE number — what is counted is what
+        #     changes.
+        # The last four are source assertions: the behaviour needs a DOM, a
+        # failing request, IndexedDB and a clock, but every one of those
+        # mistakes is made in the source.
+        run: node scripts/test-spaces-model.ts
+
+      # dash: the data app — same pipeline, same gate.
+      - name: Install (dash)
+        working-directory: dash
+        run: npm ci
+
+      - name: Typecheck (dash)
+        working-directory: dash
+        run: node_modules/.bin/tsc -b
+
+      - name: Build single-file shell (dash)
+        working-directory: dash
+        run: npm run build:single
+
+      - name: Splice conformance gate (dash)
+        run: node scripts/shell-gate.mjs dash/dist-single/Bento_Dash.bento.html
 
       - name: Language pack verification rig
         # Packs come off the network, so the signature + hash-pin chain is the
@@ -198,6 +242,29 @@ jobs:
         run: |
           slides/node_modules/.bin/esbuild scripts/test-validate.ts --bundle --platform=node --format=esm --outfile="$RUNNER_TEMP/test-validate.mjs"
           node "$RUNNER_TEMP/test-validate.mjs"
+
+      - name: bento/dash model rig
+        # The format is permanent — additive forever, no server to migrate a
+        # single file. Two failures are unrecoverable once files exist: dropping
+        # a field this build does not recognise, and letting anything but an
+        # ABSENT block reach the starter document (which then overwrites live
+        # data on the first save). Both are asserted from both sides.
+        run: node scripts/test-dash-model.ts
+
+      - name: bento/dash store + undo rig
+        # Undo is a patch log rather than document snapshots, which buys history
+        # that costs what the EDIT costs — and risks a failure a snapshot cannot
+        # have: an inverse that does not restore what it displaced. Every op is
+        # checked apply → undo → identical, because that failure is silent.
+        run: node scripts/test-dash-store.ts
+
+      - name: bento/dash import rig
+        # Import is where a data tool does its damage, because every mistake is
+        # SILENT: the file opens, the grid fills, the totals compute, and the
+        # numbers are wrong. Two guards matter most and are checked from both
+        # sides — an undecidable date order is REFUSED rather than guessed, and
+        # the decimal convention is decided per COLUMN from the whole column.
+        run: node scripts/test-dash-import.ts
 
       - name: Built-in layout geometry rig
         # The built-ins are drawn against 1600x900 while the model default is

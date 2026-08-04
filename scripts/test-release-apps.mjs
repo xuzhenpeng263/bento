@@ -16,6 +16,12 @@
 //   · `dir` wrong        → the release cannot find package.json. Loud, harmless.
 //   · `shell` wrong      → the build succeeds and staging copies a file that is
 //                          not there. Discovered mid-release.
+//   · `changelog` wrong  → also silent, and it ships. The notes ride in the
+//                          SIGNED manifest and are rendered inline by every
+//                          file that finds an update, so an app pointed at
+//                          another app's changelog tells all of its users about
+//                          a product they do not have. (Every app read the root
+//                          CHANGELOG until 2026-08-03.)
 //   · `appId` wrong      → the WORST case, and silent. A shipped shell verifies
 //                          the manifest's `app` against its own configureApp()
 //                          id (kernel/src/update.ts), so a mismatch signs and
@@ -71,8 +77,46 @@ for (const [key, app] of Object.entries(APPS)) {
   // Exactly one app may own the shared bento.page content, or a release either
   // regenerates it from a shell it did not build, or nobody ever rebuilds it.
   ok(typeof app.ownsSiteContent === 'boolean', `${key}: declares ownsSiteContent`)
+
+  // ---- release notes -------------------------------------------------------
+  // The notes are lifted from the section matching THIS version and signed
+  // into the manifest, so both halves have to line up before a release runs.
+  // Resolved exactly as release.mjs resolves it: registry, then the
+  // <dir>/CHANGELOG.md convention, then the root. The root is slides' file, so
+  // reaching it from another app is the failure — these checks are what keep it
+  // unreachable.
+  const resolved = app.changelog
+    ?? (existsSync(join(root, `${app.dir}/CHANGELOG.md`)) ? `${app.dir}/CHANGELOG.md` : 'CHANGELOG.md')
+  const clPath = join(root, resolved)
+  ok(existsSync(clPath), `${key}: resolves to a changelog that exists (${resolved})`)
+  if (existsSync(clPath)) {
+    const cl = readFileSync(clPath, 'utf8')
+    // A section for the version being released, with at least one bold lead-in
+    // — release.mjs harvests exactly those, so a section of prose signs EMPTY
+    // notes and the reader gets a bare version number.
+    const re = new RegExp(`^## \\[${pkg.version.replace(/\./g, '\\.')}\\][^\n]*$`, 'm')
+    const m = re.exec(cl)
+    ok(!!m, `${key}: the changelog has a section for the version being released (${pkg.version})`)
+    if (m) {
+      const next = cl.slice(m.index + m[0].length)
+      const body = next.split(/^## \[/m)[0]
+      ok(/^- \*\*(.+?)\*\*/ms.test(body.trim()),
+        `${key}: that section has bold lead-ins (what release.mjs signs as the notes)`)
+    }
+  }
+
+  // The agent guide is published at /<dir>/agents.md by that app's release.
+  if (app.agents) ok(existsSync(join(root, app.agents)), `${key}: agent guide exists (${app.agents})`)
   ok(typeof app.packs === 'boolean', `${key}: declares whether it has a pack channel`)
 }
+
+// The actual 2026-08-03 bug: two apps reading one file. Distinctness is the
+// property, and it is one line — the wrongness was never visible in either
+// app's own checks, only in the pair.
+const cls = Object.entries(APPS).map(([k, a]) => [k, a.changelog
+  ?? (existsSync(join(root, `${a.dir}/CHANGELOG.md`)) ? `${a.dir}/CHANGELOG.md` : 'CHANGELOG.md')])
+ok(new Set(cls.map(([, c]) => c)).size === cls.length,
+  `each app has its OWN changelog (${cls.map(([k, c]) => `${k}→${c}`).join(', ')})`)
 
 const owners = Object.entries(APPS).filter(([, a]) => a.ownsSiteContent).map(([k]) => k)
 ok(owners.length === 1,

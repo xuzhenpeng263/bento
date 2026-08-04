@@ -5,9 +5,9 @@ guide matches the bento/slides shell of the same version. A deck's `#bento-doc`
 JSON is always the source of truth — if it was written by a newer shell it may
 carry features beyond this guide; unknown keys are ignored, never fatal.
 
-> **Bento is a suite.** Slides is the first app and the only one shipping
-> today. **Spaces** (`bento/spaces`, notes) and **Dash** (`bento/dash`, data
-> and sheets) are in development, and a word processor is planned. Each ships
+> **Bento is a suite.** Slides is the first app; **Spaces**
+> (`bento/spaces`, notes and wiki) ships alongside it. **Dash** (`bento/dash`,
+> data and sheets) is in development, and a word processor is planned. Each ships
 > as its own self-contained distributable — `Bento_Slides.bento.html`,
 > `Bento_Spaces.bento.html`, and so on — with its own agent guide at
 > `bento.page/<app>/agents.md`. **This guide covers Slides only.** Before you

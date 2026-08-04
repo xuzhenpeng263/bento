@@ -1,14 +1,14 @@
 # bento/spaces
 
-A Notion/notes-like Bento app: one HTML file that is the document, the viewer
-and the editor. **This is currently a SCAFFOLD** — it is on-platform and it
-works end to end, but the app itself is deliberately minimal (a flat list of
-text blocks) so that the kernel seam is legible and the real app can be grown
-from a known-good starting point.
+A notes/wiki app where **one HTML file is a whole space**: a tree of pages, the
+reader that displays them, and the editor that writes them. No account, no
+server, no sidecar folder — you can mail it, and the person who receives it can
+read and edit it with nothing installed.
 
-If you are an agent picking up spaces work: read `AGENTS.md`,
-`docs/PLATFORM.md` and `docs/PARALLEL-WORK.md` first. `spaces/` is your
-ownership zone; `kernel/` is not (kernel changes are serialized).
+Agents: `docs/spaces-agents.md` is the working guide (published at
+`bento.page/spaces/agents.md`). Before changing anything here read `AGENTS.md`,
+`docs/PLATFORM.md` and `docs/PARALLEL-WORK.md`. `spaces/` is this app's
+ownership zone; `kernel/` is not — kernel changes are serialized.
 
 ## Run it
 
@@ -19,36 +19,100 @@ npm run dev            # dev server (port 5196 via .claude/launch.json)
 npm run build:single   # → dist-single/Bento_Spaces.bento.html (the product)
 ```
 
-## What's wired (the reference for any new Bento app)
+## The format
 
-- **Self-contained single-file build** — the same vite + `postbuild-compress`
-  pipeline as slides, passing the splice conformance gate
-  (`node scripts/shell-gate.mjs spaces/dist-single/Bento_Spaces.bento.html`).
-- **`configureApp()`** — app id, display name, and the app's own update
-  manifest path (`releases/spaces/manifest.json`).
-- **Self-save** — `saveFile()` (File System Access, download fallback);
-  ⌘S and the Save button. The serialized file keeps its compressed runtime.
-- **Autosave + recovery** — kernel IndexedDB store keyed by `docId`, with a
-  restore/discard banner when the last session ended unsaved.
-- **i18n** — the kernel engine via a local facade; catalogs are empty for now,
-  which is fine because English strings are the keys.
-- **AI round-trip** — `window.bento` exposes `doc`, `serialize()`,
-  `loadDoc(json)`.
-- **Format discipline** — `parseDoc` validates `format === 'bento/spaces'`,
-  mints a `docId` when absent, preserves unknown fields, and rejects other
-  apps' documents.
+`bento/spaces` version 1. Additive and permanent: every future version opens
+files this one wrote, and unknown fields survive a round trip untouched. There
+is no server to migrate a file that someone has had on a disk for three years.
 
-## What is deliberately NOT wired yet
+```jsonc
+{
+  "format": "bento/spaces", "version": 1,
+  "docId": "…",                     // minted once, never regenerated
+  "home": "p-intro",
+  "pages": [                        // FLAT, pre-order; nesting is `parent`
+    { "id": "p-intro", "title": "Introduction", "icon": "…",
+      "blocks": [                   // FLAT, pre-order; nesting is `parent`
+        { "id": "b1", "type": "p", "html": "Hello <b>world</b>." }
+      ] }
+  ]
+}
+```
 
-- **Collaboration.** No CRDT/relay. `docs/PLATFORM.md` §10 permits shipping
-  without collab rather than with a half-secure version. The sync engine is
-  currently slides-shaped (see `docs/DECISIONS.md`); genericizing it is its
-  own project.
-- **Password encryption UI.** The kernel writes `bento/enc` envelopes and this
-  app detects them, but there is no unlock prompt yet — an encrypted file
-  reports rather than pretending.
-- **Rich text, nested blocks, embeds, references.** The block model is one
-  flat `{id, text}` list. Grow it ADDITIVELY: every future version must still
-  open documents this one wrote.
-- **Update UI.** `configureApp` declares the manifest path, but nothing checks
-  for updates yet, and no spaces release has been cut.
+Three decisions worth knowing before editing the model:
+
+- **Both arrays are flat and in pre-order.** A child always follows its parent,
+  so one forward pass rebuilds the tree. Nested arrays would make every
+  operation recursive and every CRDT node ambiguous.
+- **Block properties are flat on the block** (`done`, `open`, `src`, `lang`),
+  not inside a `props` object. `type` is an open string: an unrecognised type
+  round-trips and falls back to rendering its `html`.
+- **`html` is inline-only** — `b i u s em strong code a span mark sub sup br`.
+  Block structure is `type`, never markup. `src/sanitize.ts` unwraps anything
+  else at load, and matches `href` against `getAttribute('href')` rather than
+  `.href`, because the resolved property hides `javascript:` behind a base URL.
+
+Ids are unique across the whole document and are never reused — links,
+backlinks and future collaboration key on them. A duplicate is repaired
+deterministically **from the bytes** (`repairId`), so two readers of one file
+always agree on every id. `scripts/test-spaces-model.ts` pins that, plus the
+load contract and format additivity.
+
+## The parts
+
+| File | What it owns |
+|---|---|
+| `src/model.ts` | the format, `buildIndex()` (tree, backlinks), id repair |
+| `src/sanitize.ts` | the inline allowlist — the only thing between a file someone mailed you and script execution |
+| `src/store.ts` | undo, and the **typing run** |
+| `src/render.ts` | model → DOM, shared by the editor, reading view and print |
+| `src/editor.ts` | topbar, sidebar, block menu, `[[` picker, ⌘K, ⌘F, archive |
+| `src/assets.ts` | content-addressed images and the downscale |
+| `src/about.ts` | updates, language, password, exports |
+| `src/i18n/` | per-locale catalogs; `packed.ts` is generated and is what ships |
+
+### The typing run
+
+Slides sidesteps commit granularity because canvas text commits on blur. A
+notes app may never blur — so a **run** is consecutive input in one block with
+no structural op between. It takes one checkpoint at its first input and
+mutates in place after that. It closes on idle, on the caret leaving the block,
+on any structural change, on save, and on `replaceDoc`.
+
+One run = one undo entry = later, one collaboration text batch. This single
+policy sets undo granularity, autosave churn, the dirty flag and the future op
+rate, which is why it lives in the store rather than in the editor.
+
+### Links are fragments
+
+`#p/<id>`, and navigation is `history.pushState(null, '', '#p/id')`. Measured:
+from a `file://` opaque origin, `pushState` with a **fragment** is legal while
+`pushState` with a **path** throws `SecurityError`. That is the whole reason
+pages are one document rather than one file each.
+
+## Platform guarantees this app honours
+
+- **Splice contract** — `#bento-doc` stays plaintext with a stable id; the file
+  survives DOMParser → splice → `outerHTML`. Gated by
+  `node scripts/shell-gate.mjs spaces/dist-single/Bento_Spaces.bento.html`, the
+  same check the release runs before signing.
+- **No network to open, edit, read or save.** Updates are the only fetch, and
+  they are opt-out.
+- **Autosave + recovery** in a per-app IndexedDB database (`bento-spaces-…`);
+  encrypted spaces are never snapshotted to disk in plaintext.
+- **Signed self-update** against `releases/spaces/manifest.json`, with this
+  app's own release notes (`spaces/CHANGELOG.md` — never another app's).
+- **i18n** with English strings as keys; `scripts/build-spaces-i18n.mjs
+  --check` fails the build if the packed table is stale or a core catalog is
+  incomplete, because a catalog ships inside every saved file and cannot be
+  corrected without a release.
+
+## Not built yet
+
+- **Collaboration.** No CRDT wiring. The sync engine is slides-shaped
+  (composite `slideId ␟ elementId` node keys); spaces needs `pageId ␟ blockId`
+  and a token RGA over `html`, which is the same shape — but genericizing it is
+  its own project, and PLATFORM §10 permits shipping without collab rather than
+  with a half-secure version.
+- **Tables, embeds, and databases.** Deliberate: the format is permanent, so a
+  block type ships when its model is right, not when its UI is ready.

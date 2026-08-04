@@ -31,9 +31,25 @@ verify the manifest signature against the public key embedded in every shell.
 ## Cutting a release
 
 0. **Get the CHANGELOG right first — it is not just prose any more.** The
-   first FIVE bold lead-ins of the version's section become the `notes` in the
+   first SIX bold lead-ins of the version's section become the `notes` in the
    SIGNED manifest, which shipped files show inline in the About dialog while
-   the reader decides whether to update. So:
+   the reader decides whether to update.
+
+   **Each app has its own changelog** (`scripts/apps.mjs` → `changelog`):
+   slides reads the root `CHANGELOG.md`, spaces reads `spaces/CHANGELOG.md`.
+   Every app read the root one until 2026-08-03, which would have signed
+   slides' release notes into a spaces manifest and shown them to every spaces
+   user. `scripts/test-release-apps.mjs` now pins the distinctness, and:
+
+   ```sh
+   node scripts/release.mjs --app spaces --print-notes
+   ```
+
+   prints exactly what would be signed and exits, touching nothing. Run it.
+   The notes are the one artifact with no way back — they are inside the signed
+   envelope, and re-signing a version is refused by the monotonicity check.
+
+   So:
    - lead with what the release IS (features), not the last thing merged —
      entries otherwise sit in merge order and a stray fix ends up introducing
      the release;
@@ -44,15 +60,24 @@ verify the manifest signature against the public key embedded in every shell.
      if the bug never shipped, announcing it tells people about breakage they
      never had. The commit history is the record for those.
 
-1. Bump `slides/package.json` version (this becomes `APP_VERSION` in the
-   shell and the manifest version — single source of truth).
+1. Bump **that app's** `package.json` version — `slides/package.json` or
+   `spaces/package.json` (it becomes `APP_VERSION` in the shell and the
+   manifest version — single source of truth). Apps version independently.
 2. Land it and tag. `main` is branch-protected and requires a pull request, so
    the bump CANNOT be committed directly — open a small PR for it, merge, then
-   tag the merge commit:
+   tag the merge commit.
+
+   **Tags are per app.** Slides keeps the bare `vX.Y.Z` form it has used for
+   23 releases; every other app is prefixed:
 
    ```sh
-   git tag vX.Y.Z <merge-sha>
+   git tag vX.Y.Z <merge-sha>          # slides
+   git tag spaces-vX.Y.Z <merge-sha>   # every other app
    ```
+
+   Slides is at 1.0.x and spaces starts at 0.1.0, so an unprefixed spaces tag
+   would sort into the middle of slides' history and claim a version slides can
+   never use again.
 
    **Build from a clean checkout of that tag**, not from whatever the main
    working tree happens to be on. Several sessions may have their own branches

@@ -24,6 +24,13 @@ export const APPS = {
     shell: 'Bento_Slides.bento.html',
     /** the whole bento.page site — landing, gallery, guides — is slides-derived today */
     ownsSiteContent: true,
+    /** where this app's release notes come from. The notes ride in the SIGNED
+     *  manifest and are what a reader sees when offered an update, so an app
+     *  reading another app's changelog would tell every one of its users about
+     *  changes to a different product. */
+    changelog: 'CHANGELOG.md',
+    /** published at /<dir>/agents.md — the runnable half of "designed for AI" */
+    agents: 'docs/agents.md',
     /** signed language packs exist for this app (docs/i18n-packs.md) */
     packs: true,
   },
@@ -36,5 +43,17 @@ export const APPS = {
     // channel does not exist. Deferring packs is fine; deferring the CHANNEL
     // would not be (working/spaces-design.md §6.5).
     packs: false,
+    changelog: 'spaces/CHANGELOG.md',
+    agents: 'docs/spaces-agents.md',
+  },
+  dash: {
+    appId: 'bento-dash',
+    dir: 'dash',
+    shell: 'Bento_Dash.bento.html',
+    ownsSiteContent: false,
+    // Same reasoning as spaces: no pack catalog yet, and deferring the CATALOG
+    // is fine where deferring the CHANNEL would not be.
+    packs: false,
+    changelog: 'dash/CHANGELOG.md',
   },
 }
