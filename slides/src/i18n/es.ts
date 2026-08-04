@@ -4,6 +4,15 @@
 import type { Catalog } from '../i18n'
 
 export const es: Catalog = {
+  "Export PowerPoint (.pptx)": "Exportar PowerPoint (.pptx)",
+  "Exporting PowerPoint…": "Exportando PowerPoint…",
+  "PowerPoint export failed": "Error al exportar PowerPoint",
+  "Some effects cannot be represented in PowerPoint:": "Algunos efectos no se pueden representar en PowerPoint:",
+  "slide transitions": "transiciones de diapositiva",
+  "entrance or count-up animations": "animaciones de entrada o conteo",
+  "looping or ambient animations": "animaciones en bucle o ambientales",
+  "interactive or animated SVG effects": "efectos interactivos o SVG animados",
+  "They will be exported as static content. Animated GIFs and supported audio/video are preserved. Continue?": "Se exportarán como contenido estático. Se conservarán los GIF animados y el audio/vídeo compatible. ¿Continuar?",
   "AI": "AI",
   "AI copilot": "AI copilot",
   "AI copilot — generate and refine slides": "AI copilot — generate and refine slides",

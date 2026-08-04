@@ -17,7 +17,7 @@ import { renderSlide, renderThumbnail } from '../render'
 import { SlideCanvas } from './canvas'
 import { PropsPanel } from './panels'
 import { startPresentation } from '../present'
-import { adoptFileHandle, canWriteInPlace, currentFileName, downloadFile, fileBase, hasFileHandle, isEncryptionActive, openFilePicker, extractDocJson, openedFileName, saveDocJson, saveFile, serializeAuto, serializeFile, setEncryptionPassword, suggestedFileName, writeUpdatedDoc, writeUpdatedFileAs } from '../save'
+import { adoptFileHandle, canWriteInPlace, currentFileName, downloadFile, fileBase, hasFileHandle, isEncryptionActive, openFilePicker, extractDocJson, openedFileName, saveDocJson, serializeAuto, serializeFile, setEncryptionPassword, suggestedFileName, writeUpdatedDoc, writeUpdatedFileAs } from '../save'
 import { addVersion, clearRecovery, clearVersions, docContentKey, getRecovery, listVersions, pruneOld, putRecovery, type Snapshot } from '../autosave'
 import { insertElements, insertSlides, parseClip, serializeElements, serializeSlides } from './clipboard'
 import { openSpeakerWindow, speakerIdleBody } from '../screens'
@@ -29,6 +29,7 @@ import { injectFonts } from '../fonts'
 import { appConfig } from '../../../kernel/src/app.ts'
 import { disconnectOnline, joinFromDoc, mintCollab, mintInvite, onlineTransport, rotateKeys, sharingOn, startSharing, stopSharing } from '../sync/online'
 import { AiPanel } from './ai'
+import { exportPptx, pptxEffectLosses } from '../pptx'
 
 const i18nT = t
 
@@ -297,11 +298,11 @@ export class Editor {
     }, 1500)
     const undoB = btn(ICONS.undo, '', () => this.store.undo(), t('Undo (⌘Z)'))
     const redoB = btn(ICONS.redo, '', () => this.store.redo(), t('Redo (⇧⌘Z)'))
-    const saveB = btn(ICONS.save, t('Save'), () => this.save(false), canWriteInPlace()
-      ? t('Save — rewrite this file in place (⌘S)')
-      : t('Save — download an updated copy (⌘S). This browser can’t rewrite the open file.'))
+    const saveB = btn(ICONS.save, t('Save'), () => this.save(false),
+      t('Save only the document data as .bento.json — lightweight, git-friendly, ideal for AI tools.'))
     saveB.appendChild(this.dirtyDot) // the amber unsaved-changes dot lives ON Save
     const pdfB = btn(ICONS.pdf, '', () => this.exportPdf(), t('Export PDF (print)'))
+    const pptxB = btn(ICONS.download, 'PPTX', () => void this.exportPowerPoint(), t('Export PowerPoint (.pptx)'))
     const helpB = btn('<b class="ed-help-q">?</b>', '', () => this.openHelp(), t('Shortcuts & tips (?)'))
     helpB.classList.add('ed-btn-help')
     this.avatarsBox = div('ed-avatars')
@@ -316,7 +317,7 @@ export class Editor {
     const langD = this.languageDropdown()
     const aiB = btn('<b class="ed-ai-btnmark">✦</b>', t('AI'), () => this.toggleAi(), t('AI copilot — generate and refine slides'))
     aiB.classList.add('ed-btn-ai')
-    actions.append(pdfB, this.avatarsBox, shareD, aiB, saveGroup, langD, helpB)
+    actions.append(pdfB, pptxB, this.avatarsBox, shareD, aiB, saveGroup, langD, helpB)
 
     // Phone chrome: two menus that stay EMPTY on a wide screen. Nothing is
     // duplicated — applyPhoneChrome moves the real buttons in and out, so every
@@ -347,7 +348,7 @@ export class Editor {
     this.phoneChrome = {
       insertD, insertMenu, moreD, moreMenu, slidesB, formatB, insert, actions, history,
       // order matters: this is the order they appear in the ⋯ menu
-      demote: [redoB, commentB, pdfB, shareD, langD, helpB],
+      demote: [redoB, commentB, pdfB, pptxB, shareD, langD, helpB],
     }
 
     bar.append(logo, this.updatesB, title, this.fileChip, slidesB, insertD, history, insert, actions, moreD)
@@ -1839,6 +1840,27 @@ export class Editor {
     setTimeout(() => window.print(), 250)
   }
 
+  private async exportPowerPoint() {
+    this.canvas.commitTextEdit()
+    if (!this.store.doc.slides.some((s) => !s.stateOf)) { this.toast(t('No pages yet')); return }
+    const losses = pptxEffectLosses(this.store.doc)
+    const details = [
+      losses.transitions && `${losses.transitions} ${t('slide transitions')}`,
+      losses.entrances && `${losses.entrances} ${t('entrance or count-up animations')}`,
+      losses.loops && `${losses.loops} ${t('looping or ambient animations')}`,
+      losses.interactions && `${losses.interactions} ${t('interactive or animated SVG effects')}`,
+    ].filter(Boolean).map((line) => `• ${line}`).join('\n')
+    if (details && !window.confirm(`${t('Some effects cannot be represented in PowerPoint:')}\n\n${details}\n\n${t('They will be exported as static content. Animated GIFs and supported audio/video are preserved. Continue?')}`)) return
+    this.toast(t('Exporting PowerPoint…'))
+    const base = (this.store.doc.title || 'Untitled').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'Untitled'
+    try {
+      await exportPptx(this.store.doc, `${base}.pptx`)
+    } catch (error) {
+      console.error('bento: pptx export failed', error)
+      this.toast(t('PowerPoint export failed'))
+    }
+  }
+
   // --- insert image ------------------------------------------------------------------
 
   private pickImage() {
@@ -2562,13 +2584,16 @@ export class Editor {
     this.savedTimer = window.setTimeout(() => tag!.classList.remove('show'), 1400)
   }
 
-  async save(forcePicker: boolean) {
+  async save(_forcePicker: boolean) {
     this.canvas.commitTextEdit()
     // shared docs persist their CRDT state so the saved copy can rejoin
     // as a true fork later (offline edits merge both ways)
     this.session?.stampInto(this.store.doc)
     try {
-      const result = await saveFile(this.store.doc, forcePicker)
+      // The primary Save action is the lightweight, editable interchange file.
+      // A held JSON handle is rewritten in place; otherwise this downloads a
+      // .bento.json copy. The self-contained HTML remains an explicit Save As.
+      const result = await saveDocJson(this.store.doc)
       if (result === 'cancelled') return
       this.store.setDirty(false)
       // the file name is knowable from here on — put it in the tab and the chip

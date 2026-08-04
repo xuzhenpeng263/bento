@@ -4,6 +4,15 @@
 import type { Catalog } from '../i18n'
 
 export const ja: Catalog = {
+  "Export PowerPoint (.pptx)": "PowerPointを書き出す（.pptx）",
+  "Exporting PowerPoint…": "PowerPointを書き出しています…",
+  "PowerPoint export failed": "PowerPointの書き出しに失敗しました",
+  "Some effects cannot be represented in PowerPoint:": "次の効果は PowerPoint で保持できません：",
+  "slide transitions": "件のスライド切り替え",
+  "entrance or count-up animations": "件の開始／カウントアップ アニメーション",
+  "looping or ambient animations": "件のループ／アンビエント アニメーション",
+  "interactive or animated SVG effects": "件のインタラクティブ／SVG アニメーション効果",
+  "They will be exported as static content. Animated GIFs and supported audio/video are preserved. Continue?": "静的コンテンツとして書き出します。アニメーション GIF と対応する音声・動画は保持されます。続けますか？",
   "AI": "AI",
   "AI copilot": "AI copilot",
   "AI copilot — generate and refine slides": "AI copilot — generate and refine slides",

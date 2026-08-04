@@ -4,6 +4,15 @@
 import type { Catalog } from '../i18n'
 
 export const zhHans: Catalog = {
+  "Export PowerPoint (.pptx)": "导出 PowerPoint（.pptx）",
+  "Exporting PowerPoint…": "正在导出 PowerPoint…",
+  "PowerPoint export failed": "PowerPoint 导出失败",
+  "Some effects cannot be represented in PowerPoint:": "以下动效无法在 PowerPoint 中保留：",
+  "slide transitions": "个页面转场",
+  "entrance or count-up animations": "个入场或数字递增动画",
+  "looping or ambient animations": "个循环或环境动画",
+  "interactive or animated SVG effects": "个交互或 SVG 动画效果",
+  "They will be exported as static content. Animated GIFs and supported audio/video are preserved. Continue?": "这些内容将以静态形式导出；动态 GIF 和受支持的音视频会保留。是否继续？",
   "AI": "AI",
   "AI copilot": "AI 助手",
   "AI copilot — generate and refine slides": "AI 助手 — 生成并精调幻灯片",
