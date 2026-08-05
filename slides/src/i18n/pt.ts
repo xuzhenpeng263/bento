@@ -789,4 +789,6 @@ export const pt: Catalog = {
   "Open another file? Unsaved changes will be lost.": "Abrir outro ficheiro? As alterações não guardadas serão perdidas.",
   "{name} doesn't contain a WebDeck document.": "{name} não contém um documento Bento.",
   "Couldn't open that file — see console": "Não foi possível abrir o ficheiro — veja a consola",
-}
+}  "Close File": "Fechar arquivo",
+  "Close this file? Unsaved changes will be lost.": "Fechar este arquivo? As alterações não salvas serão perdidas.",
+
