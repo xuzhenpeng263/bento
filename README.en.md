@@ -21,7 +21,7 @@ A WebDeck file is a complete document: slides, speaker notes, live charts, embed
 - **Live collaboration**: E2EE real-time editing with a blind relay (optional)
 - **AI-friendly**: round-trip the document JSON — AI agents author and edit decks
 - **Responsive UI**: works on desktop and mobile browsers
-- **PPTX and PDF export**: share standard formats when needed
+- **PPTX export**: export to PowerPoint format when needed
 
 ---
 
