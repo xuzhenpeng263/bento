@@ -19,6 +19,8 @@ export const es: Catalog = {
   "Creates one page at a time": "Creates one page at a time",
   "AI settings": "AI settings",
   "Close AI copilot": "Close AI copilot",
+  "Close File": "Cerrar archivo",
+  "Close this file? Unsaved changes will be lost.": "¿Cerrar este archivo? Los cambios no guardados se perderán.",
   "Describe the presentation or the change you want…": "Describe the presentation or the change you want…",
   "Send": "Send",
   "Stop": "Stop",

@@ -19,6 +19,8 @@ export const ja: Catalog = {
   "Creates one page at a time": "Creates one page at a time",
   "AI settings": "AI settings",
   "Close AI copilot": "Close AI copilot",
+  "Close File": "ファイルを閉じる",
+  "Close this file? Unsaved changes will be lost.": "このファイルを閉じますか？保存されていない変更は失われます。",
   "Describe the presentation or the change you want…": "Describe the presentation or the change you want…",
   "Send": "Send",
   "Stop": "Stop",

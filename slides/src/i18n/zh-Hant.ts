@@ -19,6 +19,8 @@ export const zhHant: Catalog = {
   "Creates one page at a time": "Creates one page at a time",
   "AI settings": "AI settings",
   "Close AI copilot": "Close AI copilot",
+  "Close File": "關閉檔案",
+  "Close this file? Unsaved changes will be lost.": "關閉此檔案？未儲存的變更將遺失。",
   "Describe the presentation or the change you want…": "Describe the presentation or the change you want…",
   "Send": "Send",
   "Stop": "Stop",

@@ -19,6 +19,8 @@ export const zhHans: Catalog = {
   "Creates one page at a time": "逐页创建",
   "AI settings": "AI 设置",
   "Close AI copilot": "关闭 AI 助手",
+  "Close File": "关闭文件",
+  "Close this file? Unsaved changes will be lost.": "关闭此文件？未保存的更改将丢失。",
   "Describe the presentation or the change you want…": "描述你想制作的演示文稿或需要调整的内容…",
   "Send": "发送",
   "Stop": "停止",
