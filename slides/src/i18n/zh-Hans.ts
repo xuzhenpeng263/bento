@@ -795,6 +795,4 @@ export const zhHans: Catalog = {
   "Zoom in and out": "缩放",
   "Space-drag": "空格+拖动",
   "Pan as well, if your mouse has a middle button": "如果鼠标有中键，也可用于平移",
-}  "Close File": "关闭文件",
-  "Close this file? Unsaved changes will be lost.": "关闭此文件？未保存的更改将丢失。",
-
+}

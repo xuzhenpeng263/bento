@@ -793,6 +793,4 @@ export const es: Catalog = {
   "Open another file? Unsaved changes will be lost.": "¿Abrir otro archivo? Los cambios no guardados se perderán.",
   "{name} doesn't contain a WebDeck document.": "{name} no contiene un documento Bento.",
   "Couldn't open that file — see console": "No se pudo abrir el archivo — consulta la consola",
-}  "Close File": "Cerrar archivo",
-  "Close this file? Unsaved changes will be lost.": "¿Cerrar este archivo? Los cambios no guardados se perderán.",
-
+}

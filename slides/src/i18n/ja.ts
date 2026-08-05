@@ -793,6 +793,4 @@ export const ja: Catalog = {
   "Open another file? Unsaved changes will be lost.": "別のファイルを開きますか？未保存の変更は失われます。",
   "{name} doesn't contain a WebDeck document.": "{name} には WebDeck ドキュメントが含まれていません。",
   "Couldn't open that file — see console": "ファイルを開けませんでした — コンソールを参照",
-}  "Close File": "ファイルを閉じる",
-  "Close this file? Unsaved changes will be lost.": "このファイルを閉じますか？保存されていない変更は失われます。",
-
+}
