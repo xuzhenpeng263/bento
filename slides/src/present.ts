@@ -651,7 +651,7 @@ export function startPresentation(
     }
     if (!speaker) { openingSpeaker = false; console.warn('[webdeck-speaker] popup blocked — allow pop-ups for this site'); return }
     setSpeakerWindow(speaker)
-    ;(window as unknown as Record<string, unknown>).__bentoSpeaker = speaker // diagnostics
+    ;(window as unknown as Record<string, unknown>).__webdeckSpeaker = speaker // diagnostics
     const d = speaker.document
     d.title = `${doc.title} — ${t('Speaker view')}`
     if (!d.head.querySelector('style')) { // already styled when adopting an editor window

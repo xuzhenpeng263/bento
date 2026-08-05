@@ -75,7 +75,7 @@ export function serializeSlides(slides: Slide[], doc: BentoDoc): string {
 
 export function parseClip(text: string): ClipPayload | null {
   if (!text || text.length > 40_000_000) return null
-  try { const p = JSON.parse(text); return p && p.__bento === 'clip' ? p as ClipPayload : null } catch { return null }
+  try { const p = JSON.parse(text); return p && p.__webdeck === 'clip' ? p as ClipPayload : null } catch { return null }
 }
 
 /** Merge payload assets into doc; on same-key-different-value, remap to a fresh key. */
