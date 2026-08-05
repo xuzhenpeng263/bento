@@ -63,7 +63,7 @@ const site = join(root, 'site')
 /** The live tree, resolved exactly as publish-site.mjs resolves it. */
 const published = process.env.BENTO_SITE_DIR
   ? resolve(process.env.BENTO_SITE_DIR)
-  : resolve(root, '..', 'bento-site')
+  : resolve(root, '..', 'webdeck-site')
 
 // `--print-notes` shows exactly what this release would sign into the manifest,
 // then exits. Nothing is built, staged, wiped or signed.
@@ -137,7 +137,7 @@ cpSync(shellSrc, join(site, `${app.dir}/index.html`))
 // Slides ALSO publishes to the site root — see the ownsSiteContent block below.
 // `/agents.md` is referenced by the README and by the harness SKILL.md, which
 // people upload to claude.ai as a zip, so it is effectively frozen; this is the
-// same compat shape as skills/bento-deck. Both copies come from one source.
+// same compat shape as skills/webdeck-deck. Both copies come from one source.
 if (app.agents && existsSync(join(root, app.agents))) {
   writeFileSync(
     join(site, `${app.dir}/agents.md`),
@@ -342,12 +342,12 @@ if (app.ownsSiteContent) {
   // The harness skill (canonical home: the Claude Code plugin at
   // plugins/webdeck). Published three ways: the raw SKILL.md (curl
   // one-liner), a claude.ai-uploadable zip (must contain webdeck/SKILL.md,
-  // folder-inside-zip), and a compat copy at the old bento-deck URL.
+  // folder-inside-zip), and a compat copy at the old webdeck-deck URL.
   const skillSrc = join(root, 'plugins/webdeck/skills/webdeck/SKILL.md')
   mkdirSync(join(site, 'skills/webdeck'), { recursive: true })
   cpSync(skillSrc, join(site, 'skills/webdeck/SKILL.md'))
-  mkdirSync(join(site, 'skills/bento-deck'), { recursive: true })
-  cpSync(skillSrc, join(site, 'skills/bento-deck/SKILL.md'))
+  mkdirSync(join(site, 'skills/webdeck-deck'), { recursive: true })
+  cpSync(skillSrc, join(site, 'skills/webdeck-deck/SKILL.md'))
   execFileSync('zip', ['-q', '-X', '-o', 'webdeck.zip', 'webdeck/SKILL.md'], { cwd: join(site, 'skills') })
 
   // MIT license — travels to the public site repo so the published tree carries it.

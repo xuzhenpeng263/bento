@@ -54,7 +54,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" v
     <rect x="8" y="8" width="11" height="36" rx="4" fill="#5E7699"/>
     <rect x="23" y="8" width="21" height="16" rx="4" fill="#FF9E8A"/>
     <rect x="23" y="28" width="21" height="16" rx="4" fill="#F0EBE0"/>
-    <text x="70" y="35" font-family="Instrument Sans, sans-serif" font-weight="700" font-size="30" fill="#ffffff">bento<tspan fill="#FF9E8A">/</tspan>.</text>
+    <text x="70" y="35" font-family="Instrument Sans, sans-serif" font-weight="700" font-size="30" fill="#ffffff">webdeck<tspan fill="#FF9E8A">/</tspan>.</text>
   </g>
 
   <!-- kicker -->

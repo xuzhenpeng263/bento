@@ -65,7 +65,7 @@ function fakeStorage(opts: { writable?: boolean } = {}) {
 withStorage({ get() { throw new Error('SecurityError: The document is sandboxed and lacks the allow-same-origin flag') } }, () => {
   ok(lsGet('webdeck-lang') === null, 'a throwing localStorage property reads as null, not an exception')
   ok(lsSet('webdeck-lang', 'ja') === false, 'a write reports false rather than throwing')
-  ok(lsJson('bento-panel-open', { a: 1 }).a === 1, 'lsJson falls back when the property throws')
+  ok(lsJson('webdeck-panel-open', { a: 1 }).a === 1, 'lsJson falls back when the property throws')
   ok(storageAvailable() === false, 'storageAvailable is false')
   let threw = false
   try { lsDel('webdeck-lang') } catch { threw = true }
@@ -89,8 +89,8 @@ withStorage({ value: fakeStorage() }, () => {
   ok(storageAvailable() === true, 'storageAvailable is true')
   lsDel('webdeck-author')
   ok(lsGet('webdeck-author') === null, 'lsDel removes it')
-  ok(lsSetJson('bento-ed-panels', { left: 260 }) === true, 'lsSetJson stores')
-  ok(lsJson<{ left: number }>('bento-ed-panels', { left: 0 }).left === 260, 'lsJson reads it back')
+  ok(lsSetJson('webdeck-ed-panels', { left: 260 }) === true, 'lsSetJson stores')
+  ok(lsJson<{ left: number }>('webdeck-ed-panels', { left: 0 }).left === 260, 'lsJson reads it back')
 })
 
 // ---- 4. reads work, writes throw (quota, Safari private) --------------------
@@ -101,10 +101,10 @@ withStorage({ value: fakeStorage({ writable: false }) }, () => {
 
 // ---- 5. corrupt JSON is somebody else's data, not a crash -------------------
 withStorage({ value: fakeStorage() }, () => {
-  lsSet('bento-panel-open', '{not json')
-  ok(lsJson('bento-panel-open', { safe: true }).safe === true, 'unparseable JSON falls back')
-  lsSet('bento-panel-open', 'null')
-  ok(lsJson('bento-panel-open', { safe: true }).safe === true, 'a stored null falls back rather than returning null')
+  lsSet('webdeck-panel-open', '{not json')
+  ok(lsJson('webdeck-panel-open', { safe: true }).safe === true, 'unparseable JSON falls back')
+  lsSet('webdeck-panel-open', 'null')
+  ok(lsJson('webdeck-panel-open', { safe: true }).safe === true, 'a stored null falls back rather than returning null')
 })
 
 // ---- 6. THE REGRESSION: importing a module that reads storage on load -------

@@ -10,7 +10,7 @@
 //   node scripts/guestbook-roll.mjs
 //     → full roll: archive → mint epoch N+1 with FRESH room+key (kill-switch:
 //       the published file stops pointing at the old room) → publish to
-//       bento-site (Pages fallback) + site/ staging → SEED THE DAEMON (which
+//       webdeck-site (Pages fallback) + site/ staging → SEED THE DAEMON (which
 //       serves from KV and is what actually makes the roll go live).
 //
 //   flags: --base <url> (default https://webdeck.page) · --no-daemon (skip the
@@ -33,7 +33,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const live = join(root, 'working/guestbook-live/guestbook.webdeck.html')
-const siteRepo = join(root, '../bento-site')
+const siteRepo = join(root, '../webdeck-site')
 const args = process.argv.slice(2)
 const opt = (name, fb) => { const i = args.indexOf(`--${name}`); return i >= 0 && args[i + 1] ? args[i + 1] : fb }
 const base = opt('base', 'https://webdeck.page').replace(/\/$/, '')
@@ -85,7 +85,7 @@ if (args.includes('--snapshot-only')) process.exit(0)
 //     file and writes fresh room+key + owner deck into working/guestbook-live/)
 run('node', [join(root, 'scripts/build-guestbook.mjs')])
 
-// 3 · publish the static fallback: bento-site (Pages) + site/ staging
+// 3 · publish the static fallback: webdeck-site (Pages) + site/ staging
 copyFileSync(live, join(siteRepo, 'guestbook.webdeck.html'))
 copyFileSync(join(root, 'site-src/guestbook.html'), join(siteRepo, 'guestbook/index.html'))
 if (existsSync(join(root, 'site/guestbook.webdeck.html'))) copyFileSync(live, join(root, 'site/guestbook.webdeck.html'))

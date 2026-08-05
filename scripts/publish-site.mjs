@@ -7,7 +7,7 @@
 // page, agents.md, config — tracked in this repo) plus GENERATED artifacts
 // (the signed shell, the manifest, the gallery decks, the *.webdeck.html demos —
 // gitignored here, rebuilt by release.mjs / build-example-decks.mjs). This
-// script mirrors that tree into the public `bento-site` repo and pushes it, so
+// script mirrors that tree into the public `webdeck-site` repo and pushes it, so
 // nothing is hand-copied file-by-file and the guestbook / gallery imagery can't
 // silently drift between sessions.
 //
@@ -17,7 +17,7 @@
 //               slides/dist-single/ — run `npm run build:single` or a release).
 //   --dry       show what would change; don't commit or push.
 //
-// Destination repo: $BENTO_SITE_DIR, else ../bento-site beside this repo.
+// Destination repo: $BENTO_SITE_DIR, else ../webdeck-site beside this repo.
 
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
@@ -32,7 +32,7 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const site = join(root, 'site')
 const dest = process.env.BENTO_SITE_DIR
   ? resolve(process.env.BENTO_SITE_DIR)
-  : resolve(root, '..', 'bento-site')
+  : resolve(root, '..', 'webdeck-site')
 
 const args = process.argv.slice(2)
 const dry = args.includes('--dry')
@@ -179,7 +179,7 @@ const cmpVersion = (a, b) => {
 // (working/guestbook-live/), and releases are built from a clean checkout of
 // the tag where it never does. Without this exclusion, every such release
 // silently deletes the published deck. That is how the v1.0.12 publish removed
-// the live guestbook from bento-site.
+// the live guestbook from webdeck-site.
 //
 // The landing page is now written unconditionally (release.mjs), so only the
 // deck needs protecting, and only when this build has none to offer.
@@ -199,7 +199,7 @@ if (!existsSync(join(site, 'guestbook.webdeck.html'))) {
 // assembler did not write is removed from the live site.
 //
 // Measured, not theorised. A cloned `release.mjs --app spaces` staged a spaces
-// site and this script mirrored it against a copy of the real bento-site:
+// site and this script mirrored it against a copy of the real webdeck-site:
 // 52 deletions, every existing gate green, nothing refused — including
 // `releases/slides/manifest.json`, all 22 signed language packs, the shell,
 // `slides/index.html`, all four gallery decks and `guestbook/index.html`.
@@ -278,7 +278,7 @@ const status = capture('git', ['-C', dest, 'status', '--porcelain'])
 // not, because this exited here first. The documented "idempotent, safe to
 // re-run" property was false in exactly the case anyone would rely on it.
 if (!status) {
-  console.log('✓ site unchanged — bento-site already up to date')
+  console.log('✓ site unchanged — webdeck-site already up to date')
 } else {
   run('git', ['-C', dest, 'commit', '-q', '-m', message])
   run('git', ['-C', dest, 'push', '-q', 'origin', 'HEAD'])
@@ -290,7 +290,7 @@ const ver = (() => {
     return JSON.parse(m.payload).version
   } catch { return '?' }
 })()
-console.log(`\n✓ published to bento-site @ ${head} (app v${ver})`)
+console.log(`\n✓ published to webdeck-site @ ${head} (app v${ver})`)
 
 // ---- GitHub release --------------------------------------------------------
 // Publishing the site makes a version downloadable and self-updatable, but the

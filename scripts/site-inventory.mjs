@@ -59,7 +59,7 @@ export function plannedDeletions(published, staged, excluded = []) {
  * dropped a language, or staged no packs at all, still trips the gate.
  */
 export function supersededPacks(published, staged) {
-  const PACK = /^releases\/([^/]+)\/packs\/bento-([^/]+)-(\d+\.\d+\.\d+)-(.+)\.pack\.json$/
+  const PACK = /^releases\/([^/]+)\/packs\/webdeck-([^/]+)-(\d+\.\d+\.\d+)-(.+)\.pack\.json$/
   const stagedKeys = new Map() // "applang" -> version
   for (const p of staged) {
     const m = PACK.exec(p)

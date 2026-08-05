@@ -103,7 +103,7 @@ ok(groups.get('releases') === 5, `the shell, manifest, index and 2 packs collaps
 ok(groups.get('agents.md') === 1, 'a top-level file is its own group')
 
 // ---- walk() ----------------------------------------------------------------
-const tmp = join(tmpdir(), `bento-gate-${process.pid}`)
+const tmp = join(tmpdir(), `webdeck-gate-${process.pid}`)
 try {
   for (const rel of ['a.txt', 'sub/b.txt', '.git/HEAD', 'sub/deep/c.txt']) {
     mkdirSync(dirname(join(tmp, rel)), { recursive: true })
