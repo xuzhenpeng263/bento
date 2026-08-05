@@ -278,7 +278,7 @@ function randomMutation(r: Replica, rnd: () => number): (doc: Doc) => void {
         break
       }
       case 9: // delete slide
-        if (slides.length > 1) slides.splice(Math.floor(rnd() * slides.length), 1)
+        if (slides.length) slides.splice(Math.floor(rnd() * slides.length), 1)
         break
       case 10: {
         // reorder slides
@@ -717,6 +717,24 @@ const castCount = (d: Doc) =>
   const before = A.fingerprint()
   const r = A.state.mergeSnapshot(A.doc, baseDoc(), legacy as any)
   ok(!r.changed && A.fingerprint() === before, 'v1 snapshot ignored by mergeSnapshot')
+}
+
+{
+  console.log('zero-slide deck: deletion is preserved and replicas converge…')
+  const A = new Replica('A')
+  const B = new Replica('B')
+  const deleted = A.mutate((d) => d.slides.splice(0, d.slides.length))
+  B.receive(deleted)
+  ok(A.doc.slides.length === 0, 'local replica keeps a valid empty deck')
+  ok(B.doc.slides.length === 0, 'remote replica does not synthesize a replacement slide')
+  ok(A.fingerprint() === B.fingerprint(), 'empty replicas converge')
+
+  const inserted = B.mutate((d) => d.slides.push({
+    id: 'after-empty', background: '#fff', transition: 'none', notes: '', elements: [],
+  }))
+  A.receive(inserted)
+  ok(A.doc.slides.length === 1 && B.doc.slides.length === 1, 'a slide can be inserted after emptying')
+  ok(A.fingerprint() === B.fingerprint(), 'replicas converge after inserting into an empty deck')
 }
 
 console.log(failures === 0 ? `\nALL PASS (${checks} checks)` : `\n${failures} FAILURES of ${checks} checks`)

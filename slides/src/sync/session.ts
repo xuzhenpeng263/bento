@@ -18,8 +18,7 @@
 // the same store events the editor already listens to. Zero editor rewrites.
 
 import type { Store } from '../store'
-import type { BentoDoc, Slide } from '../model'
-import { uid } from '../model'
+import type { BentoDoc } from '../model'
 import { SyncState, SYNC_V, BLOB_INLINE_MAX, type Op } from './crdt'
 import { putBlob, getBlob, dataUriToBytes, bytesToDataUri, encodedSize, MAX_BLOB } from './blobs'
 import { mintCollab } from './online'
@@ -485,23 +484,11 @@ export class SyncSession {
   private afterRemoteChange(structure: boolean) {
     void this.resolveBlobs()
     const store = this.store
-    // an all-slides-deleted race leaves an empty deck — heal with a blank
-    if (store.doc.slides.length === 0) {
-      const blank: Slide = {
-        id: uid('s'),
-        background: store.doc.theme.background,
-        transition: 'fade',
-        elements: [],
-        notes: '',
-      }
-      store.doc.slides.push(blank)
-      // mint it as a local op so every replica converges on ONE healer's
-      // slide (LWW keeps all healers' slides; harmless extra blanks)
-      this.applying = false
-      this.flush()
-      this.applying = true
-    }
-    store.currentIndex = Math.min(store.currentIndex, store.doc.slides.length - 1)
+    // An empty deck is a valid document state. Keep the cursor at its neutral
+    // index so a later local or remote insertion becomes immediately usable.
+    store.currentIndex = store.doc.slides.length
+      ? Math.min(store.currentIndex, store.doc.slides.length - 1)
+      : 0
     const sel = store.selection.filter((id) => store.element(id))
     const selChanged = sel.length !== store.selection.length
     store.selection = sel
