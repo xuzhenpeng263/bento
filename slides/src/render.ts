@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Shared model → DOM renderer. One code path draws slides everywhere:
 // editor canvas, sidebar thumbnails, and Reveal.js sections.
 
@@ -513,7 +513,7 @@ export function renderTableHtml(el: TableElement, doc: BentoDoc): string {
             // a table of Arabic terms is otherwise laid out as if it were
             // English. Per cell, so a bilingual table stays correct in both
             // columns.
-            `<div class="bento-cell-inner" dir="auto">${sanitizeHtml(cell.html || '') || '<br>'}</div></td>`
+            `<div class="webdeck-cell-inner" dir="auto">${sanitizeHtml(cell.html || '') || '<br>'}</div></td>`
           )
         })
         .join('')
@@ -537,7 +537,7 @@ export function renderTableHtml(el: TableElement, doc: BentoDoc): string {
  */
 export function renderElement(el: SlideElement, doc: BentoDoc, opts: RenderOpts = {}): HTMLElement {
   const node = document.createElement('div')
-  node.className = `bento-el bento-el-${el.type}`
+  node.className = `webdeck-el webdeck-el-${el.type}`
   node.dataset.elId = el.id
   node.dataset.flipId = morphKey(el)
   if (el.link) node.dataset.link = el.link
@@ -551,7 +551,7 @@ export function renderElement(el: SlideElement, doc: BentoDoc, opts: RenderOpts 
       node.style.flexDirection = 'column'
       node.style.justifyContent = VALIGN[el.valign]
       const inner = document.createElement('div')
-      inner.className = 'bento-text-inner'
+      inner.className = 'webdeck-text-inner'
       // Base direction from the text itself. Without it every box is LTR, and
       // Arabic/Hebrew/Persian/Urdu render with their neutral characters in the
       // wrong place — a trailing full stop jumps to the head of the line, and
@@ -719,7 +719,7 @@ export function renderElement(el: SlideElement, doc: BentoDoc, opts: RenderOpts 
 /** Render a full slide surface (background + elements) at model coordinates. */
 export function renderSlide(slide: Slide, doc: BentoDoc, opts: RenderOpts = {}): HTMLElement {
   const surface = document.createElement('div')
-  surface.className = 'bento-slide'
+  surface.className = 'webdeck-slide'
   surface.dataset.slideId = slide.id
   surface.style.width = `${doc.size.width}px`
   surface.style.height = `${doc.size.height}px`
@@ -733,7 +733,7 @@ export function renderSlide(slide: Slide, doc: BentoDoc, opts: RenderOpts = {}):
 export function renderThumbnail(slide: Slide, doc: BentoDoc, width: number): HTMLElement {
   const scale = width / doc.size.width
   const box = document.createElement('div')
-  box.className = 'bento-thumb-surface'
+  box.className = 'webdeck-thumb-surface'
   box.style.width = `${width}px`
   box.style.height = `${doc.size.height * scale}px`
   const inner = renderSlide(slide, doc, { svgAsImage: true })

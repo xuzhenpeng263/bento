@@ -22,13 +22,13 @@
 <p class="sub">
   This is the premise the whole extension approach rests on. If a stored directory
   handle re-grants with one click and then hands out <em>writable</em> file handles
-  with no further prompts, a Bento host can save any deck in your Decks folder —
+  with no further prompts, a WebDeck host can save any deck in your Decks folder —
   including one you opened by double-clicking, which no web page can ever do.
   If it prompts per file, the idea is worth much less.
 </p>
 
 <div class="warn">
-  <b>Pick a scratch folder.</b> Step 3 creates <code>bento-probe.txt</code> inside it
+  <b>Pick a scratch folder.</b> Step 3 creates <code>webdeck-probe.txt</code> inside it
   and writes a line to it. Nothing else is touched, and it tells you before it writes.
 </div>
 
@@ -46,7 +46,7 @@
   <b>Step 3.</b> Re-grant with one click, then write a file <em>inside</em> the folder —
   the file itself was never picked.<br>
   <button id="grant" disabled>Re-grant</button>
-  <button id="write" disabled>Create and write bento-probe.txt</button>
+  <button id="write" disabled>Create and write webdeck-probe.txt</button>
   <button id="again" disabled>Write a second file (no new prompt?)</button>
 </div>
 
@@ -66,7 +66,7 @@ const verdict = (ok, text) => {
 
 // --- the smallest IndexedDB that can hold a handle --------------------------
 const db = () => new Promise((res, rej) => {
-  const r = indexedDB.open('bento-dir-probe', 1)
+  const r = indexedDB.open('webdeck-dir-probe', 1)
   r.onupgradeneeded = () => r.result.createObjectStore('h')
   r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error)
 })
@@ -142,7 +142,7 @@ async function writeInside(name, body, label) {
 
 document.getElementById('write').onclick = async () => {
   try {
-    const perm = await writeInside('bento-probe.txt', `written by the bento directory probe\n`, 'file 1')
+    const perm = await writeInside('webdeck-probe.txt', `written by the bento directory probe\n`, 'file 1')
     document.getElementById('again').disabled = false
     if (perm === 'granted') {
       log('\nThe file inherited the folder grant — no prompt of its own.')
@@ -158,7 +158,7 @@ document.getElementById('write').onclick = async () => {
 
 document.getElementById('again').onclick = async () => {
   try {
-    const perm = await writeInside('bento-probe-2.txt', 'second file\n', 'file 2')
+    const perm = await writeInside('webdeck-probe-2.txt', 'second file\n', 'file 2')
     verdict(perm === 'granted',
       perm === 'granted'
         ? 'One folder grant covers every file inside it, and survives a reload with a single click. A host can save any deck in that folder — including ones opened by double-clicking. This is the premise the extension needs, and it holds.'

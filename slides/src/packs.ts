@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Language packs (docs/i18n-packs.md): fetching them, and carrying them in
 // the file.
 //
@@ -7,8 +7,8 @@
 //
 // An earlier version of this also let a pack be installed into localStorage
 // "on this computer". It was removed, because localStorage is scoped per
-// ORIGIN and that is fatally misaligned with how Bento is actually used: the
-// download comes from bento.page (an https origin), and the file is then
+// ORIGIN and that is fatally misaligned with how WebDeck is actually used: the
+// download comes from webdeck.page (an https origin), and the file is then
 // opened from disk (a file:// origin). A language added on the website was
 // therefore GONE the moment the user saved the deck and reopened it locally —
 // the exact journey the product encourages. "I added Korean and it vanished"
@@ -29,12 +29,12 @@ import { lsGet } from '../../kernel/src/storage.ts'
 
 /**
  * Where the release channel publishes the pack index and the packs.
- * Dev override: localStorage 'bento-packs-url' — the same convention the
- * updater uses for 'bento-update-url', so a local channel can be pointed at
+ * Dev override: localStorage 'webdeck-packs-url' — the same convention the
+ * updater uses for 'webdeck-update-url', so a local channel can be pointed at
  * without a rebuild. (A URL, not pack data: nothing durable lives here.)
  */
 const channel = (): string =>
-  lsGet('bento-packs-url') ?? 'https://bento.page/releases/slides'
+  lsGet('webdeck-packs-url') ?? 'https://webdeck.page/releases/slides'
 
 export interface PackListing {
   lang: string
@@ -52,8 +52,8 @@ export interface PackListing {
 export type PackError = 'offline' | 'bad-pack' | 'wrong-app' | 'unverified'
 
 /** The block type carrying a pack inside a saved shell. */
-export const PACK_BLOCK_TYPE = 'application/bento+lang'
-const blockId = (lang: string) => `bento-lang-${lang}`
+export const PACK_BLOCK_TYPE = 'application/webdeck+lang'
+const blockId = (lang: string) => `webdeck-lang-${lang}`
 
 /** Packs destined for the file: those already in it, plus any staged since. */
 const inFile = new Map<string, LanguagePack>()
@@ -216,14 +216,14 @@ export function shellBlocksForPacks(): ShellBlock[] {
  * Payload shape, produced by scripts/sign-packs.mjs (spec in
  * docs/i18n-packs.md §"Signing and release"):
  *
- *     { app: 'bento-slides', version, at, packs: [ { lang, label, version,
+ *     { app: 'webdeck', version, at, packs: [ { lang, label, version,
  *       url, sha256, bytes } ] }
  *
  * `app` is checked exactly as the release manifest's is: the signing key is
- * platform-wide, so the id is what stops a validly-signed bento/spaces index
- * being served to bento/slides. `url` is relative to the channel unless
+ * platform-wide, so the id is what stops a validly-signed webdeck-spaces index
+ * being served to webdeck. `url` is relative to the channel unless
  * absolute, so a dev channel serves its OWN packs instead of quietly reaching
- * back to bento.page.
+ * back to webdeck.page.
  */
 async function fetchIndex(): Promise<PackListing[]> {
   try {

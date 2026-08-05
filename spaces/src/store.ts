@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Document state, undo history, and the TYPING RUN.
 //
 // Slides sidesteps commit granularity because canvas text commits on blur. A

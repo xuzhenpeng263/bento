@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // First-page preview rig.
 //
 //   node scripts/test-preview.ts        (Node ≥ 23.6 strips types natively)
@@ -11,7 +11,7 @@
 // can fail SILENTLY — nobody looks at markup they cannot see — and both are
 // unrecoverable once files are on disk:
 //
-//   1. THE ENCRYPTION VETO. A `bento/enc` deck must never carry a plaintext
+//   1. THE ENCRYPTION VETO. A `webdeck/enc` deck must never carry a plaintext
 //      rendering of page one. Getting this wrong publishes the title slide of
 //      every password-protected deck ever saved, and the owner would have no
 //      way to notice.
@@ -50,9 +50,9 @@ const SCRIPT_CLOSE = '</scr' + 'ipt>'
 const SCRIPT_OPEN = '<scr' + 'ipt>'
 const NOSCRIPT_CLOSE = '</nosc' + 'ript>'
 
-const PLAIN = JSON.stringify({ format: 'bento/slides', docId: 'x', title: 'Q3 board' })
+const PLAIN = JSON.stringify({ format: 'webdeck', docId: 'x', title: 'Q3 board' })
 const ENVELOPE = JSON.stringify({
-  format: 'bento/enc', v: 1, it: 300000, salt: 'c2FsdA==', iv: 'aXY=', data: 'ZGF0YQ==',
+  format: 'webdeck/enc', v: 1, it: 300000, salt: 'c2FsdA==', iv: 'aXY=', data: 'ZGF0YQ==',
 })
 
 // --- 1. the encryption veto -------------------------------------------------
@@ -69,7 +69,7 @@ ok(previewAllowed(PLAIN, true) === false, 'password active vetoes the preview ev
 
 // The body alone must be enough too. This is the path where an already-
 // encrypted block is re-serialized without the in-memory flag ever being set.
-ok(previewAllowed(ENVELOPE) === false, 'a bento/enc body vetoes the preview even with no password flag')
+ok(previewAllowed(ENVELOPE) === false, 'a webdeck/enc body vetoes the preview even with no password flag')
 ok(previewAllowed(ENVELOPE, true) === false, 'both signals together still veto')
 
 // …and through the real module state, not just the parameter, because that is
@@ -81,8 +81,8 @@ ok(previewAllowed(PLAIN) === true, 'clearing the password restores the preview')
 
 // A body that merely looks envelope-ish must not accidentally suppress a
 // preview — the check has to be the real parse, not a substring sniff.
-ok(previewAllowed(JSON.stringify({ title: 'about bento/enc envelopes' })) === true,
-  'a deck that merely mentions bento/enc still previews')
+ok(previewAllowed(JSON.stringify({ title: 'about webdeck/enc envelopes' })) === true,
+  'a deck that merely mentions webdeck/enc still previews')
 ok(previewAllowed('not json at all') === true, 'an unparseable body is not mistaken for an envelope')
 
 // --- 2. the output refusal --------------------------------------------------
@@ -106,10 +106,10 @@ ok(previewIsSafe('<div>' + '<SCR' + 'IPT src=x>' + '</div>') === false, 'an uppe
 ok(previewIsSafe('<div>' + '</NOSC' + 'RIPT>' + '</div>') === false, 'an upper-case noscript close is refused')
 
 // The forged-block case the pack rig also covers: a preview must not be able
-// to counterfeit an opening #bento-doc tag above the real one, because an old
+// to counterfeit an opening #webdeck-doc tag above the real one, because an old
 // updater splices into the FIRST match.
-ok(previewIsSafe('<div>' + '<scr' + 'ipt type="application/bento+json" id="bento-doc">{}</div>') === false,
-  'a forged #bento-doc opening tag is refused')
+ok(previewIsSafe('<div>' + '<scr' + 'ipt type="application/webdeck+json" id="webdeck-doc">{}</div>') === false,
+  'a forged #webdeck-doc opening tag is refused')
 
 console.log(`\n${checks - failures}/${checks} checks passed`)
 if (failures) process.exit(1)

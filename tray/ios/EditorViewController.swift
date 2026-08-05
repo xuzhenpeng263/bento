@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 
 import UIKit
 import WebKit
@@ -36,14 +36,14 @@ import CryptoKit
 ///    submission per release, no drift. What the app ships is file access.
 final class EditorViewController: UIViewController, WKScriptMessageHandler, WKURLSchemeHandler,
                                   WKNavigationDelegate, WKDownloadDelegate {
-    private let document: BentoDocument
+    private let document: WebDeckDocument
     private var webView: WKWebView!
 
-    /// Has the open document been handed to the web app yet? Bento only reaches
+    /// Has the open document been handed to the web app yet? WebDeck only reaches
     /// a picker when it holds no handle — afterwards ⌘S, autosave write-back and
     /// in-place update all reuse it. So the FIRST request targets this document
     /// and needs no UI; any later one is a genuine Save-As or export and must
-    /// not overwrite it. Comparing filenames instead would fail: Bento derives
+    /// not overwrite it. Comparing filenames instead would fail: WebDeck derives
     /// its suggested name from the deck TITLE, so it rarely matches.
     private var openDocumentVended = false
     private var isPresentingFullscreen = false
@@ -63,7 +63,7 @@ final class EditorViewController: UIViewController, WKScriptMessageHandler, WKUR
     /// owns both of those.
     var onDone: (() -> Void)?
 
-    init(document: BentoDocument) {
+    init(document: WebDeckDocument) {
         self.document = document
         super.init(nibName: nil, bundle: nil)
     }
@@ -249,10 +249,10 @@ final class EditorViewController: UIViewController, WKScriptMessageHandler, WKUR
         // A page refused fullscreen is not broken — that is exactly the path it
         // takes in mobile Safari, which is the well-trodden one.
         cfg.preferences.isElementFullscreenEnabled = false
-        cfg.setURLSchemeHandler(self, forURLScheme: "bento-tray")
+        cfg.setURLSchemeHandler(self, forURLScheme: "webdeck-tray")
         cfg.userContentController.add(self, name: "bentoFile")
 
-        // .atDocumentStart is required, not stylistic: Bento decides whether it
+        // .atDocumentStart is required, not stylistic: WebDeck decides whether it
         // can save during boot, so a bridge injected later arrives after the
         // editor has already concluded it cannot.
         if let js = Bundle.main.url(forResource: "bridge", withExtension: "js"),
@@ -274,7 +274,7 @@ final class EditorViewController: UIViewController, WKScriptMessageHandler, WKUR
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         view.addSubview(webView)
         observeFullscreen()
-        webView.load(URLRequest(url: URL(string: "bento-tray://\(originHost)/index.html")!))
+        webView.load(URLRequest(url: URL(string: "webdeck-tray://\(originHost)/index.html")!))
 
         view.addGestureRecognizer(TouchWatcher { [weak self] in self?.armIdleFade() })
 
@@ -319,7 +319,7 @@ final class EditorViewController: UIViewController, WKScriptMessageHandler, WKUR
     // nothing at all, which is the worst possible failure for a save.
     //
     // Downloads land in the app's Documents folder, which is visible in Files
-    // under Bento Tray. A picker per save would be punishing for an app that
+    // under WebDeck Tray. A picker per save would be punishing for an app that
     // saves often, and a download cannot overwrite the user's original anyway —
     // that is what the FSA path is for.
 
@@ -388,7 +388,7 @@ final class EditorViewController: UIViewController, WKScriptMessageHandler, WKUR
             } else {
                 // A copy/template/read-only export. Ask where it goes; it must
                 // never land on the open document.
-                pendingExportName = (m["suggestedName"] as? String) ?? "deck.bento.html"
+                pendingExportName = (m["suggestedName"] as? String) ?? "deck.webdeck.html"
                 reply(id, ok: true, value: pendingExportName!)
             }
 
@@ -428,7 +428,7 @@ final class EditorViewController: UIViewController, WKScriptMessageHandler, WKUR
 
     private func reply(_ id: Int, ok: Bool, value: String?) {
         let arg = value.map { "\"\($0.replacingOccurrences(of: "\"", with: "\\\""))\"" } ?? "null"
-        webView.evaluateJavaScript("window.__bentoNativeReply(\(id), \(ok), \(arg))")
+        webView.evaluateJavaScript("window.__webdeckNativeReply(\(id), \(ok), \(arg))")
     }
 
     /// Write an exported copy to a temp file and let the user place it. Kept

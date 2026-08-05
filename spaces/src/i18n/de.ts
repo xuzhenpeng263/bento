@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // German — machine-drafted, native review welcome.
 //
 // The English string is the KEY: it must match the source byte-for-byte,
 // including punctuation and curly quotes, or the lookup silently falls back
 // to English forever. Placeholders in {braces} are substituted at runtime.
 //
-// Terms: space = Space (m., "der Space") — kept as a loanword the way the German slides catalog keeps "Deck", so the UI stays tied to the product name bento/spaces; "Bereich" would break that link · page = Seite · block = Block (pl. Blöcke)
+// Terms: space = Space (m., "der Space") — kept as a loanword the way the German slides catalog keeps "Deck", so the UI stays tied to the product name webdeck-spaces; "Bereich" would break that link · page = Seite · block = Block (pl. Blöcke)
 
 import type { Catalog } from '../i18n'
 
@@ -126,10 +126,10 @@ export const de: Catalog = {
   "This file": "Diese Datei",
   "This file could not be opened": "Diese Datei konnte nicht geöffnet werden",
   "This file declares rules this build does not know. It is open read-only so nothing is lost.": "Diese Datei nennt Regeln, die dieser Build nicht kennt. Sie ist schreibgeschützt geöffnet, damit nichts verloren geht.",
-  "This file was written by a newer version of bento/spaces. It is open read-only so nothing is lost.": "Diese Datei wurde von einer neueren Version von bento/spaces geschrieben. Sie ist schreibgeschützt geöffnet, damit nichts verloren geht.",
+  "This file was written by a newer version of webdeck-spaces. It is open read-only so nothing is lost.": "Diese Datei wurde von einer neueren Version von webdeck-spaces geschrieben. Sie ist schreibgeschützt geöffnet, damit nichts verloren geht.",
   "This image is {size} and travels inside the file, making it that much bigger for everyone you send it to. Embed it anyway?": "Dieses Bild ist {size} groß und reist in der Datei mit — die Datei wird für jeden, dem du sie schickst, entsprechend größer. Trotzdem einbetten?",
   "This image was resized to keep the file small. Click to replace it with the original.": "Dieses Bild wurde verkleinert, damit die Datei klein bleibt. Klicken, um es durch das Original zu ersetzen.",
-  "This is not a bento/spaces document — {detail}.": "Dies ist kein bento/spaces-Dokument — {detail}.",
+  "This is not a webdeck-spaces document — {detail}.": "Dies ist kein webdeck-spaces-Dokument — {detail}.",
   "This page only": "Nur diese Seite",
   "This space has no pages.": "Dieser Space hat keine Seiten.",
   "This space is encrypted. Saves stay encrypted.": "Dieser Space ist verschlüsselt. Speichern bleibt verschlüsselt.",
@@ -147,7 +147,7 @@ export const de: Catalog = {
   "Wrong password — try again": "Falsches Passwort — bitte erneut versuchen",
   "You have the newest version ({v}).": "Du hast die neueste Version ({v}).",
   "archived": "archiviert",
-  "bento/spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "bento/spaces {version} · {pages} Seiten, {blocks} Blöcke. Das Dokument, der Editor und die Suche stecken alle in dieser einen Datei.",
+  "webdeck-spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "webdeck-spaces {version} · {pages} Seiten, {blocks} Blöcke. Das Dokument, der Editor und die Suche stecken alle in dieser einen Datei.",
   "none": "keine",
   "{i} of {n}": "{i} von {n}",
   "{n} duplicate or missing id(s) were repaired so links and pages resolve.": "{n} doppelte oder fehlende IDs wurden repariert, damit Links und Seiten wieder gefunden werden.",

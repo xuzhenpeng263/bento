@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bento.page/sitemap.xml
+Sitemap: https://webdeck.page/sitemap.xml

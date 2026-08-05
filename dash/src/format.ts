@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Turning a stored value into the string a reader sees.
 //
 // THE LINE THIS FILE DRAWS, because PLATFORM §8 does not draw it yet:

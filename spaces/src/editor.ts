@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// The bento/spaces editor.
+// Copyright (c) 2026 The WebDeck authors
+// The webdeck-spaces editor.
 //
 // The keyboard IS the interface here, so the keymap is specified rather than
 // discovered, and every block is its own contentEditable host — never one big
@@ -96,7 +96,7 @@ export class Editor {
 
     const bar = el('header', 'sp-bar')
     const mark = el('span', 'sp-mark')
-    mark.innerHTML = 'bento<span>/</span>spaces'
+    mark.innerHTML = 'webdeck<span>/</span>spaces'
 
     // Pages panel toggle — on every width, like slides' Slides/Format toggles.
     // A sidebar you cannot put away is a sidebar you resent on a laptop.
@@ -109,7 +109,7 @@ export class Editor {
     title.setAttribute('aria-label', t('Space name'))
     title.addEventListener('input', () => {
       this.store.runEdit('__title', () => { this.store.doc.title = title.value })
-      document.title = `${title.value} — bento/spaces`
+      document.title = `${title.value} — webdeck-spaces`
     })
     this.statusEl = el('span', 'sp-status')
 

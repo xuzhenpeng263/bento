@@ -1,14 +1,14 @@
 {
-  "name": "bento",
-  "owner": { "name": "The Bento authors", "url": "https://bento.page" },
+  "name": "webdeck",
+  "owner": { "name": "The WebDeck authors", "url": "https://webdeck.page" },
   "plugins": [
     {
-      "name": "bento-slides",
-      "source": "./plugins/bento-slides",
-      "description": "Author Bento presentations — self-contained .bento.html decks with morph transitions, live charts and speaker notes. Starts from nothing: downloads the latest Bento app automatically.",
-      "homepage": "https://bento.page",
+      "name": "webdeck",
+      "source": "./plugins/webdeck",
+      "description": "Author WebDeck presentations — self-contained .webdeck.html decks with morph transitions, live charts and speaker notes. Starts from nothing: downloads the latest WebDeck app automatically.",
+      "homepage": "https://webdeck.page",
       "license": "MIT",
-      "keywords": ["slides", "presentation", "deck", "bento", "powerpoint"]
+      "keywords": ["slides", "presentation", "deck", "webdeck", "powerpoint"]
     }
   ]
 }

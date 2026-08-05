@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Pull the daemon's KV archives down to disk so nothing is lost to the 90-cap.
 //
 // The daemon prunes KV `archives/` to the newest 90. At the launch 15-min roll
@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url'
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const args = process.argv.slice(2)
 const opt = (n, fb) => { const i = args.indexOf(`--${n}`); return i >= 0 && args[i + 1] ? args[i + 1] : fb }
-const base = opt('base', 'https://bento.page').replace(/\/$/, '')
+const base = opt('base', 'https://webdeck.page').replace(/\/$/, '')
 
 const keyFile = join(root, 'working/guestbook-admin-key.txt')
 if (!existsSync(keyFile)) { console.error('no admin key at working/guestbook-admin-key.txt'); process.exit(1) }
@@ -35,7 +35,7 @@ const onDisk = new Set(readdirSync(outDir))
 const statusRes = await fetch(`${base}/guestbook-admin/status`, { headers: auth })
 if (!statusRes.ok) { console.error(`status → ${statusRes.status}: ${(await statusRes.text()).slice(0, 200)}`); process.exit(1) }
 const status = await statusRes.json()
-const keys = status.archives ?? [] // e.g. ["archives/epoch-8-2026-07-22-19-15.bento.html", …]
+const keys = status.archives ?? [] // e.g. ["archives/epoch-8-2026-07-22-19-15.webdeck.html", …]
 
 // 2 · download any we don't already have
 let pulled = 0
@@ -48,5 +48,5 @@ for (const key of keys) {
   pulled++
 }
 
-const total = readdirSync(outDir).filter((f) => f.endsWith('.bento.html')).length
+const total = readdirSync(outDir).filter((f) => f.endsWith('.webdeck.html')).length
 console.log(`archive pull: ${pulled} new · ${keys.length} on daemon · ${total} total on disk → working/guestbook-archives/`)

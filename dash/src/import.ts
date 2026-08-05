@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // CSV / delimited import: parse, infer, encode.
 //
 // This is M1's whole demo — "the CSV someone emailed you, cleaned and typed and

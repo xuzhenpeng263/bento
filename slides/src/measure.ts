@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
-// Text measurement — `window.bento.measure()`.
+// Text measurement — `window.webdeck.measure()`.
 //
 // WHY THIS EXISTS. The format is absolute pixels, which is what lets morph, the
 // editor's drag handles and the renderer all work from one representation. The
@@ -60,7 +60,7 @@ export interface TextMeasurement {
  */
 function withHost<T>(fn: (host: HTMLElement) => T): T {
   const host = document.createElement('div')
-  host.setAttribute('data-bento-transient', '')
+  host.setAttribute('data-webdeck-transient', '')
   host.style.cssText =
     'position:fixed;left:-10000px;top:0;visibility:hidden;pointer-events:none;contain:strict;'
   document.body.appendChild(host)
@@ -86,7 +86,7 @@ export function measureText(spec: TextMeasureSpec, doc: BentoDoc): TextMeasureme
 function measureInto(host: HTMLElement, spec: TextMeasureSpec, doc: BentoDoc): TextMeasurement {
   const el = defaultText({
     ...spec,
-    id: 'bento-measure',
+    id: 'webdeck-measure',
     x: 0,
     y: 0,
     w: spec.w,
@@ -97,7 +97,7 @@ function measureInto(host: HTMLElement, spec: TextMeasureSpec, doc: BentoDoc): T
   // measurement — let the inner text take whatever height it needs.
   node.style.height = 'auto'
   host.appendChild(node)
-  const inner = node.querySelector<HTMLElement>('.bento-text-inner') ?? node
+  const inner = node.querySelector<HTMLElement>('.webdeck-text-inner') ?? node
   const height = Math.ceil(inner.getBoundingClientRect().height)
   // lineHeight is unitless in the model, so one line is fontSize * lineHeight
   const per = (el.fontSize ?? 16) * (el.lineHeight ?? 1.2)

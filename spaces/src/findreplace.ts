@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Find and replace over inline html.
 //
 // Its own module, with NO DOM dependency, for one reason: the number the

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// The starter deck — what a freshly built bento/slides file opens with.
+// Copyright (c) 2026 The WebDeck authors
+// The starter deck — what a freshly built webdeck file opens with.
 //
 // It is the product demo, the launch asset and the feature tour in one: every
 // claim it makes is proven by the feature making it. A cast of four "bento
@@ -313,7 +313,7 @@ const DOTS_PAPER =
 export function starterDoc(): BentoDoc {
   const doc = newDoc()
   // The DECK's title, not the app's — it reads as a document name (window title,
-  // suggested filename), so it stays in title case. The lowercase `bento/slides`
+  // suggested filename), so it stays in title case. The lowercase `webdeck`
   // wordmark is app chrome and is unaffected.
   doc.title = 'Bento Slides Showcase'
   doc.theme.fontFamily = BODY
@@ -1056,7 +1056,7 @@ export function starterDoc(): BentoDoc {
     slide({
       notes:
         'The cast reassembles into the logo. Press Esc — this deck is already your copy of the app: ' +
-        'edit it, save it, send it. bento.page has the latest build and the story.',
+        'edit it, save it, send it. webdeck.page has the latest build and the story.',
       elements: [
         grain(),
         glow(0, [
@@ -1106,7 +1106,7 @@ export function starterDoc(): BentoDoc {
         }),
         shape('rect', { x: 562, y: 644, w: 156, h: 44, radius: 22, fill: PEACH, fillGradient: GRAD_PEACH, shadow: { y: 10, blur: 26, color: 'rgba(0,0,0,0.4)' } }),
         text({
-          x: 562, y: 655, w: 156, h: 24, html: 'bento.page', fontSize: 16, fontWeight: 700,
+          x: 562, y: 655, w: 156, h: 24, html: 'webdeck.page', fontSize: 16, fontWeight: 700,
           color: INK, align: 'center',
         }),
       ],

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Boot sequence. Order matters: capture the pristine document BEFORE any DOM
 // mutation — the captured copy is what gets re-serialized on save.
 
@@ -20,15 +20,19 @@ import { Store } from './store'
 import { Editor } from './editor/editor'
 import { startPresentation } from './present'
 import { SyncSession } from './sync/session'
-import { onlineTransport, startSharing, stopSharing } from './sync/online'
+import { onlineTransport, startSharing, stopSharing, disconnectOnline } from './sync/online'
 import { renderWelcome, type WelcomeResult } from './welcome'
+
+// Module-level references held for tear-down (close file → welcome screen).
+let _store: Store | null = null
+let _session: SyncSession | null = null
 
 // Tell the kernel who this app is — must precede any kernel module use
 // (window title suffix, save-picker label, update manifest + its `app` check).
 configureApp({
-  appId: 'bento-slides',
-  appName: 'bento/slides',
-  manifestUrl: 'https://bento.page/releases/slides/manifest.json',
+  appId: 'webdeck',
+  appName: 'webdeck',
+  manifestUrl: 'https://webdeck.page/releases/slides/manifest.json',
 })
 
 // Every save writes a static rendering of page one into the shell, so file
@@ -42,7 +46,7 @@ capturePristine()
 // Chrome direction follows the VIEWER's language (Arabic/Hebrew/… get an RTL
 // interface). Deliberately AFTER capturePristine: saves re-serialize the
 // pristine clone, so the dir/lang attributes never reach a saved file — the
-// same viewer-scoped rule as 'bento-lang' and reduced motion. The DOCUMENT
+// same viewer-scoped rule as 'webdeck-lang' and reduced motion. The DOCUMENT
 // never mirrors; styles.css pins every slide surface back to direction: ltr.
 applyDirection()
 
@@ -75,7 +79,7 @@ async function passwordGate() {
     `<input type="password" autocomplete="current-password">` +
     `<button>${t('Unlock')}</button><div class="ed-pwerr"></div></div>`
   document.body.appendChild(gate)
-  document.getElementById('bento-splash')?.remove()
+  document.getElementById('webdeck-splash')?.remove()
   const input = gate.querySelector('input')!
   const button = gate.querySelector('button')!
   const err = gate.querySelector<HTMLElement>('.ed-pwerr')!
@@ -110,7 +114,7 @@ async function passwordGate() {
  * No embedded document: show the welcome page.
  *
  * The welcome page offers three paths into the editor:
- * 1. Open a .bento.html or .bento.json file (with write-permission request)
+ * 1. Open a .webdeck.html or .webdeck.json file (with write-permission request)
  * 2. Start a new blank deck from the starter template
  * 3. Drag-and-drop a file (handled by the editor's existing drop listener)
  *
@@ -130,7 +134,7 @@ function showWelcome() {
   const onDrop = async (ev: DragEvent) => {
     const item = [...(ev.dataTransfer?.items ?? [])].find((i) => i.kind === 'file')
     const named = ev.dataTransfer?.files?.[0]?.name ?? ''
-    if (!item || !/\.(bento\.html|json)$/i.test(named)) return
+    if (!item || !/\.(webdeck\.html|json)$/i.test(named)) return
     ev.preventDefault()
     const file = ev.dataTransfer?.files?.[0]
     if (!file) return
@@ -163,6 +167,24 @@ function bootWith(doc: BentoDoc, openedAs?: string) {
   else editorMode(doc, openedAs)
 }
 
+/** Close the current file and return to the welcome screen. */
+function closeFile() {
+  if (_store?.dirty && !confirm(t('Close this file? Unsaved changes will be lost.'))) return
+
+  if (_session) {
+    disconnectOnline(_session)
+    _session.destroy()
+    _session = null
+  }
+
+  const app = document.getElementById('app')
+  if (app) app.innerHTML = ''
+
+  _store = null
+
+  showWelcome()
+}
+
 /**
  * Read-only files are PLAYER files: they open straight into the show and
  * never expose the editor. Leaving the presentation lands on a minimal card.
@@ -170,7 +192,7 @@ function bootWith(doc: BentoDoc, openedAs?: string) {
 function playerMode(doc: BentoDoc) {
   document.title = `${doc.title} — ${appConfig().appName}`
   if (doc.fonts?.length) injectFonts(doc)
-  document.getElementById('bento-splash')?.remove()
+  document.getElementById('webdeck-splash')?.remove()
   const card = document.createElement('div')
   card.className = 'ed-player'
   card.innerHTML =
@@ -189,7 +211,7 @@ function playerMode(doc: BentoDoc) {
   card.querySelector('.ed-playcopy')!.addEventListener('click', () => {
     void serializeAuto(doc).then((html) => downloadFile(html, suggestedFileName(doc)))
   })
-  ;(window as any).bento = { format: doc.format, doc, readonly: true }
+  ;(window as any).webdeck = { format: doc.format, doc, readonly: true }
   start()
 }
 
@@ -205,10 +227,14 @@ const store = new Store(doc)
 const editor = new Editor(document.getElementById('app')!, store)
 if (openedAs) editor.openedAs = openedAs
 
-// Live collaboration (bento-sync): same-machine tabs sync automatically over
+// Live collaboration (webdeck-sync): same-machine tabs sync automatically over
 // BroadcastChannel; the online relay transport joins via the Share UI.
 const session = new SyncSession(store)
 editor.connectSync(session)
+
+// Hold references for closeFile() tear-down
+_store = store
+_session = session
 
 // Opening a link ending in #present starts the show immediately (player mode).
 if (location.hash === '#present') {
@@ -220,7 +246,7 @@ if (location.hash === '#present') {
 // brand moment instead of a flicker; the pristine capture ran before this,
 // so saved files keep the splash for their own next boot.
 {
-  const splash = document.getElementById('bento-splash')
+  const splash = document.getElementById('webdeck-splash')
   if (splash) {
     const wait = Math.max(0, 1250 - performance.now())
     setTimeout(() => {
@@ -231,12 +257,14 @@ if (location.hash === '#present') {
 }
 
 // Small scripting surface for tooling and automation: read/replace the
-// document model and serialize the full .bento.html file.
-;(window as any).bento = {
+// document model and serialize the full .webdeck.html file.
+;(window as any).webdeck = {
   format: doc.format,
   get doc() {
     return store.doc
   },
+  /** Close the current file and return to the welcome page. */
+  closeFile: () => closeFile(),
   serialize: () => {
     session.stampInto(store.doc)
     return serializeFile(store.doc)
@@ -268,7 +296,7 @@ if (location.hash === '#present') {
   },
   /**
    * AI/tooling round-trip: replace the whole document from a JSON string
-   * (the contents of #bento-doc). Validates via parseDoc; returns false and
+   * (the contents of #webdeck-doc). Validates via parseDoc; returns false and
    * changes nothing on invalid input. Undoable in the editor.
    */
   loadDoc(json: string): boolean {

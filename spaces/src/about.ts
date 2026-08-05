@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // The About surface: what this file is, updating it, its language, its
 // password, and the ways out of it.
 //
@@ -60,7 +60,7 @@ export function openAbout({ store, onRepaint }: AboutHooks): void {
   const pages = store.doc.pages.length
   const blocks = store.doc.pages.reduce((n, p) => n + p.blocks.length, 0)
   blurb.textContent = t(
-    'bento/spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.',
+    'webdeck-spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.',
     { version: APP_VERSION, pages, blocks },
   )
   card.append(blurb)

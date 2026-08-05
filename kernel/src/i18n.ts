@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Internationalization, Bento-sized: a ~1KB t() with English-string-as-key
 // (gettext philosophy — the source stays readable, fallback is free), catalogs
 // compiled into the bundle (self-containment: nothing is fetched), and locale
@@ -173,7 +173,7 @@ const pseudo = (s: string): string =>
   '⟧'
 
 function resolve(): string {
-  const saved = lsGet('bento-lang')
+  const saved = lsGet('webdeck-lang')
   if (saved) return saved
   const nav = navigator.language || 'en'
   if (hasLocale(nav)) return nav
@@ -193,8 +193,8 @@ export const locale = (): string => activeLocale()
 
 /** Persist the override and switch. Callers re-render their own UI. */
 export function setLocale(code: string): void {
-  if (code === 'en') lsDel('bento-lang')
-  else lsSet('bento-lang', code)
+  if (code === 'en') lsDel('webdeck-lang')
+  else lsSet('webdeck-lang', code)
   current = code
 }
 
@@ -208,6 +208,6 @@ export function t(en: string, vars?: Record<string, string | number>): string {
   return out
 }
 
-// dev convenience: window.bento.i18n exposes locale switching for testing;
+// dev convenience: window.webdeck.i18n exposes locale switching for testing;
 // the pseudo locale is reachable by setLocale('x-pseudo') in any build.
 export const i18nApi = { t, locale, setLocale, choices: localeChoices, addPack, removePack, loadedPacks }

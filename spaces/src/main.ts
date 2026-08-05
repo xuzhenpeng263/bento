@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// Boot sequence for bento/spaces. Order matters: configure the app, then
+// Copyright (c) 2026 The WebDeck authors
+// Boot sequence for webdeck-spaces. Order matters: configure the app, then
 // capture the pristine document BEFORE any DOM mutation — the captured copy is
 // what gets re-serialized on save.
 
@@ -21,9 +21,9 @@ import { Editor } from './editor'
 import { downloadMarkdown } from './about'
 
 configureApp({
-  appId: 'bento-spaces',
-  appName: 'bento/spaces',
-  manifestUrl: 'https://bento.page/releases/spaces/manifest.json',
+  appId: 'webdeck-spaces',
+  appName: 'webdeck-spaces',
+  manifestUrl: 'https://webdeck.page/releases/spaces/manifest.json',
 })
 
 capturePristine()
@@ -61,7 +61,7 @@ if (envelope) {
  * every later save stays encrypted.
  */
 async function passwordGate(): Promise<void> {
-  document.getElementById('bento-splash')?.remove()
+  document.getElementById('webdeck-splash')?.remove()
   const wrap = document.createElement('div')
   wrap.className = 'sp-gate'
   const card = document.createElement('div')
@@ -111,7 +111,7 @@ async function passwordGate(): Promise<void> {
 function refuse(res: Extract<ParseResult, { ok: false }>): void {
   const detail = 'detail' in res ? res.detail : ''
   const what = res.err === 'format'
-    ? t('This is not a bento/spaces document — {detail}.', { detail })
+    ? t('This is not a webdeck-spaces document — {detail}.', { detail })
     : res.err === 'json'
       ? t('The document block is not valid JSON — {detail}.', { detail })
       : t('The document block is not shaped like a space — {detail}.', { detail })
@@ -123,7 +123,7 @@ function refuse(res: Extract<ParseResult, { ok: false }>): void {
       const html = `<!DOCTYPE html>\n${document.documentElement.outerHTML}`
       const a = document.createElement('a')
       a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }))
-      a.download = 'untouched-copy.bento.html'
+      a.download = 'untouched-copy.webdeck.html'
       a.click()
     }],
     [t('Copy the document JSON'), () => { void navigator.clipboard?.writeText(embedded ?? '') }],
@@ -136,7 +136,7 @@ function refuse(res: Extract<ParseResult, { ok: false }>): void {
 }
 
 function gate(title: string, body: string, actions: Array<[string, () => void]>): void {
-  document.getElementById('bento-splash')?.remove()
+  document.getElementById('webdeck-splash')?.remove()
   const wrap = document.createElement('div')
   wrap.className = 'sp-gate'
   const card = document.createElement('div')
@@ -159,7 +159,7 @@ function gate(title: string, body: string, actions: Array<[string, () => void]>)
 
 function boot(doc: SpacesDoc, repaired: string[], frozen?: 'policy' | 'version'): void {
   document.title = `${doc.title} — ${appConfig().appName}`
-  document.getElementById('bento-splash')?.remove()
+  document.getElementById('webdeck-splash')?.remove()
 
   const store = new Store(doc)
   if (frozen) store.readOnly = true
@@ -167,7 +167,7 @@ function boot(doc: SpacesDoc, repaired: string[], frozen?: 'policy' | 'version')
 
   if (frozen) {
     banner(frozen === 'version'
-      ? t('This file was written by a newer version of bento/spaces. It is open read-only so nothing is lost.')
+      ? t('This file was written by a newer version of webdeck-spaces. It is open read-only so nothing is lost.')
       : t('This file declares rules this build does not know. It is open read-only so nothing is lost.'))
   }
   if (repaired.length) {
@@ -279,7 +279,7 @@ function boot(doc: SpacesDoc, repaired: string[], frozen?: 'policy' | 'version')
 
   if (!canWriteInPlace()) {
     // stated rather than discovered — the product-defining limitation on iOS
-    console.info('[bento/spaces] this browser cannot write back to the file; every save makes a new copy')
+    console.info('[webdeck-spaces] this browser cannot write back to the file; every save makes a new copy')
   }
 }
 

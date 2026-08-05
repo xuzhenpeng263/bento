@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Self-extracting shell: compress the built runtime so the file on disk is
 // ~half the size, with zero feature loss.
 //
-//   node scripts/postbuild-compress.mjs slides/dist-single/Bento_Slides.bento.html
+//   node scripts/postbuild-compress.mjs slides/dist-single/WebDeck.webdeck.html
 //
 // Takes the vite single-file build, extracts the big inline module script and
 // stylesheet, deflates them (raw) into base64 payload blocks, and restructures
 // the document into the canonical byte order:
 //
-//   head chrome → NOTICE → tooling comment → #bento-doc (PLAINTEXT, always)
+//   head chrome → NOTICE → tooling comment → #webdeck-doc (PLAINTEXT, always)
 //   → splash (paints while the payload parses) → payloads + 1KB loader last
 //
 // The loader inflates via the native DecompressionStream and boots the module
@@ -18,7 +18,7 @@
 // a plain-HTML message instead of a blank page.
 //
 // COMPATIBILITY CONTRACT (老 updaters are frozen code — we conform to them):
-//   - #bento-doc stays plaintext with the same id.
+//   - #webdeck-doc stays plaintext with the same id.
 //   - The whole file survives DOMParser → splice → outerHTML round-trips.
 //   - No literal "</script>" anywhere (base64 alphabet can't produce one;
 //     the loader is checked below).
@@ -39,11 +39,11 @@ const flag = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`)
   return i > 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback
 }
-const generator = flag('generator', 'bento-slides')
-const titleFallback = flag('title', 'bento/slides')
+const generator = flag('generator', 'webdeck')
+const titleFallback = flag('title', 'webdeck')
 
 const html = readFileSync(path, 'utf8')
-if (html.includes('id="bento-rt"')) {
+if (html.includes('id="webdeck-rt"')) {
   console.log('already compressed — skipping')
   process.exit(0)
 }
@@ -68,11 +68,11 @@ const cssB64 = b64(css)
 
 // --- other parts ------------------------------------------------------------
 const notice = html.match(/<!--\s*NOTICE[\s\S]*?-->/)?.[0] ?? ''
-const docBlock = html.match(/<script type="application\/bento\+json" id="bento-doc">[\s\S]*?<\/script>/)?.[0]
-if (!docBlock) throw new Error('#bento-doc not found')
+const docBlock = html.match(/<script type="application\/webdeck\+json" id="webdeck-doc">[\s\S]*?<\/script>/)?.[0]
+if (!docBlock) throw new Error('#webdeck-doc not found')
 const favicon = html.match(/<link rel="icon"[^>]*\/?>/)?.[0] ?? ''
 const title = html.match(/<title>[\s\S]*?<\/title>/)?.[0] ?? `<title>${titleFallback}</title>`
-const splashDiv = html.match(/<div id="bento-splash"[\s\S]*?<\/div>\s*<\/div>/)?.[0] ?? ''
+const splashDiv = html.match(/<div id="webdeck-splash"[\s\S]*?<\/div>\s*<\/div>/)?.[0] ?? ''
 const splashCss = (() => {
   const bodyPart = html.slice(html.indexOf('<body'))
   const m = bodyPart.match(/<style[^>]*>([\s\S]*?)<\/style>/)
@@ -83,15 +83,15 @@ const SLIDES_TOOLING = `<!--
   ════════════════════════════════════════════════════════════════════════
   AI AGENTS / TOOLING — READ THIS BEFORE EDITING THIS DECK
   ════════════════════════════════════════════════════════════════════════
-  Full authoring guide (schema + copy-paste snippets): https://bento.page/agents.md
+  Full authoring guide (schema + copy-paste snippets): https://webdeck.page/agents.md
 
   THE MECHANICS
-  · The document is the ONE script block of type "application/bento+json",
-    id "bento-doc", below — plain readable JSON. Edit THAT block in place;
+  · The document is the ONE script block of type "application/webdeck+json",
+    id "webdeck-doc", below — plain readable JSON. Edit THAT block in place;
     never regenerate the whole file. Escape every "<" in the JSON as \\u003c.
   · The base64 blocks near the end are the DEFLATE-compressed app runtime
-    (open source, https://bento.page) — no user content, leave them alone.
-  · In a running file, window.bento exposes { doc, serialize(), loadDoc(json),
+    (open source, https://webdeck.page) — no user content, leave them alone.
+  · In a running file, window.webdeck exposes { doc, serialize(), loadDoc(json),
     comments(), updates, i18n }. In the app UI: Save → Copy / Replace JSON.
 
   MAKE A GREAT DECK, NOT JUST A CORRECT ONE
@@ -128,23 +128,23 @@ const SLIDES_TOOLING = `<!--
   ════════════════════════════════════════════════════════════════════════
 -->`
 
-// Every Bento app must point agents at the document block and the scripting
+// Every WebDeck app must point agents at the document block and the scripting
 // API (docs/PLATFORM.md §7). Apps beyond slides get this short form until
 // they have authoring guidance of their own worth shipping in every file.
 const GENERIC_TOOLING = `<!--
   ════════════════════════════════════════════════════════════════════════
   AI AGENTS / TOOLING — READ THIS BEFORE EDITING THIS FILE
   ════════════════════════════════════════════════════════════════════════
-  · The document is the ONE script block of type "application/bento+json",
-    id "bento-doc", below — plain readable JSON. Edit THAT block in place;
+  · The document is the ONE script block of type "application/webdeck+json",
+    id "webdeck-doc", below — plain readable JSON. Edit THAT block in place;
     never regenerate the whole file. Escape every "<" in the JSON as \\u003c.
   · The base64 blocks near the end are the DEFLATE-compressed app runtime
-    (open source, https://bento.page) — no user content, leave them alone.
-  · In a running file, window.bento exposes { doc, serialize(), loadDoc(json) }.
+    (open source, https://webdeck.page) — no user content, leave them alone.
+  · In a running file, window.webdeck exposes { doc, serialize(), loadDoc(json) }.
   ════════════════════════════════════════════════════════════════════════
 -->`
 
-const TOOLING_COMMENT = generator === 'bento-slides' ? SLIDES_TOOLING : GENERIC_TOOLING
+const TOOLING_COMMENT = generator === 'webdeck' ? SLIDES_TOOLING : GENERIC_TOOLING
 
 // --- loader (plain script, runs at end of body; no "</script>" literal) -----
 // Keep the loader small: unlike the payloads it ships as PLAINTEXT in every
@@ -155,8 +155,8 @@ const TOOLING_COMMENT = generator === 'bento-slides' ? SLIDES_TOOLING : GENERIC_
 // without the two guards below every save wrote this ~100KB of CSS back as
 // plaintext, the next boot inflated the payload and appended another copy, and
 // the file grew by 100KB per save without bound:
-//   1. `data-bento-transient` — serializeBody() strips marked nodes from the
-//      clone, so the CSS lives in the deflated #bento-rt-css payload (27KB)
+//   1. `data-webdeck-transient` — serializeBody() strips marked nodes from the
+//      clone, so the CSS lives in the deflated #webdeck-rt-css payload (27KB)
 //      and nowhere else in the file.
 //   2. the sweep — a file written before guard 1 existed already carries N
 //      plaintext copies of exactly this CSS; dropping them before injecting
@@ -168,7 +168,7 @@ const loader = `
     d.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0D1B2E;color:#F2F0EA;font:16px/1.6 sans-serif;text-align:center;padding:40px;z-index:99999'
     d.innerHTML = msg
     document.body.appendChild(d)
-    var s = document.getElementById('bento-splash'); if (s) s.remove()
+    var s = document.getElementById('webdeck-splash'); if (s) s.remove()
   }
   if (typeof DecompressionStream === 'undefined') {
     fail('This file needs a browser from 2023 or later (Chrome 80+, Edge, Firefox 113+, Safari 16.4+).<br>The document itself is intact \\u2014 open this file in a newer browser.')
@@ -182,18 +182,18 @@ const loader = `
     return await new Response(stream).text()
   }
   try {
-    var css = await inflate('bento-rt-css')
+    var css = await inflate('webdeck-rt-css')
     // drop stale plaintext copies (see TRANSIENT DOM above), then inject ours
     var old = document.querySelectorAll('style')
     for (var i = 0; i < old.length; i++) {
-      if (old[i].hasAttribute('data-bento-transient') || old[i].textContent === css) old[i].remove()
+      if (old[i].hasAttribute('data-webdeck-transient') || old[i].textContent === css) old[i].remove()
     }
     var st = document.createElement('style')
-    st.id = 'bento-rt-style'
-    st.setAttribute('data-bento-transient', '')
+    st.id = 'webdeck-rt-style'
+    st.setAttribute('data-webdeck-transient', '')
     st.textContent = css
     document.head.appendChild(st)
-    var js = await inflate('bento-rt')
+    var js = await inflate('webdeck-rt')
     var url = URL.createObjectURL(new Blob([js], { type: 'text/javascript' }))
     await import(url)
   } catch (e) {
@@ -221,8 +221,8 @@ const out = `<!DOCTYPE html>
   <body>
     ${splashDiv}
     <div id="app"></div>
-    <script id="bento-rt-css" type="bento/deflate-b64">${cssB64}</script>
-    <script id="bento-rt" type="bento/deflate-b64">${jsB64}</script>
+    <script id="webdeck-rt-css" type="webdeck/deflate-b64">${cssB64}</script>
+    <script id="webdeck-rt" type="webdeck/deflate-b64">${jsB64}</script>
     <script>${loader}</script>
   </body>
 </html>

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // CONFORMANCE GATE — old updaters are frozen code; every shell must satisfy
 // the splice contract they rely on (see postbuild-compress.mjs): plaintext
-// #bento-doc, regex-extractable, balanced script tags, and a v0.1.0-style
+// #webdeck-doc, regex-extractable, balanced script tags, and a v0.1.0-style
 // text splice must produce a well-formed document.
 //
 // It also covers the SECOND class of plaintext block: `application/bento+*`
@@ -19,7 +19,7 @@
 // A THIRD invariant is about size rather than correctness: the runtime ships
 // DEFLATED, and a save must not quietly turn it back into plaintext. The
 // loader inflates the app stylesheet into a <style> at boot, and a save clones
-// the live document — so unless that node is marked `data-bento-transient` for
+// the live document — so unless that node is marked `data-webdeck-transient` for
 // `serializeBody` to strip, every save writes ~100KB of CSS into the file and
 // the next boot appends another copy. It is invisible in review and unbounded
 // in a shipped file, so the gate checks the artifact for it.
@@ -47,10 +47,10 @@ const repoRoot = dirname(here)
 // hard rule (AGENTS.md #1) and the adversarial fixtures below need them as
 // data, not as tokens the reader's tooling might act on.
 const SCRIPT_CLOSE = '</scr' + 'ipt>'
-const DOC_BLOCK_OPEN = '<script type="application/bento+json" id="bento-doc">'
-const DOC_BLOCK_RE = /<script type="application\/bento\+json" id="bento-doc">[\s\S]*?<\/script>/
+const DOC_BLOCK_OPEN = '<script type="application/webdeck+json" id="webdeck-doc">'
+const DOC_BLOCK_RE = /<script type="application\/bento\+json" id="webdeck-doc">[\s\S]*?<\/script>/
 
-/** The escape every plaintext Bento block is written with. `<` can then never
+/** The escape every plaintext WebDeck block is written with. `<` can then never
  *  start a close tag, a comment, or a nested `<script` — and stays valid JSON. */
 const escapeBlockText = (json) => json.replace(/</g, '\\u003c')
 
@@ -102,12 +102,12 @@ const attrValue = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'
 
 /** The checks the gate has always run, on any candidate file. */
 function checkSpliceContract(html, label) {
-  if (!DOC_BLOCK_RE.test(html)) fail(`#bento-doc block not found/extractable (${label})`)
+  if (!DOC_BLOCK_RE.test(html)) fail(`#webdeck-doc block not found/extractable (${label})`)
   const opens = (html.match(/<script[\s>]/g) ?? []).length
   const closes = html.split(SCRIPT_CLOSE).length - 1
   if (opens !== closes) fail(`script tag imbalance ${opens}/${closes} (${label})`)
 
-  const fakeDoc = escapeBlockText(JSON.stringify({ format: 'bento/slides', probe: '<tag> & </close>' }))
+  const fakeDoc = escapeBlockText(JSON.stringify({ format: 'webdeck', probe: '<tag> & </close>' }))
   // function replacement throughout: `$` in generated text must stay literal
   const spliced = html.replace(DOC_BLOCK_RE, () => `${DOC_BLOCK_OPEN}\n${fakeDoc}\n${SCRIPT_CLOSE}`)
   if (!spliced.includes(fakeDoc)) fail(`splice failed (${label})`)
@@ -127,8 +127,8 @@ function checkSpliceContract(html, label) {
  */
 function checkDataBlocks(html, label) {
   const blocks = scanScripts(html).filter((s) => /^application\/bento\+/.test(s.type))
-  const docs = blocks.filter((b) => b.id === 'bento-doc')
-  if (docs.length !== 1) fail(`expected exactly one #bento-doc, found ${docs.length} (${label})`)
+  const docs = blocks.filter((b) => b.id === 'webdeck-doc')
+  if (docs.length !== 1) fail(`expected exactly one #webdeck-doc, found ${docs.length} (${label})`)
 
   const ids = new Set()
   for (const b of blocks) {
@@ -153,7 +153,7 @@ function checkDataBlocks(html, label) {
 
 /**
  * A pack designed to break the file if anything is unescaped: it closes a
- * script tag, forges a `#bento-doc` opening tag (an old updater splices into
+ * script tag, forges a `#webdeck-doc` opening tag (an old updater splices into
  * the FIRST match, so a forged one placed above the real block would hijack
  * the document), opens an HTML comment, and carries non-ASCII, RTL, emoji and
  * the line separators JSON leaves raw.
@@ -168,7 +168,7 @@ const ADVERSARIAL_PACK = {
   label: '한국어 · 日本語 · Ελληνικά · «Z» 🎌',
   strings: {
     Save: SCRIPT_CLOSE,
-    Open: `${DOC_BLOCK_OPEN}{\"format\":\"bento/slides\",\"hijacked\":true}${SCRIPT_CLOSE}`,
+    Open: `${DOC_BLOCK_OPEN}{\"format\":\"webdeck\",\"hijacked\":true}${SCRIPT_CLOSE}`,
     Close: '</SCRIPT\t> </script/ <script> <!-- --> <![CDATA[',
     Quotes: '\"\'`\\ & &amp; &quot; \u0000\u001f',
     // JSON.stringify leaves these RAW in its output: a JS parser reads them
@@ -183,7 +183,7 @@ function packBlockHtml(pack, { escaped = true } = {}) {
   const json = JSON.stringify(pack)
   const text = escaped ? escapeBlockText(json) : json
   return (
-    `<script type="application/bento+lang" id="${attrValue('bento-lang-' + pack.lang)}"` +
+    `<script type="application/webdeck+lang" id="${attrValue('webdeck-lang-' + pack.lang)}"` +
     ` data-lang="${attrValue(pack.lang)}">\n${text}\n${SCRIPT_CLOSE}`
   )
 }
@@ -191,7 +191,7 @@ function packBlockHtml(pack, { escaped = true } = {}) {
 // Function replacements: a `$` in a pack body must stay literal.
 /** Insert a block where `serializeBody` does — appended to <head>. */
 const withBlockInHead = (html, block) => html.replace('</head>', () => `${block}\n</head>`)
-/** …and, for the forged-doc-block case, ABOVE the real #bento-doc. */
+/** …and, for the forged-doc-block case, ABOVE the real #webdeck-doc. */
 const withBlockBeforeDoc = (html, block) => html.replace(DOC_BLOCK_OPEN, () => `${block}\n${DOC_BLOCK_OPEN}`)
 
 function checkPackCarryingShell(shell) {
@@ -200,20 +200,20 @@ function checkPackCarryingShell(shell) {
   const realDoc = shell.match(DOC_BLOCK_RE)[0]
 
   for (const [where, html] of [
-    ['pack after #bento-doc', withBlockInHead(shell, block)],
-    ['pack before #bento-doc', withBlockBeforeDoc(shell, block)],
+    ['pack after #webdeck-doc', withBlockInHead(shell, block)],
+    ['pack before #webdeck-doc', withBlockBeforeDoc(shell, block)],
   ]) {
     checkSpliceContract(html, where)
     const blocks = checkDataBlocks(html, where)
 
     // The forged opening tag inside the pack must not become what an updater
     // extracts — the real block, wherever the pack sits, is still the match.
-    if (html.match(DOC_BLOCK_RE)[0] !== realDoc) fail(`#bento-doc extraction hijacked by a pack (${where})`)
+    if (html.match(DOC_BLOCK_RE)[0] !== realDoc) fail(`#webdeck-doc extraction hijacked by a pack (${where})`)
 
     // Round-trip: what a parser sees in the block is byte-identical to what we
     // wrote, and JSON.parse of it reproduces the pack exactly.
     // by id, not by type: a shell may already carry real packs of its own
-    const wantId = attrValue('bento-lang-' + pack.lang)
+    const wantId = attrValue('webdeck-lang-' + pack.lang)
     const got = blocks.find((b) => b.id === wantId)
     if (!got) fail(`pack block not found after insertion (${where})`)
     if (got.text.trim() !== escapeBlockText(JSON.stringify(pack)))
@@ -246,15 +246,15 @@ function checkPackCarryingShell(shell) {
 
 // --- invariant 4: the runtime stays compressed, and stays out of the save ---
 
-const TRANSIENT_ATTR = 'data-bento-transient'
-const PAYLOAD_TYPE = 'bento/deflate-b64'
+const TRANSIENT_ATTR = 'data-webdeck-transient'
+const PAYLOAD_TYPE = 'webdeck/deflate-b64'
 
 /** Every `<style>` in the file, with its raw text. */
 function scanStyles(html) {
   return Array.from(html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)).map((m) => m[1])
 }
 
-/** The inflated text of each `bento/deflate-b64` payload, by id. */
+/** The inflated text of each `webdeck/deflate-b64` payload, by id. */
 function inflatePayloads(html) {
   const out = new Map()
   for (const s of scanScripts(html).filter((x) => x.type === PAYLOAD_TYPE)) {
@@ -345,14 +345,14 @@ function checkEscapeIsImplemented() {
   if (applied < 2)
     fail(
       'kernel/src/save.ts no longer applies the \\u003c escape on both write paths ' +
-        `(#bento-doc and registerShellBlocks) — found ${applied}`,
+        `(#webdeck-doc and registerShellBlocks) — found ${applied}`,
     )
 }
 
 // --- invariant 5: a preview-carrying shell ---------------------------------
 //
 // The THIRD class of plaintext content a saved file carries: the static
-// first-page preview `kernel/src/save.ts` writes as a `[data-bento-preview]`
+// first-page preview `kernel/src/save.ts` writes as a `[data-webdeck-preview]`
 // element, followed by a parser-blocking remover script that deletes it before
 // the page is ever painted (docs/DECISIONS.md). Like a language pack it is not
 // shaped by us — it is rendered from whatever the author typed on page one —
@@ -368,25 +368,25 @@ const SCRIPT_OPEN_TAG = '<scr' + 'ipt'
 /** A preview whose content came from a hostile deck: entity-escaped exactly as
  *  a DOM serializer escapes text, plus quotes, RTL, emoji and separators. */
 const ADVERSARIAL_PREVIEW =
-  `<div data-bento-preview="1"><div style="position:fixed;left:0;top:0;background:#0D1B2E">` +
+  `<div data-webdeck-preview="1"><div style="position:fixed;left:0;top:0;background:#0D1B2E">` +
   `<div>&lt;/script&gt; &lt;script&gt;alert(1)&lt;/script&gt; ` +
-  `&lt;script type="application/bento+json" id="bento-doc"&gt;{"hijacked":true}&lt;/script&gt;` +
+  `&lt;script type="application/webdeck+json" id="webdeck-doc"&gt;{"hijacked":true}&lt;/script&gt;` +
   `&lt;/noscript&gt; &lt;!-- --&gt; &lt;![CDATA[ &amp; &quot; ' \` \\ ` +
   `مرحبا שלום 🎌 a b c</div>` +
   `</div></div>` +
   // the remover that now ships beside every preview: a REAL script element,
   // so the shell's open/close balance has to survive one more of them
-  `${SCRIPT_OPEN_TAG} data-bento-preview="1">/* remover */${SCRIPT_CLOSE}`
+  `${SCRIPT_OPEN_TAG} data-webdeck-preview="1">/* remover */${SCRIPT_CLOSE}`
 
 /** …and the same content with the escapes NOT applied — what the kernel's
  *  `previewIsSafe` refusal exists to keep out of a file. */
 const UNSAFE_PREVIEW =
-  `<div data-bento-preview="1"><div>${SCRIPT_CLOSE} ` +
+  `<div data-webdeck-preview="1"><div>${SCRIPT_CLOSE} ` +
   `${DOC_BLOCK_OPEN}{"hijacked":true}${SCRIPT_CLOSE}</div></div>`
 
 /** Insert a preview where `writePreview` does — straight after the splash. */
 const withPreview = (html, preview) =>
-  html.includes('<div id="bento-splash"')
+  html.includes('<div id="webdeck-splash"')
     ? html.replace('<div id="app">', () => `${preview}\n    <div id="app">`)
     : html.replace('</body>', () => `${preview}\n</body>`)
 
@@ -396,7 +396,7 @@ function checkPreviewCarryingShell(shell) {
 
   checkSpliceContract(html, 'preview-carrying shell')
   checkDataBlocks(html, 'preview-carrying shell')
-  if (html.match(DOC_BLOCK_RE)[0] !== realDoc) fail('#bento-doc extraction hijacked by a preview')
+  if (html.match(DOC_BLOCK_RE)[0] !== realDoc) fail('#webdeck-doc extraction hijacked by a preview')
 
   // …and the preview survives the frozen text splice untouched: an updater
   // rewriting the document must not disturb the thumbnail riding beside it.
@@ -421,7 +421,7 @@ function checkPreviewCarryingShell(shell) {
  * could notice these rules being dropped at save time.
  *
  * Two rules, both silent failures if they go: the ENCRYPTION VETO (a
- * `bento/enc` deck must never ship a plaintext rendering of page one beside
+ * `webdeck/enc` deck must never ship a plaintext rendering of page one beside
  * its ciphertext) and the OUTPUT REFUSAL (`previewIsSafe`, which is the only
  * thing standing between author content and an unbalanced script tag).
  */

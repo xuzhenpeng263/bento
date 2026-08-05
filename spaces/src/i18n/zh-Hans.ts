@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Simplified Chinese — machine-drafted, native review welcome.
 //
 // The English string is the KEY: it must match the source byte-for-byte,
@@ -126,10 +126,10 @@ export const zh_Hans: Catalog = {
   "This file": "此文件",
   "This file could not be opened": "无法打开此文件",
   "This file declares rules this build does not know. It is open read-only so nothing is lost.": "此文件声明了此版本不认识的规则。已以只读方式打开，以免丢失任何内容。",
-  "This file was written by a newer version of bento/spaces. It is open read-only so nothing is lost.": "此文件由更新版本的 bento/spaces 写入。已以只读方式打开，以免丢失任何内容。",
+  "This file was written by a newer version of webdeck-spaces. It is open read-only so nothing is lost.": "此文件由更新版本的 webdeck-spaces 写入。已以只读方式打开，以免丢失任何内容。",
   "This image is {size} and travels inside the file, making it that much bigger for everyone you send it to. Embed it anyway?": "这张图片有 {size}，会嵌在文件内部，你发给谁，文件对谁就大出这么多。仍要嵌入吗？",
   "This image was resized to keep the file small. Click to replace it with the original.": "为了让文件保持小巧，这张图片已被缩放。点击可换回原图。",
-  "This is not a bento/spaces document — {detail}.": "这不是 bento/spaces 文档 — {detail}。",
+  "This is not a webdeck-spaces document — {detail}.": "这不是 webdeck-spaces 文档 — {detail}。",
   "This page only": "仅此页面",
   "This space has no pages.": "此空间没有页面。",
   "This space is encrypted. Saves stay encrypted.": "此空间已加密。保存时仍保持加密。",
@@ -147,7 +147,7 @@ export const zh_Hans: Catalog = {
   "Wrong password — try again": "密码错误 — 请重试",
   "You have the newest version ({v}).": "你已是最新版本 ({v})。",
   "archived": "已归档",
-  "bento/spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "bento/spaces {version} · {pages} 个页面，{blocks} 个块。文档、编辑器和搜索全都在这一个文件里。",
+  "webdeck-spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "webdeck-spaces {version} · {pages} 个页面，{blocks} 个块。文档、编辑器和搜索全都在这一个文件里。",
   "none": "无",
   "{i} of {n}": "第 {i} 个，共 {n} 个",
   "{n} duplicate or missing id(s) were repaired so links and pages resolve.": "已修复 {n} 个重复或缺失的 id，链接和页面现在都能正常解析。",

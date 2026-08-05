@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Japanese — machine-drafted, native review welcome.
 //
 // The English string is the KEY: it must match the source byte-for-byte,
@@ -126,10 +126,10 @@ export const ja: Catalog = {
   "This file": "このファイル",
   "This file could not be opened": "このファイルを開けませんでした",
   "This file declares rules this build does not know. It is open read-only so nothing is lost.": "このファイルには、このビルドが知らないルールが宣言されています。何も失わないよう読み取り専用で開いています。",
-  "This file was written by a newer version of bento/spaces. It is open read-only so nothing is lost.": "このファイルは新しいバージョンの bento/spaces で書かれています。何も失わないよう読み取り専用で開いています。",
+  "This file was written by a newer version of webdeck-spaces. It is open read-only so nothing is lost.": "このファイルは新しいバージョンの webdeck-spaces で書かれています。何も失わないよう読み取り専用で開いています。",
   "This image is {size} and travels inside the file, making it that much bigger for everyone you send it to. Embed it anyway?": "この画像は {size} あり、ファイルの中に一緒に入ります。その分、送る相手全員にとってファイルが大きくなります。それでも埋め込みますか？",
   "This image was resized to keep the file small. Click to replace it with the original.": "ファイルを小さく保つため、この画像は縮小されました。クリックすると元の画像に差し替えます。",
-  "This is not a bento/spaces document — {detail}.": "これは bento/spaces のドキュメントではありません — {detail}。",
+  "This is not a webdeck-spaces document — {detail}.": "これは webdeck-spaces のドキュメントではありません — {detail}。",
   "This page only": "このページだけ",
   "This space has no pages.": "このスペースにはページがありません。",
   "This space is encrypted. Saves stay encrypted.": "このスペースは暗号化されています。保存しても暗号化されたままです。",
@@ -147,7 +147,7 @@ export const ja: Catalog = {
   "Wrong password — try again": "パスワードが違います — もう一度お試しください",
   "You have the newest version ({v}).": "最新バージョンです ({v})。",
   "archived": "アーカイブ済み",
-  "bento/spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "bento/spaces {version} · {pages} ページ、{blocks} ブロック。ドキュメントもエディターも検索も、すべてこの 1 つのファイルの中にあります。",
+  "webdeck-spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "webdeck-spaces {version} · {pages} ページ、{blocks} ブロック。ドキュメントもエディターも検索も、すべてこの 1 つのファイルの中にあります。",
   "none": "なし",
   "{i} of {n}": "{i} / {n}",
   "{n} duplicate or missing id(s) were repaired so links and pages resolve.": "重複または欠落した id を {n} 件修復し、リンクとページが解決するようにしました。",

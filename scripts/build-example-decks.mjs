@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // The gallery decks — four distinct art directions distilled from
 // Awwwards Site-of-the-Year style FAMILIES (immersive dark tech,
 // editorial typography, premium minimal commerce, playful toy-like).
@@ -8,7 +8,7 @@
 //
 //   node scripts/build-example-decks.mjs [outDir]     (default: working/)
 //
-// Output: <outDir>/<name>.bento.html — each doc carries template:true, so
+// Output: <outDir>/<name>.webdeck.html — each doc carries template:true, so
 // every open instantiates a fresh, independent deck (the .dotx semantics).
 // release.mjs runs this into site/gallery/ for the landing page's gallery.
 
@@ -17,7 +17,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
-const shell = readFileSync(join(root, 'slides/dist-single/Bento_Slides.bento.html'), 'utf8')
+const shell = readFileSync(join(root, 'slides/dist-single/WebDeck.webdeck.html'), 'utf8')
 
 // the deck-embedded faces (same technique as the landing build)
 const fontSrc = readFileSync(join(root, 'slides/src/fontdata.ts'), 'utf8')
@@ -158,7 +158,7 @@ const fontsFor = (want) => {
 }
 
 const doc = (o) => ({
-  format: 'bento/slides', version: 1, title: o.title,
+  format: 'webdeck', version: 1, title: o.title,
   size: { width: 1280, height: 720 },
   theme: o.theme, template: true,
   ...(o.withFonts
@@ -651,7 +651,7 @@ function deckPicnic() {
       text({ x: 661, y: 633, w: 198, h: 30, html: 'last picnic!!', fontSize: 16, fontWeight: 800, color: INK, align: 'center', rotation: -5, fx: { enter: 'fade-up', order: 1 } }),
       // Embedded audio (self-contained) — a short chime synthesised in
       // build-example-decks.mjs, so it's unambiguously public domain. Demos the
-      // media element's embed path: the sound travels inside the .bento.html.
+      // media element's embed path: the sound travels inside the .webdeck.html.
       text({ x: 130, y: 556, w: 360, h: 26, html: '▶ press play — the picnic jingle', fontSize: 15, fontWeight: 800, color: INK, rotation: -1 }),
       media({ id: 'pic-jingle', kind: 'audio', src: mediaFile('chime.wav', 'audio/wav'), x: 130, y: 588, w: 300, h: 56, controls: true }),
       text({ x: 130, y: 682, w: 700, h: 20, html: 'PHOTOS: JACK DELANO, 1941 · LIBRARY OF CONGRESS — PUBLIC DOMAIN', fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'rgba(32,26,49,0.55)' }),
@@ -745,17 +745,17 @@ function deckPicnic() {
 // ——— splice + write ————————————————————————————————————————————————
 const outDir = process.argv[2] ?? join(root, 'working')
 mkdirSync(outDir, { recursive: true })
-const blockRe = /<script type="application\/bento\+json" id="bento-doc">[\s\S]*?<\/script>/
+const blockRe = /<script type="application\/bento\+json" id="webdeck-doc">[\s\S]*?<\/script>/
 for (const [file, build] of [
-  ['signal-editorial-type.bento.html', deckSignal],
-  ['terra-premium-product.bento.html', deckTerra],
-  ['orbital-dark-immersive.bento.html', deckOrbital],
-  ['picnic-playful.bento.html', deckPicnic],
+  ['signal-editorial-type.webdeck.html', deckSignal],
+  ['terra-premium-product.webdeck.html', deckTerra],
+  ['orbital-dark-immersive.webdeck.html', deckOrbital],
+  ['picnic-playful.webdeck.html', deckPicnic],
 ]) {
   uid = 0
   const d = build()
   const json = JSON.stringify(d).replace(/</g, '\\u003c')
-  const out = shell.replace(blockRe, `<script type="application/bento+json" id="bento-doc">\n${json}\n</scr` + 'ipt>')
+  const out = shell.replace(blockRe, `<script type="application/webdeck+json" id="webdeck-doc">\n${json}\n</scr` + 'ipt>')
   if (!out.includes(json)) throw new Error(`splice failed for ${file}`)
   writeFileSync(join(outDir, file), out)
   console.log(`${file} — ${d.slides.length} slides, ${Math.round(out.length / 1024)} KB`)

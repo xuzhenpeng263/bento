@@ -1,4 +1,4 @@
-# Bento collaboration — CRDT design
+# WebDeck collaboration — CRDT design
 
 *Design document, July 2026. Status: **implemented** (M0–M3 shipped in
 v0.8.0) — `slides/src/sync/` (engine, session, online transport),
@@ -32,7 +32,7 @@ Companion to `architecture.md` §7 (updates) and the local-first principles in
    *beside* the file, never a replacement for it.
 4. Privacy by architecture: the relay can be blind (E2EE), and nothing about
    a document leaks to infrastructure a user didn't opt into.
-5. Fits the Bento budget: small enough to live inside every file
+5. Fits the WebDeck budget: small enough to live inside every file
    (single-file invariant — nothing is fetched at runtime).
 
 **Non-goals (for now)**
@@ -55,7 +55,7 @@ gains a second, binary representation of the document (Yjs update log) that
 must never diverge from the JSON — and that binary blob is opaque to the AI
 tooling contract we just shipped.
 
-**B. bento-sync (in-house, op-based, per-property LWW)** — a CRDT shaped
+**B. webdeck-sync (in-house, op-based, per-property LWW)** — a CRDT shaped
 exactly like our document. The model is unusually CRDT-friendly: every slide
 and element already has a globally unique id; properties are scalars/small
 JSON; order is the only sequence problem, and fractional indexing solves it
@@ -165,11 +165,11 @@ edits, not your collaborator's) — the differ produces inverses for free
 
 ## Persistence: the file is a snapshot, the room is a log
 
-The saved `.bento.html` format changes by **one additive optional field**:
+The saved `.webdeck.html` format changes by **one additive optional field**:
 
 ```jsonc
 "collab": {
-  "room": "wss://sync.bento.page/d/<docId>",
+  "room": "wss://sync.webdeck.page/d/<docId>",
   "vv": { "actorA": 812, "actorB": 344 }   // version vector at save time
 }
 ```
@@ -196,7 +196,7 @@ The saved `.bento.html` format changes by **one additive optional field**:
 
 ```
 editor ⇄ BroadcastChannel (same machine, free, no server)   [M1]
-editor ⇄ wss://sync.bento.page  — Cloudflare Worker + one   [M2]
+editor ⇄ wss://sync.webdeck.page  — Cloudflare Worker + one   [M2]
           Durable Object per docId room:
           · authenticates the room token
           · fans out opaque frames to members
@@ -205,14 +205,14 @@ editor ⇄ wss://sync.bento.page  — Cloudflare Worker + one   [M2]
 ```
 
 **E2EE.** Share links carry the room key in the URL fragment:
-`https://bento.page/s/<docId>#k=<base64url-key>` — fragments never reach any
+`https://webdeck.page/s/<docId>#k=<base64url-key>` — fragments never reach any
 server. Frames are AES-GCM under a key derived from `k` (WebCrypto, zero
 bytes of crypto code shipped). The relay stores ciphertext; a subpoena gets
 noise. Possession of the link *is* the capability — appropriate for launch;
 accounts/ACLs can wrap this later without changing the protocol.
 
 **Presence** (ephemeral, never persisted): name (localStorage
-`bento-author`), a color derived from actorId, current slide, selection ids,
+`webdeck-author`), a color derived from actorId, current slide, selection ids,
 cursor. Rendered as colored outlines + avatars chips; disappears on
 disconnect. Same encrypted channel, `p:` frames.
 
@@ -254,16 +254,16 @@ One Worker + Durable Object class, ~300 lines:
 |---|---|---|
 | **M0** | `src/sync/` — differ, op codec, merge engine, fractional index; property-based convergence tests (random op interleavings across N simulated actors must converge byte-identical) | nothing |
 | **M1** | Same-machine live collab over BroadcastChannel (two windows/tabs); presence; per-actor undo. Ships user value with **zero infrastructure** and validates the whole pipeline | M0 |
-| **M2** | `sync.bento.page` Worker + DO relay; E2EE; share links (`/s/<docId>#k=…`); Share UI in the topbar; offline queue | M1 + DNS (exists) |
+| **M2** | `sync.webdeck.page` Worker + DO relay; E2EE; share links (`/s/<docId>#k=…`); Share UI in the topbar; offline queue | M1 + DNS (exists) |
 | **M3** | Text sequence CRDT for `element.html`; in-text cursors | proven demand |
 
 M0+M1 are pure client work, shippable through the existing release channel.
-M2 is the first Bento server code ever — small, blind, and replaceable.
+M2 is the first WebDeck server code ever — small, blind, and replaceable.
 
 ## Identity (v0.8.2 posture and the enterprise path)
 
 Identity is deliberately **self-managed and local**: a display name in the
-Collaborate popover (localStorage `bento-author`, shared with comments),
+Collaborate popover (localStorage `webdeck-author`, shared with comments),
 shown to peers via presence — zero friction, zero accounts, consistent with
 E2EE (the relay couldn't verify identities anyway; it never sees them).
 Presence names are therefore *claims, not proofs* — fine for teams that
@@ -356,7 +356,7 @@ already gives key-holders content integrity; `g` adds *authorization*.
 
 ## Offline mode
 
-A viewer-side hard switch (localStorage `bento-offline`, toggle in About)
+A viewer-side hard switch (localStorage `webdeck-offline`, toggle in About)
 that blocks every network touch: update checks and the relay transport.
 Same-machine tab sync (BroadcastChannel) is not networking and stays on.
 Documents keep their (dormant) credentials — offline mode is a property of
@@ -366,7 +366,7 @@ way. This is the "no cloud, provably" story for local-first purists.
 ## What we are explicitly protecting
 
 The five invariants that already define the format survive untouched:
-plaintext `#bento-doc`, the splice contract, ids-as-identity, pure-data
+plaintext `#webdeck-doc`, the splice contract, ids-as-identity, pure-data
 documents (ops are data too — no code ever travels the sync channel), and
 "any saved file opens alone, forever."
 
@@ -393,7 +393,7 @@ the read capability.*
   `rev` set, closes matching sockets, fans out `{ctl:'revoked', p}` (clients
   seeing their own key stand down permanently), and refuses future connects/
   writes for revoked member OR invite keys.
-- Member device keys live in localStorage (`bento-member-<docId>`), never in
+- Member device keys live in localStorage (`webdeck-member-<docId>`), never in
   the file. Presence carries `pub` + derived `role` → key-bound names in the
   People panel; the owner gets per-member Remove.
 - The public guestbook runs this scheme: an owner-signed PUBLIC invite in the

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // System-clipboard copy/paste: external objects (images, text) onto the canvas,
-// and Bento elements or whole slides between decks (across tabs/windows).
+// and WebDeck elements or whole slides between decks (across tabs/windows).
 //
-// Bento content is written to the clipboard as JSON tagged with `__bento:"clip"`
+// WebDeck content is written to the clipboard as JSON tagged with `__webdeck:"clip"`
 // (plain text, so it survives the OS clipboard). Referenced assets (image data,
 // fonts) travel inside the payload, so pasting into another deck brings the
 // pixels and typefaces along; asset-key collisions with different content are
@@ -14,7 +14,7 @@ import { uid } from '../model'
 import { firstFamily } from '../fonts'
 
 export interface ClipPayload {
-  __bento: 'clip'
+  __webdeck: 'clip'
   kind: 'elements' | 'slides'
   elements?: SlideElement[]
   slides?: Slide[]
@@ -53,7 +53,7 @@ function collectAssets(els: SlideElement[], fonts: NonNullable<BentoDoc['fonts']
 export function serializeElements(els: SlideElement[], doc: BentoDoc): string {
   const fonts = fontsFor(els, doc)
   const payload: ClipPayload = {
-    __bento: 'clip', kind: 'elements',
+    __webdeck: 'clip', kind: 'elements',
     elements: structuredClone(els),
     assets: collectAssets(els, fonts, doc),
     fonts,
@@ -65,7 +65,7 @@ export function serializeSlides(slides: Slide[], doc: BentoDoc): string {
   const els = slides.flatMap((s) => s.elements)
   const fonts = fontsFor(els, doc)
   const payload: ClipPayload = {
-    __bento: 'clip', kind: 'slides',
+    __webdeck: 'clip', kind: 'slides',
     slides: structuredClone(slides),
     assets: collectAssets(els, fonts, doc),
     fonts,

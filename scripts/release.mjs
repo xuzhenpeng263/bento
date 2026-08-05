@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Cut a release for ONE app: build its shell, sign its manifest, and assemble
-// the complete static site for bento.page into ./site/.
+// the complete static site for webdeck.page into ./site/.
 //
 //   node scripts/release.mjs [--app slides|spaces] [--no-build] [--key path]
 //
@@ -15,11 +15,11 @@
 //
 // Output (publish ./site/ to GitHub Pages — see docs/RELEASING.md):
 //   site/
-//     CNAME                                  bento.page
+//     CNAME                                  webdeck.page
 //     index.html                             placeholder landing page
 //     <app>/index.html                       live demo (the shell itself)
 //     <app>/agents.md                        that app's AI-agent guide
-//     releases/<app>/Bento_<App>.bento.html  the download
+//     releases/<app>/Bento_<App>.webdeck.html  the download
 //     releases/<app>/manifest.json           signed update manifest
 //     releases/slides/packs/*.pack.json      language packs (slides only today)
 //     releases/slides/packs.json             signed pack index (pins each
@@ -90,7 +90,7 @@ mkdirSync(site, { recursive: true })
 // ---- seed from what is ALREADY PUBLISHED -----------------------------------
 //
 // `site/` is mirrored authoritatively with `rsync --delete`, so anything this
-// build does not stage is DELETED from bento.page. One release builds one app;
+// build does not stage is DELETED from webdeck.page. One release builds one app;
 // every other app's signed shell, manifest and packs are therefore missing —
 // and shipped files fetch those by frozen URL, so removing them takes their
 // update and pack channels offline permanently, with no client-side repair.
@@ -115,7 +115,7 @@ if (existsSync(published)) {
   console.error(
     `✗ no published tree at ${published}, so this release cannot restore the apps it is not building.\n` +
     `  Publishing a partial site/ deletes every other app's signed shell, manifest and packs\n` +
-    `  from bento.page, and shipped files fetch those by frozen URL.\n\n` +
+    `  from webdeck.page, and shipped files fetch those by frozen URL.\n\n` +
     `  Clone it beside this repo, or set BENTO_SITE_DIR.\n` +
     `  First release ever, with nothing published yet: --allow-missing-published.`,
   )
@@ -130,7 +130,7 @@ cpSync(shellSrc, join(site, `releases/${app.dir}/${app.shell}`))
 cpSync(shellSrc, join(site, `${app.dir}/index.html`))
 
 // The agent guide, at the URL the guides themselves advertise:
-// `bento.page/<app>/agents.md`. Stamped with this shell's version so the guide
+// `webdeck.page/<app>/agents.md`. Stamped with this shell's version so the guide
 // declares which feature set it matches (an agent can compare it against a
 // document written by a newer shell).
 //
@@ -268,7 +268,7 @@ const signArgs = [
   join(site, `releases/${app.dir}/${app.shell}`),
   '--app', app.appId,
   '--version', version,
-  '--url', `https://bento.page/releases/${app.dir}/${app.shell}`,
+  '--url', `https://webdeck.page/releases/${app.dir}/${app.shell}`,
   '--out', join(site, `releases/${app.dir}/manifest.json`),
 ]
 if (notes) signArgs.push('--notes', notes)
@@ -296,7 +296,7 @@ if (app.packs) {
   if (existsSync(packsOut)) {
     let dropped = 0
     for (const f of readdirSync(packsOut)) {
-      const m = /^bento-slides-(\d+\.\d+\.\d+)-.+\.pack\.json$/.exec(f)
+      const m = /^webdeck-(\d+\.\d+\.\d+)-.+\.pack\.json$/.exec(f)
       if (m && m[1] !== version) { rmSync(join(packsOut, f)); dropped++ }
     }
     if (dropped) console.log(`• cleared ${dropped} superseded language pack(s) from the seeded tree`)
@@ -313,13 +313,13 @@ if (app.packs) {
   console.log(`packs: ${app.appId} has no signed pack channel yet — skipped`)
 }
 
-writeFileSync(join(site, 'CNAME'), 'bento.page\n')
+writeFileSync(join(site, 'CNAME'), 'webdeck.page\n')
 // The site is fully pre-built static — disable Jekyll so every file is served
 // verbatim. Without this, GitHub Pages' Jekyll processes .md files that carry
 // YAML front matter (e.g. skills/*/SKILL.md) into .html, 404-ing the .md URL.
 writeFileSync(join(site, '.nojekyll'), '')
 
-// ---- the bento.page site itself -------------------------------------------
+// ---- the webdeck.page site itself -------------------------------------------
 // Landing, gallery, agent guide, skills, /help, /q, 404 and the guestbook are
 // all SLIDES-derived today — the gallery decks and the 404 deck literally
 // embed the slides shell. A spaces release must not regenerate them from a
@@ -340,15 +340,15 @@ if (app.ownsSiteContent) {
   // SKILL.md ships inside a zip people upload to claude.ai.
   cpSync(join(site, `${app.dir}/agents.md`), join(site, 'agents.md'))
   // The harness skill (canonical home: the Claude Code plugin at
-  // plugins/bento-slides). Published three ways: the raw SKILL.md (curl
-  // one-liner), a claude.ai-uploadable zip (must contain bento-slides/SKILL.md,
+  // plugins/webdeck). Published three ways: the raw SKILL.md (curl
+  // one-liner), a claude.ai-uploadable zip (must contain webdeck/SKILL.md,
   // folder-inside-zip), and a compat copy at the old bento-deck URL.
-  const skillSrc = join(root, 'plugins/bento-slides/skills/bento-slides/SKILL.md')
-  mkdirSync(join(site, 'skills/bento-slides'), { recursive: true })
-  cpSync(skillSrc, join(site, 'skills/bento-slides/SKILL.md'))
+  const skillSrc = join(root, 'plugins/webdeck/skills/webdeck/SKILL.md')
+  mkdirSync(join(site, 'skills/webdeck'), { recursive: true })
+  cpSync(skillSrc, join(site, 'skills/webdeck/SKILL.md'))
   mkdirSync(join(site, 'skills/bento-deck'), { recursive: true })
   cpSync(skillSrc, join(site, 'skills/bento-deck/SKILL.md'))
-  execFileSync('zip', ['-q', '-X', '-o', 'bento-slides.zip', 'bento-slides/SKILL.md'], { cwd: join(site, 'skills') })
+  execFileSync('zip', ['-q', '-X', '-o', 'webdeck.zip', 'webdeck/SKILL.md'], { cwd: join(site, 'skills') })
 
   // MIT license — travels to the public site repo so the published tree carries it.
   cpSync(join(root, 'LICENSE'), join(site, 'LICENSE'))
@@ -358,16 +358,16 @@ if (app.ownsSiteContent) {
   cpSync(join(root, 'site-src/help.html'), join(site, 'help/index.html'))
 
   // 404 — of course it's a deck (see build-404-deck.mjs + site-src/404.html).
-  execFileSync('node', [join(root, 'scripts/build-404-deck.mjs'), join(site, '404.bento.html')], { stdio: 'inherit' })
+  execFileSync('node', [join(root, 'scripts/build-404-deck.mjs'), join(site, '404.webdeck.html')], { stdio: 'inherit' })
   cpSync(join(root, 'site-src/404.html'), join(site, '404.html'))
 
   // /q — "this QR code is a presentation" (deck lives in the URL fragment).
   execFileSync('node', [join(root, 'scripts/build-qr-page.mjs'), join(site, 'q/index.html')], { stdio: 'inherit' })
 
-  // /hello.bento.html — the launch announcement, itself a Bento deck (U1). This
+  // /hello.webdeck.html — the launch announcement, itself a WebDeck deck (U1). This
   // is the Show HN link target: opening it boots the editor with the pitch
   // loaded as a live, editable template deck.
-  execFileSync('node', [join(root, 'scripts/build-announcement-deck.mjs'), join(site, 'hello.bento.html')], { stdio: 'inherit' })
+  execFileSync('node', [join(root, 'scripts/build-announcement-deck.mjs'), join(site, 'hello.webdeck.html')], { stdio: 'inherit' })
 
   // The guestbook LANDING page is an authored source (site-src/guestbook.html),
   // tracked in this repo, so it ships on every release. It used to be written
@@ -383,7 +383,7 @@ if (app.ownsSiteContent) {
   // The Guestbook DECK (U2) — ships only once an epoch has been minted into
   // working/guestbook-live/ (scripts/build-guestbook.mjs). Kill switch:
   // delete that file and re-release.
-  const guestbook = join(root, 'working/guestbook-live/guestbook.bento.html')
+  const guestbook = join(root, 'working/guestbook-live/guestbook.webdeck.html')
   if (existsSync(guestbook)) {
     // RE-SHELL the current epoch onto the freshly-built shell (don't just copy a
     // deck that may embed an old shell). The document — room creds, docId, wall
@@ -391,14 +391,14 @@ if (app.ownsSiteContent) {
     // SAME live room and walls while updating the runtime. This is why the
     // guestbook never lags a release. (An epoch ROLL, with fresh creds, is a
     // separate deliberate act: scripts/build-guestbook.mjs / the daemon.)
-    const freshShell = readFileSync(join(site, 'releases/slides/Bento_Slides.bento.html'), 'utf8')
+    const freshShell = readFileSync(join(site, 'releases/slides/WebDeck.webdeck.html'), 'utf8')
     const gbHtml = readFileSync(guestbook, 'utf8')
-    const m = gbHtml.match(/<script type="application\/bento\+json" id="bento-doc">\s*([\s\S]*?)\s*<\/script>/)
-    if (!m) throw new Error('guestbook: no #bento-doc block in working/guestbook-live/')
+    const m = gbHtml.match(/<script type="application\/bento\+json" id="webdeck-doc">\s*([\s\S]*?)\s*<\/script>/)
+    if (!m) throw new Error('guestbook: no #webdeck-doc block in working/guestbook-live/')
     const gbDoc = JSON.parse(m[1].replace(/\\u003c/g, '<'))
     const reshelled = spliceDoc(freshShell, gbDoc)
     writeFileSync(guestbook, reshelled) // keep the working epoch file on the fresh shell too
-    cpSync(guestbook, join(site, 'guestbook.bento.html'))
+    cpSync(guestbook, join(site, 'guestbook.webdeck.html'))
     console.log(`guestbook: re-shelled current epoch onto the fresh shell (room ${gbDoc.collab?.room?.split('/').pop() ?? '?'})`)
   } else {
     console.log('guestbook: not armed (working/guestbook-live/ empty) — skipped')

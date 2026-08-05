@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Facade: the i18n ENGINE lives in the shared kernel; CATALOGS are per-app
 // string data and live here. This module registers them at import time and
 // re-exports the engine, so registration is guaranteed to precede the first

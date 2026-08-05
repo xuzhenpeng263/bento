@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Spanish — machine-drafted, native review welcome.
 //
 // The English string is the KEY: it must match the source byte-for-byte,
@@ -126,10 +126,10 @@ export const es: Catalog = {
   "This file": "Este archivo",
   "This file could not be opened": "No se pudo abrir este archivo",
   "This file declares rules this build does not know. It is open read-only so nothing is lost.": "Este archivo declara reglas que esta versión no conoce. Está abierto en solo lectura para no perder nada.",
-  "This file was written by a newer version of bento/spaces. It is open read-only so nothing is lost.": "Este archivo lo escribió una versión más reciente de bento/spaces. Está abierto en solo lectura para no perder nada.",
+  "This file was written by a newer version of webdeck-spaces. It is open read-only so nothing is lost.": "Este archivo lo escribió una versión más reciente de webdeck-spaces. Está abierto en solo lectura para no perder nada.",
   "This image is {size} and travels inside the file, making it that much bigger for everyone you send it to. Embed it anyway?": "Esta imagen pesa {size} y viaja dentro del archivo, que crecerá otro tanto para todos a quienes se lo envíes. ¿Incrustarla de todos modos?",
   "This image was resized to keep the file small. Click to replace it with the original.": "Esta imagen se redimensionó para mantener el archivo pequeño. Haz clic para reemplazarla por la original.",
-  "This is not a bento/spaces document — {detail}.": "Esto no es un documento de bento/spaces — {detail}.",
+  "This is not a webdeck-spaces document — {detail}.": "Esto no es un documento de webdeck-spaces — {detail}.",
   "This page only": "Solo esta página",
   "This space has no pages.": "Este espacio no tiene páginas.",
   "This space is encrypted. Saves stay encrypted.": "Este espacio está cifrado. Los guardados siguen cifrados.",
@@ -147,7 +147,7 @@ export const es: Catalog = {
   "Wrong password — try again": "Contraseña incorrecta: inténtalo de nuevo",
   "You have the newest version ({v}).": "Tienes la versión más reciente ({v}).",
   "archived": "archivada",
-  "bento/spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "bento/spaces {version} · {pages} página(s), {blocks} bloque(s). El documento, el editor y la búsqueda están todos en este único archivo.",
+  "webdeck-spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "webdeck-spaces {version} · {pages} página(s), {blocks} bloque(s). El documento, el editor y la búsqueda están todos en este único archivo.",
   "none": "ninguna",
   "{i} of {n}": "{i} de {n}",
   "{n} duplicate or missing id(s) were repaired so links and pages resolve.": "Se repararon {n} id(s) duplicados o ausentes para que los enlaces y las páginas funcionen.",

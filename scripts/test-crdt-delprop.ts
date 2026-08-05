@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // CRDT property-REMOVAL rig.
 //
 //   node scripts/test-crdt-delprop.ts
@@ -42,7 +42,7 @@ const el = (extra: Record<string, unknown> = {}) => ({
   color: '#000', align: 'left', valign: 'top', lineHeight: 1.2, ...extra,
 })
 const doc = (els: unknown[]) => ({
-  format: 'bento/slides', version: '1', docId: 'd1', title: 't',
+  format: 'webdeck', version: '1', docId: 'd1', title: 't',
   size: { width: 1280, height: 720 }, theme: { accent: '#000' }, assets: {}, fonts: null,
   slides: [{ id: 's1', name: 'one', background: '#fff', transition: 'fade', notes: '', elements: els }],
 }) as any

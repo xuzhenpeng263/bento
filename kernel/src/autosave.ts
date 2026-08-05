@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Local auto-save + lightweight version history, backed by IndexedDB.
 //
 // Two concerns, one store:
@@ -21,16 +21,16 @@ import { appConfig } from './app.ts'
 /**
  * One database PER APP.
  *
- * Every app used to share `bento-autosave`, which is two problems, not one.
+ * Every app used to share `webdeck-autosave`, which is two problems, not one.
  * The visible one is that two apps' snapshots pile into one store wherever
- * they share an origin — `bento.page`, or any local server. The dangerous one
+ * they share an origin — `webdeck.page`, or any local server. The dangerous one
  * is `DB_VERSION`: it was shared too, so a new app bumping it to 2 would make
  * every ALREADY-SHIPPED shell of every other app throw `VersionError` on open
  * and lose autosave entirely. Files in the world are frozen code; they would
  * go on opening version 1 forever and there is no way to reach them.
  *
- * `appId` is already `bento-slides` / `bento-spaces`, so this reads
- * `bento-slides-autosave` — no doubled prefix, and no special case for the
+ * `appId` is already `webdeck` / `webdeck-spaces`, so this reads
+ * `webdeck-autosave` — no doubled prefix, and no special case for the
  * app that happened to be first. Each app now owns its own version line.
  *
  * Called lazily rather than at module scope: `appConfig()` throws before
@@ -41,7 +41,7 @@ import { appConfig } from './app.ts'
 const dbName = () => `${appConfig().appId}-autosave`
 
 /** The shared name every app wrote to before scoping. Read once, then left alone. */
-const LEGACY_DB_NAME = 'bento-autosave'
+const LEGACY_DB_NAME = 'webdeck-autosave'
 const DB_VERSION = 1
 const RECOVERY = 'recovery'
 const VERSIONS = 'versions'

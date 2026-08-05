@@ -1,10 +1,10 @@
 # Third-party notices
 
-bento/slides is MIT-licensed (© 2026 The Bento authors; see `LICENSE`).
-The shippable single-file shell (`Bento_Slides.bento.html`) bundles the
+webdeck is MIT-licensed (© 2026 The WebDeck authors; see `LICENSE`).
+The shippable single-file shell (`WebDeck.webdeck.html`) bundles the
 following third-party open-source components. Their license terms require that
 these notices accompany copies, so the same text is embedded as a `NOTICE`
-comment near the top of every built shell and every saved Bento document.
+comment near the top of every built shell and every saved WebDeck document.
 
 ## Bundled runtime (ships inside the shell)
 
@@ -47,5 +47,5 @@ Full MIT license text is reproduced in the shell's `NOTICE` comment and in the
 https://openfontlicense.org.
 
 Dev-only tooling (Vite, TypeScript, `vite-plugin-singlefile`, `qrcode`,
-`@types/*`) is used to build Bento but is **not** bundled into the shipped shell
+`@types/*`) is used to build WebDeck but is **not** bundled into the shipped shell
 and is therefore not listed here.

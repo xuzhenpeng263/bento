@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Build an OWNER deck for the CURRENT live guestbook epoch, on demand — open it
 // to moderate (People panel → Remove). The daemon mints epochs server-side and
 // stashes the owner key in KV; this fetches it (admin-gated) and splices it into
@@ -23,8 +23,8 @@ import { extractDoc, spliceDoc } from './guestbook-deck.mjs'
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const args = process.argv.slice(2)
 const opt = (n, fb) => { const i = args.indexOf(`--${n}`); return i >= 0 && args[i + 1] ? args[i + 1] : fb }
-const base = opt('base', 'https://bento.page').replace(/\/$/, '')
-const out = opt('out', join(root, 'working/guestbook-live/guestbook-owner-live.bento.html'))
+const base = opt('base', 'https://webdeck.page').replace(/\/$/, '')
+const out = opt('out', join(root, 'working/guestbook-live/guestbook-owner-live.webdeck.html'))
 
 const keyFile = join(root, 'working/guestbook-admin-key.txt')
 if (!existsSync(keyFile)) { console.error('no admin key at working/guestbook-admin-key.txt'); process.exit(1) }
@@ -36,7 +36,7 @@ async function attempt() {
   const credRes = await fetch(`${base}/guestbook-admin/owner`, { headers: { Authorization: `Bearer ${adminKey}` } })
   if (!credRes.ok) throw new Error(`owner creds → ${credRes.status}: ${(await credRes.text()).slice(0, 200)}`)
   const creds = await credRes.json()
-  const publicHtml = await (await fetch(`${base}/guestbook.bento.html?cb=${Date.now()}`, { cache: 'no-store' })).text()
+  const publicHtml = await (await fetch(`${base}/guestbook.webdeck.html?cb=${Date.now()}`, { cache: 'no-store' })).text()
   const doc = extractDoc(publicHtml)
   if (doc.collab?.room !== creds.room) return null // rolled between the two fetches
   // owner collab: same room + read key, carrying ownerPriv; no public invite

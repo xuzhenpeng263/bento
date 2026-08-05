@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Minimal inline icon set (lucide-style, stroke = currentColor). No deps.
 //
 // Same construction and stroke weight as slides/src/icons.ts, deliberately:

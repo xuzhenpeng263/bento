@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Keep the LIVE guestbook daemon on the current shell.
 //
-// bento.page/guestbook.bento.html is served by the Cloudflare daemon from its
+// webdeck.page/guestbook.webdeck.html is served by the Cloudflare daemon from its
 // KV store (server/guestbook-daemon), NOT from GitHub Pages. release.mjs
-// re-shells the *static* site/guestbook.bento.html (the KV-empty fallback), but
+// re-shells the *static* site/guestbook.webdeck.html (the KV-empty fallback), but
 // the daemon keeps serving whatever deck sits in KV — so after a shell release
 // the served guestbook stays on the OLD runtime until the daemon is re-seeded.
 //
@@ -18,9 +18,9 @@
 //   node scripts/reseed-guestbook.mjs [--shell <file>] [--base <url>] [--dry]
 //
 //   --shell   the fresh shell to re-shell onto
-//             (default: site/releases/slides/Bento_Slides.bento.html,
-//              then slides/dist-single/Bento_Slides.bento.html)
-//   --base    daemon origin (default https://bento.page)
+//             (default: site/releases/slides/WebDeck.webdeck.html,
+//              then slides/dist-single/WebDeck.webdeck.html)
+//   --base    daemon origin (default https://webdeck.page)
 //   --dry     report what would change; don't seed.
 //
 // Auth: the Bearer key in working/guestbook-admin-key.txt (gitignored). Absent
@@ -51,8 +51,8 @@ const appHash = (html) => {
 }
 
 const shellFile = opt('shell', null) ?? [
-  join(root, 'site/releases/slides/Bento_Slides.bento.html'),
-  join(root, 'slides/dist-single/Bento_Slides.bento.html'),
+  join(root, 'site/releases/slides/WebDeck.webdeck.html'),
+  join(root, 'slides/dist-single/WebDeck.webdeck.html'),
 ].find(existsSync)
 if (!shellFile || !existsSync(shellFile)) { warn('no fresh shell found (run a build/release first)'); process.exit(0) }
 
@@ -61,13 +61,13 @@ if (!existsSync(keyFile)) { warn(`no admin key at ${keyFile.slice(root.length + 
 const adminKey = readFileSync(keyFile, 'utf8').trim()
 if (!adminKey) { warn('admin key file is empty'); process.exit(0) }
 
-const base = (opt('base', 'https://bento.page')).replace(/\/$/, '')
+const base = (opt('base', 'https://webdeck.page')).replace(/\/$/, '')
 const freshShell = readFileSync(shellFile, 'utf8')
 const freshHash = appHash(freshShell)
 
 try {
   // 1 · the daemon's OWN current deck (carries the live room creds + walls seed)
-  const curResp = await fetch(`${base}/guestbook.bento.html`, { headers: { 'cache-control': 'no-cache' } })
+  const curResp = await fetch(`${base}/guestbook.webdeck.html`, { headers: { 'cache-control': 'no-cache' } })
   if (!curResp.ok) { warn(`daemon GET returned ${curResp.status}`); process.exit(0) }
   const curHtml = await curResp.text()
   const curHash = appHash(curHtml)

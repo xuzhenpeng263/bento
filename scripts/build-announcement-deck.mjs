@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // U1: the launch announcement IS a deck. This file becomes the Show HN link
 // target and the press kit. PRIVATE until launch — built into working/, not
-// wired into release.mjs (wire it at T-0, e.g. to site/hello.bento.html).
+// wired into release.mjs (wire it at T-0, e.g. to site/hello.webdeck.html).
 //
 //   node scripts/build-announcement-deck.mjs [outFile]
-//   default: working/the-announcement.bento.html
+//   default: working/the-announcement.webdeck.html
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
-const out = process.argv[2] ?? join(root, 'working/the-announcement.bento.html')
-const shell = readFileSync(join(root, 'slides/dist-single/Bento_Slides.bento.html'), 'utf8')
+const out = process.argv[2] ?? join(root, 'working/the-announcement.webdeck.html')
+const shell = readFileSync(join(root, 'slides/dist-single/WebDeck.webdeck.html'), 'utf8')
 const fontSrc = readFileSync(join(root, 'slides/src/fontdata.ts'), 'utf8')
 const font = (n) => fontSrc.match(new RegExp(`export const ${n}\\s*=\\s*'(data:[^']+)'`))[1]
 
-// ——— bento.page palette, verbatim ———
+// ——— webdeck.page palette, verbatim ———
 const INK = '#0D1B2E', PANEL = '#16273E', PAPER = '#F2F0EA', PEACH = '#FF9E8A'
 const PEACH_DEEP = '#C25A43', STEEL = '#5E7699', TILE = '#F0EBE0'
 const MIST = 'rgba(182,193,210,0.9)', MIST_DIM = 'rgba(182,193,210,0.55)'
@@ -63,13 +63,13 @@ const tiles = (a, b, c) => [
 
 const s1 = slide({
   id: 'an-cover', background: INK, transition: 'none',
-  notes: 'Hello, Hacker News. You did not open a blog post about the product — you opened the product. This file booted the actual Bento editor with the announcement loaded as a live, editable deck. Press the Slideshow button (bottom-left of the canvas) to watch it play with morphs, arrow-key through the slides to read, or click anything to edit. It is a template, so saving mints you your own copy.',
+  notes: 'Hello, Hacker News. You did not open a blog post about the product — you opened the product. This file booted the actual WebDeck editor with the announcement loaded as a live, editable deck. Press the Slideshow button (bottom-left of the canvas) to watch it play with morphs, arrow-key through the slides to read, or click anything to edit. It is a template, so saving mints you your own copy.',
   elements: [
     ...tiles({ x: 950, y: 110, w: 200, h: 200 }, { x: 1064, y: 340, w: 120, h: 180 }, { x: 900, y: 380, w: 120, h: 120 }),
     kick(96, 96, 'SHOW HN — BENTO/SUITE'),
     text({ x: 88, y: 150, w: 880, h: 300, html: 'This announcement<br>is the product.', fontSize: 96, fontFamily: FR, fontWeight: 900, color: '#fff', lineHeight: 1.02 }),
     text({ x: 96, y: 402, w: 1040, h: 48, html: 'The boring deck is dead. One file killed it.', fontSize: 27, fontFamily: FR, fontWeight: 900, color: PEACH, lineHeight: 1.1, fx: { enter: 'fade-up', order: 1 } }),
-    text({ x: 96, y: 476, w: 820, h: 90, html: 'You opened a <b>.bento.html</b> file and it booted its own editor — you are in the actual app, with this announcement loaded as a live deck. One file. No install. No account.', fontSize: 20, color: MIST, lineHeight: 1.6, fx: { enter: 'fade-up', order: 2 } }),
+    text({ x: 96, y: 476, w: 820, h: 90, html: 'You opened a <b>.webdeck.html</b> file and it booted its own editor — you are in the actual app, with this announcement loaded as a live deck. One file. No install. No account.', fontSize: 20, color: MIST, lineHeight: 1.6, fx: { enter: 'fade-up', order: 2 } }),
     text({ x: 96, y: 644, w: 1080, h: 24, html: '▶ PRESS SLIDESHOW TO WATCH IT PLAY&nbsp;&nbsp;·&nbsp;&nbsp;← → TO READ&nbsp;&nbsp;·&nbsp;&nbsp;CLICK ANYTHING TO EDIT — IT’S ALREADY YOURS', fontSize: 12, fontWeight: 700, letterSpacing: 2.5, color: 'rgba(255,158,138,0.85)', fx: { enter: 'fade-up', order: 3 } }),
   ],
 })
@@ -93,8 +93,8 @@ const s3 = slide({
     text({ x: 90, y: 140, w: 1000, h: 110, html: 'Your data is right there.', fontSize: 64, fontFamily: FR, fontWeight: 900, color: INK, lineHeight: 1 }),
     rect({ x: 96, y: 270, w: 1088, h: 330, fill: '#0A1524', radius: 16, shadow: { y: 20, blur: 50, color: 'rgba(13,27,46,0.35)' }, fx: { enter: 'fade-up' } }),
     text({ x: 130, y: 300, w: 1020, h: 280, fontFamily: MONO, fontSize: 17, lineHeight: 1.75, color: '#8FA3BF', fx: { enter: 'fade-up' }, html:
-      '&lt;script type="application/bento+json" id="bento-doc"&gt;<br>' +
-      '{ "format": "bento/slides",<br>' +
+      '&lt;script type="application/webdeck+json" id="webdeck-doc"&gt;<br>' +
+      '{ "format": "webdeck",<br>' +
       '&nbsp;&nbsp;"title": <span style="color:#cfe0c5">"This announcement is the product"</span>,<br>' +
       '&nbsp;&nbsp;"slides": [ <span style="color:#FFBCA8">…the slide you are reading…</span> ] }<br>' +
       '&lt;/script&gt;' }),
@@ -124,19 +124,19 @@ const s4 = slide({
 
 const s5 = slide({
   id: 'an-ai', background: PAPER, transition: 'fade',
-  notes: 'Full disclosure: an AI agent designed and wrote this deck — and the four templates in the gallery — by editing the JSON directly. The recipe your agent needs is one markdown file: bento.page/agents.md. If you never touch AI, nothing here ever will either.',
+  notes: 'Full disclosure: an AI agent designed and wrote this deck — and the four templates in the gallery — by editing the JSON directly. The recipe your agent needs is one markdown file: webdeck.page/agents.md. If you never touch AI, nothing here ever will either.',
   elements: [
     kick(96, 96, 'BUILT FOR AI · WORKS WITHOUT IT', PEACH_DEEP),
     text({ x: 90, y: 140, w: 1100, h: 200, html: 'An agent wrote<br>this deck.', fontSize: 76, fontFamily: FR, fontWeight: 900, color: INK, lineHeight: 1.02 }),
-    text({ x: 96, y: 370, w: 1000, h: 130, html: 'The document is plain JSON in the file, so agents edit <b>.bento.html</b> files in place and chatbots round-trip the JSON. No converters, no uploads, no .pptx to wrestle — this deck and the whole template gallery were authored that way. There’s a Claude Code skill (<b>bento-slides</b>) that even fetches the app itself.', fontSize: 20, color: INK_SOFT, lineHeight: 1.55, fx: { enter: 'fade-up' } }),
+    text({ x: 96, y: 370, w: 1000, h: 130, html: 'The document is plain JSON in the file, so agents edit <b>.webdeck.html</b> files in place and chatbots round-trip the JSON. No converters, no uploads, no .pptx to wrestle — this deck and the whole template gallery were authored that way. There’s a Claude Code skill (<b>webdeck</b>) that even fetches the app itself.', fontSize: 20, color: INK_SOFT, lineHeight: 1.55, fx: { enter: 'fade-up' } }),
     rect({ x: 96, y: 540, w: 620, h: 70, fill: INK, radius: 35, fx: { enter: 'fade-up', order: 2 } }),
-    text({ x: 96, y: 562, w: 620, h: 30, html: 'bento.page/agents.md — the recipe for your agent', fontSize: 17, fontWeight: 600, color: TILE, align: 'center', fx: { enter: 'fade-up', order: 2 } }),
+    text({ x: 96, y: 562, w: 620, h: 30, html: 'webdeck.page/agents.md — the recipe for your agent', fontSize: 17, fontWeight: 600, color: TILE, align: 'center', fx: { enter: 'fade-up', order: 2 } }),
   ],
 })
 
 const s6 = slide({
   id: 'an-forever', background: INK, transition: 'fade',
-  notes: 'Local-first, provably: Offline mode hard-blocks every network feature. Updates are ECDSA-signed, verified in-app, and write a NEW file — the old one stays as rollback. If bento.page vanished tomorrow, every file keeps working. That is the whole point.',
+  notes: 'Local-first, provably: Offline mode hard-blocks every network feature. Updates are ECDSA-signed, verified in-app, and write a NEW file — the old one stays as rollback. If webdeck.page vanished tomorrow, every file keeps working. That is the whole point.',
   elements: [
     kick(96, 96, 'LOCAL-FIRST, PROVABLY'),
     text({ x: 90, y: 140, w: 1100, h: 200, html: 'This file will open<br>in 2036.', fontSize: 76, fontFamily: FR, fontWeight: 900, color: '#fff', lineHeight: 1.02 }),
@@ -168,13 +168,13 @@ const s8 = slide({
   elements: [
     ...tiles({ x: 540, y: 90, w: 200, h: 200 }, { x: 464, y: 210, w: 120, h: 180 }, { x: 700, y: 230, w: 120, h: 120 }),
     text({ x: 140, y: 360, w: 1000, h: 130, html: 'One file. Yours. Forever.', fontSize: 74, fontFamily: FR, fontWeight: 900, color: '#fff', align: 'center', lineHeight: 1 }),
-    text({ x: 140, y: 494, w: 1000, h: 60, html: '<b>bento.page</b> — site + gallery &nbsp;·&nbsp; <b>bento.page/slides</b> — the app &nbsp;·&nbsp; <b>MIT</b> — github.com/nyblnet/bento', fontSize: 18, color: MIST, align: 'center', lineHeight: 1.6, fx: { enter: 'fade-up' } }),
+    text({ x: 140, y: 494, w: 1000, h: 60, html: '<b>webdeck.page</b> — site + gallery &nbsp;·&nbsp; <b>webdeck.page/slides</b> — the app &nbsp;·&nbsp; <b>MIT</b> — github.com/xuzhenpeng263/webdeck', fontSize: 18, color: MIST, align: 'center', lineHeight: 1.6, fx: { enter: 'fade-up' } }),
     text({ x: 140, y: 600, w: 1000, h: 30, html: 'PRESS ESC AND SAVE A COPY — THIS ANNOUNCEMENT IS NOW YOUR DECK. FRESH IDENTITY INCLUDED.', fontSize: 12, fontWeight: 700, letterSpacing: 2.5, color: 'rgba(255,158,138,0.85)', align: 'center', fx: { enter: 'fade-up', order: 2 } }),
   ],
 })
 
 const doc = {
-  format: 'bento/slides', version: 1, title: 'This announcement is the product',
+  format: 'webdeck', version: 1, title: 'This announcement is the product',
   size: { width: 1280, height: 720 }, template: true,
   theme: { background: INK, color: '#fff', accent: PEACH, fontFamily: IN },
   assets: { 'font-fraunces': font('FRAUNCES_900'), 'font-instrument': font('INSTRUMENT_VAR') },
@@ -187,9 +187,9 @@ const doc = {
   modified: new Date().toISOString(),
 }
 
-const blockRe = /<script type="application\/bento\+json" id="bento-doc">[\s\S]*?<\/script>/
+const blockRe = /<script type="application\/bento\+json" id="webdeck-doc">[\s\S]*?<\/script>/
 const json = JSON.stringify(doc).replace(/</g, '\\u003c')
-const spliced = shell.replace(blockRe, `<script type="application/bento+json" id="bento-doc">\n${json}\n</scr` + 'ipt>')
+const spliced = shell.replace(blockRe, `<script type="application/webdeck+json" id="webdeck-doc">\n${json}\n</scr` + 'ipt>')
 if (!spliced.includes(json)) throw new Error('splice failed')
 writeFileSync(out, spliced)
 console.log(`announcement → ${out} (${doc.slides.length} slides, ${Math.round(spliced.length / 1024)} KB)`)

@@ -1,30 +1,30 @@
-# bento/spaces — for AI agents
+# webdeck-spaces — for AI agents
 
-**Guide version `__APP_VERSION__`** · document format `bento/spaces` (v1).
+**Guide version `__APP_VERSION__`** · document format `webdeck-spaces` (v1).
 
-A space (`*.bento.html`) is a self-contained HTML file holding **a tree of
+A space (`*.webdeck.html`) is a self-contained HTML file holding **a tree of
 pages**. The document lives in ONE plaintext block near the top:
 
 ```html
-<script type="application/bento+json" id="bento-doc">
-{ "format": "bento/spaces", ... }
+<script type="application/webdeck+json" id="webdeck-doc">
+{ "format": "webdeck-spaces", ... }
 </script>
 ```
 
 Two ways to work with it:
 
-1. **File harness** — edit the JSON inside `#bento-doc` in place. Escape every
+1. **File harness** — edit the JSON inside `#webdeck-doc` in place. Escape every
    `<` as `<` so the block can never contain a literal `</script>`. Leave
    the rest of the file alone.
-2. **In the browser** — `window.bento` (below). Prefer the patch calls over
+2. **In the browser** — `window.webdeck` (below). Prefer the patch calls over
    `loadDoc`: rewriting the whole document to append a paragraph clobbers
    concurrent edits and flattens undo to one entry.
 
 ```bash
-curl -fsSL https://bento.page/releases/spaces/Bento_Spaces.bento.html -o "<Name>.bento.html"
+curl -fsSL https://webdeck.page/releases/spaces/WebDeck_Spaces.webdeck.html -o "<Name>.webdeck.html"
 ```
 
-The downloaded file's `#bento-doc` block is **empty**. Opened in a browser it
+The downloaded file's `#webdeck-doc` block is **empty**. Opened in a browser it
 mints a starter space; on disk there is nothing to copy from. Write your
 document into the empty block.
 
@@ -34,7 +34,7 @@ document into the empty block.
 
 ```jsonc
 {
-  "format": "bento/spaces", "version": 1,
+  "format": "webdeck-spaces", "version": 1,
   "docId": "…",                    // minted once, NEVER regenerate it
   "title": "Team handbook",
   "home": "p-intro",               // the page a reader lands on
@@ -148,17 +148,17 @@ Links are same-document fragments:
 it lists the linker, with no maintenance. A space where pages only link *down*
 the tree wastes the one thing this format does that a folder of files cannot.
 
-## `window.bento`
+## `window.webdeck`
 
 ```js
 bento.doc                                  // the live document
-bento.pages()                              // [{id, title, parent, archived, blocks}]
+webdeck.pages()                              // [{id, title, parent, archived, blocks}]
 bento.getPage(id)                          // one page, with its blocks
 bento.search(q)                            // [{pageId, title, blockId}]
 bento.newPage(title, parent?)              // → new page id      (one undo step)
 bento.insertBlocks(pageId, afterId, [...]) // → new block ids    (one undo step)
 bento.loadDoc(json)                        // replace everything (one undo step)
-bento.serialize()                          // the whole .bento.html file
+bento.serialize()                          // the whole .webdeck.html file
 bento.undo() / bento.redo()
 bento.readonly                             // true = a locked or frozen file; writes no-op
 ```

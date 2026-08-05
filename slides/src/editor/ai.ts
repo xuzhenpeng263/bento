@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// Browser-local AI copilot. The deck remains ordinary bento/slides JSON: the
+// Copyright (c) 2026 The WebDeck authors
+// Browser-local AI copilot. The deck remains ordinary webdeck JSON: the
 // model edits it through small, explicit tools and every mutation is undoable.
 
 import type { Store } from '../store'
@@ -19,7 +19,7 @@ const CHAT_PREFIX = 'bento-ai-chat-v2:'
 const DEFAULT_CONFIG: Config = { baseUrl: 'https://api.openai.com/v1', apiKey: '', model: 'gpt-4.1' }
 
 const SYSTEM_PROMPT = `# Role & objective
-You are the slide-design copilot inside bento/slides. Modify the live deck through tools; never dump document JSON into chat.
+You are the slide-design copilot inside webdeck. Modify the live deck through tools; never dump document JSON into chat.
 
 # Skills
 Detailed instructions and valid examples are progressive. Before changing the deck, call load_skill for every relevant skill:
@@ -69,7 +69,7 @@ const tools = [
   tool('load_skill', 'Load authoritative instructions and valid examples for one slide-design skill. Required before editing.', {
     type: 'object', properties: { name: { type: 'string', enum: Object.keys(SKILLS) } }, required: ['name'], additionalProperties: false,
   }, true),
-  tool('get_document', 'Read the current bento/slides document or one page before editing.', {
+  tool('get_document', 'Read the current webdeck document or one page before editing.', {
     type: 'object', properties: { slide_id: { type: ['string', 'null'], description: 'Page id, or null for the whole document.' } }, required: ['slide_id'], additionalProperties: false,
   }, true),
   tool('create_slide', 'Create exactly ONE page. Call repeatedly, once per page. The page is appended unless after_slide_id is supplied.', {

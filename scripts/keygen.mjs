@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// One-time: generate the Bento release signing keypair (ECDSA P-256).
+// Copyright (c) 2026 The WebDeck authors
+// One-time: generate the WebDeck release signing keypair (ECDSA P-256).
 //
 //   node scripts/keygen.mjs [key-file]
 //
-// The PRIVATE key is written to ~/.bento/release-key.json (chmod 600) —
+// The PRIVATE key is written to ~/.webdeck/release-key.json (chmod 600) —
 // it must never enter the repository or any CI secret store; releases are
 // signed locally with scripts/sign-release.mjs. The PUBLIC key is printed
 // for embedding in slides/src/update.ts (PUBLIC_KEY_JWK). Every shipped
-// Bento file verifies update manifests against that embedded public key,
+// WebDeck file verifies update manifests against that embedded public key,
 // so a compromised release host cannot push code without this private key.
 
 import { generateKeyPairSync } from 'node:crypto'
@@ -30,7 +30,7 @@ const priv = privateKey.export({ format: 'jwk' })
 const pub = publicKey.export({ format: 'jwk' })
 
 mkdirSync(dirname(keyPath), { recursive: true })
-writeFileSync(keyPath, JSON.stringify({ kind: 'bento-release-key', private: priv, public: pub }, null, 2) + '\n')
+writeFileSync(keyPath, JSON.stringify({ kind: 'webdeck-release-key', private: priv, public: pub }, null, 2) + '\n')
 chmodSync(keyPath, 0o600)
 
 console.log(`Private key written to ${keyPath} (keep offline, never commit).`)

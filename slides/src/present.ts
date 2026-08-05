@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Present mode: a fullscreen Reveal.js overlay generated from the model.
 // Slides marked transition:'morph' use GSAP Flip to animate elements whose
 // ids match across the two slides (PowerPoint "Morph" behaviour).
@@ -29,8 +29,8 @@ export function startPresentation(
   opts: { fullscreen?: boolean } = {},
 ): PresentSession {
   const overlay = document.createElement('div')
-  overlay.className = 'bento-present-overlay'
-  overlay.style.setProperty('--bento-accent', doc.theme.accent)
+  overlay.className = 'webdeck-present-overlay'
+  overlay.style.setProperty('--webdeck-accent', doc.theme.accent)
   // Reveal ignores key events originating from form fields. If focus is still
   // on an editor input (title, notes…) when the show starts, arrows go dead.
   ;(document.activeElement as HTMLElement | null)?.blur?.()
@@ -126,7 +126,7 @@ export function startPresentation(
   // ——— black-screen (audience blackout; presenter keeps notes) ———
   let blacked = false
   const blackout = document.createElement('div')
-  blackout.className = 'bento-blackout'
+  blackout.className = 'webdeck-blackout'
   blackout.hidden = true
   overlay.appendChild(blackout)
 
@@ -136,18 +136,18 @@ export function startPresentation(
   // and media therefore keep receiving their normal pointer events. Blackout
   // and toasts intentionally paint above the laser visuals.
   const laserLayer = document.createElement('div')
-  laserLayer.className = 'bento-laser-layer'
+  laserLayer.className = 'webdeck-laser-layer'
   laserLayer.setAttribute('aria-hidden', 'true')
   // Until a real pointer event supplies screen coordinates, let the browser
   // paint the laser at the OS cursor. The DOM dot and trail take over on the
   // first move, when `laser-over-slide` hides this native cursor.
   const laserCursorStyle = document.createElement('style')
   laserCursorStyle.textContent =
-    `.bento-present-overlay.laser-enabled:not(.laser-over-slide) .bento-slide,` +
-    `.bento-present-overlay.laser-enabled:not(.laser-over-slide) .bento-slide *{` +
+    `.webdeck-present-overlay.laser-enabled:not(.laser-over-slide) .webdeck-slide,` +
+    `.webdeck-present-overlay.laser-enabled:not(.laser-over-slide) .webdeck-slide *{` +
     `cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23000' fill-opacity='.55'/%3E%3Ccircle cx='8' cy='8' r='6' fill='%23fff'/%3E%3Ccircle cx='8' cy='8' r='4' fill='%23ef252f'/%3E%3C/svg%3E") 8 8,crosshair!important}`
   const laserTrail = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-  laserTrail.classList.add('bento-laser-trail')
+  laserTrail.classList.add('webdeck-laser-trail')
   laserTrail.setAttribute('width', '100%')
   laserTrail.setAttribute('height', '100%')
   laserTrail.setAttribute('focusable', 'false')
@@ -155,7 +155,7 @@ export function startPresentation(
   const laserTrailCore = document.createElementNS('http://www.w3.org/2000/svg', 'g')
   laserTrail.append(laserTrailHalo, laserTrailCore)
   const laserDot = document.createElement('div')
-  laserDot.className = 'bento-laser-dot'
+  laserDot.className = 'webdeck-laser-dot'
   laserLayer.append(laserTrail, laserDot)
 
   const LASER_TRAIL_LIFETIME = 275
@@ -178,9 +178,9 @@ export function startPresentation(
     overlay.insertBefore(laserLayer, blackout)
     for (let i = 0; i < LASER_TRAIL_SEGMENTS; i++) {
       const halo = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-      halo.classList.add('bento-laser-trail-segment', 'halo')
+      halo.classList.add('webdeck-laser-trail-segment', 'halo')
       const core = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-      core.classList.add('bento-laser-trail-segment', 'core')
+      core.classList.add('webdeck-laser-trail-segment', 'core')
       if (i === 0) {
         halo.classList.add('tail-tip')
         core.classList.add('tail-tip')
@@ -360,7 +360,7 @@ export function startPresentation(
       return
     }
     const section = deck.getCurrentSlide() as HTMLElement | null
-    const surface = section?.querySelector<HTMLElement>('.bento-slide')
+    const surface = section?.querySelector<HTMLElement>('.webdeck-slide')
     if (!surface) {
       resetLaserPointer()
       return
@@ -431,7 +431,7 @@ export function startPresentation(
   const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   const readMotionPref = (): boolean | null => {
     try {
-      const v = localStorage.getItem('bento-reduce-motion')
+      const v = localStorage.getItem('webdeck-reduce-motion')
       return v === 'on' ? true : v === 'off' ? false : null
     } catch { return null }
   }
@@ -446,7 +446,7 @@ export function startPresentation(
     margin: 0,
     // Reveal's default maxScale is 2.0 — on a 1280-wide deck that caps the show
     // at 2560px and letterboxes it in the middle of large displays (a 4K/5K/8K
-    // screen shows a small centred slide). Bento content is vector/text, so it
+    // screen shows a small centred slide). WebDeck content is vector/text, so it
     // upscales crisply: allow it to fill any display. minScale stays generous
     // for tiny embeds.
     minScale: 0.1,
@@ -459,7 +459,7 @@ export function startPresentation(
      * That default is meant for a deck embedded in an article, where reading
      * beats presenting. Presenting is the only thing this overlay does, and
      * EVERY phone is under the threshold — an iPhone is 390-430 CSS px — so
-     * the platform bento/tray exists to serve would silently get a different
+     * the platform webdeck/tray exists to serve would silently get a different
      * renderer from a laptop.
      *
      * The concrete cost is navigation, not layout: measured at 402px the
@@ -499,7 +499,7 @@ export function startPresentation(
 
   // ——— speaker view (S) ———
   // Reveal's stock speaker window reloads the presentation URL in iframes —
-  // which in a Bento file boots the EDITOR. Instead: our own popup, rendered
+  // which in a WebDeck file boots the EDITOR. Instead: our own popup, rendered
   // with the same renderer from this one app instance and synced directly.
   let speaker: Window | null = null
   let speakerTimer = 0
@@ -572,8 +572,8 @@ export function startPresentation(
   // audience overlay otherwise changes silently.
   let toastTimer = 0
   const flashPresentMsg = (text: string) => {
-    let el = overlay.querySelector<HTMLElement>('.bento-present-toast')
-    if (!el) { el = document.createElement('div'); el.className = 'bento-present-toast'; overlay.appendChild(el) }
+    let el = overlay.querySelector<HTMLElement>('.webdeck-present-toast')
+    if (!el) { el = document.createElement('div'); el.className = 'webdeck-present-toast'; overlay.appendChild(el) }
     el.textContent = text
     el.classList.remove('show'); void el.offsetWidth; el.classList.add('show') // restart the fade
     clearTimeout(toastTimer)
@@ -582,7 +582,7 @@ export function startPresentation(
 
   const setReduceMotion = (on: boolean, persist = true) => {
     reduceMotion = on
-    if (persist) { try { localStorage.setItem('bento-reduce-motion', on ? 'on' : 'off') } catch { /* storage off */ } }
+    if (persist) { try { localStorage.setItem('webdeck-reduce-motion', on ? 'on' : 'off') } catch { /* storage off */ } }
     overlay.classList.toggle('reduce-motion', on)
     if (on) clearLaserTrail()
     // Toast only on an explicit toggle (M / speaker button), not the silent
@@ -596,7 +596,7 @@ export function startPresentation(
       const section = slidesEl.children[cur] as HTMLElement | undefined
       const slide = doc.slides[cur]
       if (section && slide) {
-        anim.killTweensOf(section.querySelectorAll('.bento-el'))
+        anim.killTweensOf(section.querySelectorAll('.webdeck-el'))
         for (const el of slide.elements) {
           const node = section.querySelector<HTMLElement>(`[data-el-id="${CSS.escape(el.id)}"]`)
           if (node) { applyElementFrame(node, el); resetXform(node) }
@@ -646,10 +646,10 @@ export function startPresentation(
       speaker = pre
       speakerAdopted = true
     } else {
-      speaker = window.open('', 'bento-speaker', 'width=1200,height=800')
+      speaker = window.open('', 'webdeck-speaker', 'width=1200,height=800')
       speakerAdopted = false
     }
-    if (!speaker) { openingSpeaker = false; console.warn('[bento-speaker] popup blocked — allow pop-ups for this site'); return }
+    if (!speaker) { openingSpeaker = false; console.warn('[webdeck-speaker] popup blocked — allow pop-ups for this site'); return }
     setSpeakerWindow(speaker)
     ;(window as unknown as Record<string, unknown>).__bentoSpeaker = speaker // diagnostics
     const d = speaker.document
@@ -657,7 +657,7 @@ export function startPresentation(
     if (!d.head.querySelector('style')) { // already styled when adopting an editor window
       for (const st of document.querySelectorAll('style')) d.head.appendChild(d.importNode(st, true))
     }
-    d.body.className = 'bento-speaker'
+    d.body.className = 'webdeck-speaker'
     const navBtn = (k: string, glyph: string, label: string, pressed = false) =>
       `<button class="sv-btn" data-nav="${k}" title="${label}" aria-label="${label}"${pressed ? ' aria-pressed="false"' : ''}>${glyph}</button>`
     d.body.innerHTML =
@@ -947,7 +947,7 @@ export function startPresentation(
       // Kill the outgoing slide's tweens, then restore model frames —
       // a tween killed during its delay would otherwise leave the element
       // stuck at its "from" state (invisible) for every future visit.
-      anim.killTweensOf(from.querySelectorAll('.bento-el'))
+      anim.killTweensOf(from.querySelectorAll('.webdeck-el'))
       const fromSlide = doc.slides[fromIdx]
       for (const el of fromSlide?.elements ?? []) {
         const node = from.querySelector<HTMLElement>(`[data-el-id="${CSS.escape(el.id)}"]`)
@@ -1164,7 +1164,7 @@ async function runParticleTransition(
 
 /** Sample text content from all text elements in a slide section. */
 function slideTextSample(section: HTMLElement, size: { width: number; height: number }): TextSample {
-  const texts = section.querySelectorAll<HTMLElement>('.bento-text-inner')
+  const texts = section.querySelectorAll<HTMLElement>('.webdeck-text-inner')
   let allX: number[] = []
   let allY: number[] = []
 
@@ -1327,7 +1327,7 @@ function writeNumber(value: number, shape: NumberShape): string {
 }
 
 function runCountUp(node: HTMLElement) {
-  const inner = node.querySelector<HTMLElement>('.bento-text-inner') ?? node
+  const inner = node.querySelector<HTMLElement>('.webdeck-text-inner') ?? node
   const final = inner.textContent ?? ''
   // Separators only count BETWEEN digits, so a sentence ending in a number
   // ("grew 25.") keeps its full stop instead of having it swallowed and
@@ -1356,7 +1356,7 @@ function runCountUp(node: HTMLElement) {
 
 /** Re-parse inline svg elements so their CSS animations replay on entry. */
 function restartSvgAnimations(section: HTMLElement) {
-  for (const host of section.querySelectorAll<HTMLElement>('.bento-el-svg')) {
+  for (const host of section.querySelectorAll<HTMLElement>('.webdeck-el-svg')) {
     if (host.querySelector('animate, [style*="animation"], style')) {
       // eslint-disable-next-line no-self-assign
       host.innerHTML = host.innerHTML
@@ -1726,7 +1726,7 @@ function runMorph(
       if (target) morphShapeFill(target, a, b)
     }
     if (a.type === 'text' && b.type === 'text' && a.color !== b.color) {
-      const inner = to.querySelector<HTMLElement>('.bento-text-inner')
+      const inner = to.querySelector<HTMLElement>('.webdeck-text-inner')
       if (inner) {
         anim.fromTo(inner, { color: a.color }, { color: b.color, duration: MORPH_DURATION, ease: MORPH_EASE })
       }

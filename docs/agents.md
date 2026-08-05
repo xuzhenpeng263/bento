@@ -1,73 +1,73 @@
-# bento/slides — for AI agents
+# webdeck — for AI agents
 
-**Guide version `__APP_VERSION__`** · document format `bento/slides` (v1). This
-guide matches the bento/slides shell of the same version. A deck's `#bento-doc`
+**Guide version `__APP_VERSION__`** · document format `webdeck` (v1). This
+guide matches the webdeck shell of the same version. A deck's `#webdeck-doc`
 JSON is always the source of truth — if it was written by a newer shell it may
 carry features beyond this guide; unknown keys are ignored, never fatal.
 
 > **Bento is a suite.** Slides is the first app; **Spaces**
-> (`bento/spaces`, notes and wiki) ships alongside it. **Dash** (`bento/dash`,
+> (`webdeck-spaces`, notes and wiki) ships alongside it. **Dash** (`webdeck-dash`,
 > data and sheets) is in development, and a word processor is planned. Each ships
-> as its own self-contained distributable — `Bento_Slides.bento.html`,
-> `Bento_Spaces.bento.html`, and so on — with its own agent guide at
-> `bento.page/<app>/agents.md`. **This guide covers Slides only.** Before you
+> as its own self-contained distributable — `WebDeck.webdeck.html`,
+> `WebDeck_Spaces.webdeck.html`, and so on — with its own agent guide at
+> `webdeck.page/<app>/agents.md`. **This guide covers Slides only.** Before you
 > edit a file, check its `"format"` field and use the matching guide; if the
 > format is one you have no guide for, don't guess at its shape.
 
 *Drop this file into your context (or point your harness at it) and you can
-author and edit Bento presentations directly. Also published at
-[bento.page/agents.md](https://bento.page/agents.md). For **Claude Code**,
-install the packaged **bento-slides** skill once and it triggers automatically
-(or via `/bento-slides`) — it can even download the latest Bento app itself,
+author and edit WebDeck presentations directly. Also published at
+[webdeck.page/agents.md](https://webdeck.page/agents.md). For **Claude Code**,
+install the packaged **webdeck** skill once and it triggers automatically
+(or via `/webdeck`) — it can even download the latest WebDeck app itself,
 so a deck can be authored from an empty folder:*
 
 ```
-/plugin marketplace add nyblnet/bento
-/plugin install bento-slides@bento
+/plugin marketplace add xuzhenpeng263/webdeck
+/plugin install webdeck@bento
 ```
 
 *…or as a plain personal skill:*
 
 ```bash
-mkdir -p ~/.claude/skills/bento-slides && curl -fsSL https://bento.page/skills/bento-slides/SKILL.md -o ~/.claude/skills/bento-slides/SKILL.md
+mkdir -p ~/.claude/skills/webdeck && curl -fsSL https://webdeck.page/skills/webdeck/SKILL.md -o ~/.claude/skills/webdeck/SKILL.md
 ```
 
 *(claude.ai / Claude Desktop: upload
-[bento.page/skills/bento-slides.zip](https://bento.page/skills/bento-slides.zip)
+[webdeck.page/skills/webdeck.zip](https://webdeck.page/skills/webdeck.zip)
 under Settings → Skills.)*
 
 **Working without the skill, from an empty folder?** Download the app itself —
 this is the file you write your document into:
 
 ```bash
-curl -fsSL https://bento.page/releases/slides/Bento_Slides.bento.html -o "<Topic>.bento.html"
+curl -fsSL https://webdeck.page/releases/slides/WebDeck.webdeck.html -o "<Topic>.webdeck.html"
 ```
 
-The downloaded file's `#bento-doc` block is **empty**. That is expected: opened
+The downloaded file's `#webdeck-doc` block is **empty**. That is expected: opened
 in a browser it mints a fresh showcase deck to get a new user started, but on
 disk there is nothing to discard and nothing to copy from. Write your document
 into the empty block.
 
-A Bento deck (`*.bento.html`) is a self-contained HTML file. The document
+A WebDeck deck (`*.webdeck.html`) is a self-contained HTML file. The document
 lives in ONE plaintext block near the top:
 
 ```html
-<script type="application/bento+json" id="bento-doc">
-{ "format": "bento/slides", ... }
+<script type="application/webdeck+json" id="webdeck-doc">
+{ "format": "webdeck", ... }
 </script>
 ```
 
 Two ways to work with it:
 
 1. **File harness** (Claude Code, agent sandboxes): edit the JSON inside the
-   `#bento-doc` block in place. Escape every `<` in the JSON as `\u003c`
+   `#webdeck-doc` block in place. Escape every `<` in the JSON as `\u003c`
    so the block can never contain a literal `</script>`. Leave everything else in the
    file untouched.
 2. **Chat round-trip** (any chatbot): the user copies the JSON out via
    *Save → Copy document JSON*, you return a full replacement document,
    they paste it back via *Save → Replace from JSON…* (undoable).
-   In the browser console: `window.bento.doc` (read) /
-   `window.bento.loadDoc(json)` (write, undoable).
+   In the browser console: `window.webdeck.doc` (read) /
+   `window.webdeck.loadDoc(json)` (write, undoable).
 
 ---
 
@@ -170,7 +170,7 @@ each kind of content to the feature built for it:
       obvious on screen. This is the only check that catches what the others
       cannot; a deck nobody rendered is not finished.
 
-### `window.bento.measure()` — size text before you place it
+### `window.webdeck.measure()` — size text before you place it
 
 The format is absolute pixels, which is what lets morph, the drag handles and
 the renderer work from one representation. The cost falls on you: the height of
@@ -178,7 +178,7 @@ a string at a given width and font is not knowable from the JSON. Stop guessing
 and ask:
 
 ```js
-window.bento.measure({ html: 'Long paragraph…', w: 600, fontSize: 28, lineHeight: 1.4 })
+window.webdeck.measure({ html: 'Long paragraph…', w: 600, fontSize: 28, lineHeight: 1.4 })
 // → { height: 236, width: 600, lines: 6 }
 ```
 
@@ -193,13 +193,13 @@ column, deciding whether a heading needs two lines or three, sizing a caption
 under a photo. In the editor, the same thing is a **Fit height to text** button
 in the Typography panel.
 
-### `window.bento.validate()`
+### `window.webdeck.validate()`
 
 Open the deck and run it in the browser console. It reports, in one pass, the
 things the runtime otherwise swallows in silence:
 
 ```js
-const { ok, counts, findings } = window.bento.validate()
+const { ok, counts, findings } = window.webdeck.validate()
 findings.filter(f => f.severity !== 'info')
 ```
 
@@ -226,7 +226,7 @@ without them — and elements should carry the full field set shown.
 
 ```json
 {
-  "format": "bento/slides", "version": 1, "title": "My deck",
+  "format": "webdeck", "version": 1, "title": "My deck",
   "size": { "width": 1280, "height": 720 },
   "theme": { "background": "#101418", "color": "#F2F0EA",
              "accent": "#FF9E8A", "fontFamily": "system-ui, sans-serif" },
@@ -435,4 +435,4 @@ keywords}` object — great for title slides and footers that fill from one plac
   otherwise host the file and put its URL in `media.src`.
 
 Working examples of everything above: the template decks at
-[bento.page](https://bento.page) — open one and read its JSON block.
+[webdeck.page](https://webdeck.page) — open one and read its JSON block.

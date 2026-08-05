@@ -1,15 +1,15 @@
-# The `bento/slides` document format
+# The `webdeck` document format
 
-*Normative reference for the JSON document model, current as of bento/slides
+*Normative reference for the JSON document model, current as of webdeck
 **v1.0.6** (format version `1`). The authoritative source is
 [`slides/src/model.ts`](../slides/src/model.ts) — this document tracks it. If
 the two disagree, the code wins; please file that as a docs bug.*
 
-A `.bento.html` file carries one JSON document inside a single plaintext block:
+A `.webdeck.html` file carries one JSON document inside a single plaintext block:
 
 ```html
-<script type="application/bento+json" id="bento-doc">
-{ "format": "bento/slides", "version": 1, ... }
+<script type="application/webdeck+json" id="webdeck-doc">
+{ "format": "webdeck", "version": 1, ... }
 </script>
 ```
 
@@ -53,7 +53,7 @@ the string `</script>` can never appear and terminate the block.
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `format` | `"bento/slides"` | yes | Format discriminant. Check it before editing. |
+| `format` | `"webdeck"` | yes | Format discriminant. Check it before editing. |
 | `version` | `number` | yes | Format version. Current: `1`. |
 | `docId` | `string` (uuid) | yes* | Stable per-document identity, minted at creation. **Never regenerate it.** *Minted on load if a pre-`docId` file lacks one. |
 | `title` | `string` | yes | Deck title; also synced to the HTML `<title>`. |
@@ -104,7 +104,7 @@ the string `</script>` can never appear and terminate the block.
   slide coordinates), or neither/dangling (the whole slide).
 - `resolved?: boolean`; `replies?: Array<{ id, author, text, at }>`.
 
-`window.bento.comments()` returns the flat, typed-anchor list — the entry point
+`window.webdeck.comments()` returns the flat, typed-anchor list — the entry point
 for tooling that processes flagged issues in a deck.
 
 ---
@@ -313,7 +313,7 @@ old copies off** (and upgrades a legacy `r`-room to an enforced `w`-room).
 | **Player / presentation package** | `readonly: true` | Boots straight into the presentation; never shows the editor. Collab is stripped from the saved copy. |
 | **Read-only live viewer** | `collab.role: 'reader'` (`writerPriv` stripped) | Boots the editor locked; receives live updates but the relay drops any write. |
 
-Encryption is orthogonal: the `#bento-doc` block may hold a `bento/enc`
+Encryption is orthogonal: the `#webdeck-doc` block may hold a `webdeck/enc`
 envelope (PBKDF2-SHA-256 + AES-GCM over the doc JSON) instead of plaintext
 document JSON — boot shows a password gate. The envelope is still plaintext
 JSON in the block, so the splice contract holds.
@@ -322,7 +322,7 @@ JSON in the block, so the splice contract holds.
 
 ## Format invariants (do not break)
 
-1. `format: "bento/slides"` plus **additive, optional** fields — old files open
+1. `format: "webdeck"` plus **additive, optional** fields — old files open
    in newer shells; unknown fields survive parse → serialize.
 2. Element **ids are identity** — morph, states, and links all key off them.
    Generators must emit deterministic ids.
@@ -339,7 +339,7 @@ JSON in the block, so the splice contract holds.
 
 ```json
 {
-  "format": "bento/slides",
+  "format": "webdeck",
   "version": 1,
   "title": "My deck",
   "size": { "width": 1280, "height": 720 },

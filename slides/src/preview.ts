@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
-// The static first-page preview: what a Bento deck looks like to something
+// The static first-page preview: what a WebDeck deck looks like to something
 // that renders its HTML but never runs its JavaScript.
 //
-// WHY THIS EXISTS. Thumbnailers — iOS Files, macOS QuickLook/Finder, the Bento
+// WHY THIS EXISTS. Thumbnailers — iOS Files, macOS QuickLook/Finder, the WebDeck
 // Tray app — render HTML with scripting off. Until our runtime boots, every
 // deck is the same bytes plus the same boot splash, so every deck thumbnailed
 // as the same dark box. The kernel (kernel/src/save.ts) parks what we build
@@ -70,16 +70,16 @@ const FONT_FALLBACK = `-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helve
  *  into a payload the preview's audience never decompresses. */
 function inlineRuntimeCss(root: HTMLElement) {
   prepend(root, 'position:relative;overflow:hidden')
-  for (const el of Array.from(root.querySelectorAll<HTMLElement>('.bento-el'))) {
+  for (const el of Array.from(root.querySelectorAll<HTMLElement>('.webdeck-el'))) {
     prepend(el, 'position:absolute')
   }
-  for (const el of Array.from(root.querySelectorAll<HTMLElement>('.bento-el-text .bento-text-inner'))) {
+  for (const el of Array.from(root.querySelectorAll<HTMLElement>('.webdeck-el-text .webdeck-text-inner'))) {
     prepend(el, 'overflow-wrap:break-word')
   }
-  for (const el of Array.from(root.querySelectorAll<HTMLElement>('.bento-el-table'))) {
+  for (const el of Array.from(root.querySelectorAll<HTMLElement>('.webdeck-el-table'))) {
     prepend(el, 'overflow:visible')
   }
-  for (const el of Array.from(root.querySelectorAll<HTMLElement>('.bento-cell-inner'))) {
+  for (const el of Array.from(root.querySelectorAll<HTMLElement>('.webdeck-cell-inner'))) {
     prepend(el, 'min-height:1em')
   }
   for (const el of Array.from(root.querySelectorAll<HTMLElement>('code'))) {

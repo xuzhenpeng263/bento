@@ -1,6 +1,6 @@
-# bento/tray — WebExtension
+# webdeck/tray — WebExtension
 
-A browser host for Bento documents. Grant your decks folder once; after that a
+A browser host for WebDeck documents. Grant your decks folder once; after that a
 deck you opened by **double-clicking** saves back to its own file with no
 destination prompt.
 
@@ -9,7 +9,7 @@ built from #213:
 
 | action | result |
 |---|---|
-| ⌘S | **no dialog** — `[bento-tray] wrote Tray_Test.bento.html (898775 bytes) in place` |
+| ⌘S | **no dialog** — `[webdeck-tray] wrote Tray_Test.webdeck.html (898775 bytes) in place` |
 | Save a copy… | prompts, as it must |
 | Save read-only copy… | prompts, as it must |
 | the working file afterwards | 898,775 chars, 17 slides, script tags 5/5 balanced, `readonly` unset |
@@ -43,8 +43,8 @@ which is what `probe/directory.html` measured.
 Every save says which path it took:
 
 ```
-[bento-tray] wrote <file> (<n> bytes) in place
-[bento-tray] not saving in place: <reason> — falling back to the browser picker
+[webdeck-tray] wrote <file> (<n> bytes) in place
+[webdeck-tray] not saving in place: <reason> — falling back to the browser picker
 ```
 
 Safe-by-default only helps if the safe path explains itself. Without that second
@@ -60,8 +60,8 @@ measurements in `docs/DECISIONS.md` (2026-08-02) say why:
   serialises it and the receiver fires `messageerror`. So the origin that
   acquires a handle is the only origin that can use it, and a launcher can never
   hand one to a document.
-- Running every document on one shared origin would pool `bento-autosave`
-  (plaintext doc JSON, version history) and `bento-member-<docId>` (collab
+- Running every document on one shared origin would pool `webdeck-autosave`
+  (plaintext doc JSON, version history) and `webdeck-member-<docId>` (collab
   private keys) into a store any document could read.
 - A **directory** grant behaves differently, and that is the unlock: it survives
   a reload and covers files inside it that were never picked.
@@ -117,19 +117,19 @@ const base = decodeURIComponent(new URL(location.href).pathname.split('/').pop()
 return /\.bento\.html$/i.test(base) ? base : null
 ```
 
-So `Q3.bento.html` on disk arrives as `suggestedName: "Q3.bento.html"` and the
+So `Q3.webdeck.html` on disk arrives as `suggestedName: "Q3.webdeck.html"` and the
 comparison holds. That fallback shipped in 1.0.12 for an unrelated reason —
 "Save offers the file you are looking at" — and this depends on it. If it ever
 goes back to naming saves after the deck's TITLE, this extension silently stops
 taking over and every save returns to a destination prompt.
 
-Note the `.bento.html` test in that fallback: a deck saved as plain `.html`
+Note the `.webdeck.html` test in that fallback: a deck saved as plain `.html`
 returns null, the suggested name comes from the title instead, and the override
-declines. Correct, but it means the extension only covers `.bento.html` files.
+declines. Correct, but it means the extension only covers `.webdeck.html` files.
 
 ## The matching problem
 
-A page gives us `/Users/…/Decks/Q3.bento.html`. A `FileSystemDirectoryHandle`
+A page gives us `/Users/…/Decks/Q3.webdeck.html`. A `FileSystemDirectoryHandle`
 knows its own **name** but not its path, and nothing in the API exposes one — so
 the two cannot be compared directly.
 
@@ -145,7 +145,7 @@ file.
    **Unpacked:** `chrome://extensions` → Developer mode → **Load unpacked** →
    `tray/webext/`, then the same file-URL toggle.
 2. Open its **options** and grant the folder your decks live in
-3. Double-click a `.bento.html` in that folder, edit something, press ⌘S
+3. Double-click a `.webdeck.html` in that folder, edit something, press ⌘S
 
 Expected: it saves with no dialog. Today, without the extension, that first ⌘S
 asks where to put the file.

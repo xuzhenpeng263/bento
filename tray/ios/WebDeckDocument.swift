@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 
 import UIKit
 
-/// A `.bento.html` opened IN PLACE from Files/iCloud/Dropbox.
+/// A `.webdeck.html` opened IN PLACE from Files/iCloud/Dropbox.
 ///
 /// UIDocument is what makes the whole app worth building: it is the only way to
 /// write back to the user's actual file on iOS. Every browser there is WebKit,
@@ -13,9 +13,9 @@ import UIKit
 /// The bytes are kept as Data and handed to the web view untouched. The app
 /// never parses, rewrites or "understands" the document — it is a courier. That
 /// is deliberate: the file carries its own runtime, so a deck saved by any past
-/// or future version of Bento opens correctly without this app knowing anything
+/// or future version of WebDeck opens correctly without this app knowing anything
 /// about the format.
-final class BentoDocument: UIDocument {
+final class WebDeckDocument: UIDocument {
     var html: Data = Data()
 
     override func contents(forType typeName: String) throws -> Any { html }

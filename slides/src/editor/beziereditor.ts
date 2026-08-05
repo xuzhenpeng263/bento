@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // True pen-tool editing for curve (path) shapes. Each on-curve anchor shows its
 // in/out control handles; dragging a handle bends the curve exactly (the path
 // IS the handles — no sampling, no re-smoothing, no drift). Smooth anchors

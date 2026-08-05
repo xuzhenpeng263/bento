@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
 // What is published, and what a publish would remove.
 //
@@ -44,7 +44,7 @@ export function plannedDeletions(published, staged, excluded = []) {
 /**
  * Published language packs this build REPLACES rather than removes.
  *
- * Pack filenames carry their version (`bento-slides-1.0.14-ar.pack.json`), so
+ * Pack filenames carry their version (`webdeck-1.0.14-ar.pack.json`), so
  * every release of an app retires all 22 of its predecessors and stages 22
  * new ones. Being superseded is the entire point of the name; the old file is
  * unreachable the moment the signed index stops listing it.

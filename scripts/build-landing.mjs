@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// Assemble the bento.page landing page: inject the deck's embedded typefaces
+// Copyright (c) 2026 The WebDeck authors
+// Assemble the webdeck.page landing page: inject the deck's embedded typefaces
 // (Fraunces Black + Instrument Sans, from slides/src/fontdata.ts) into the
 // template so the page is fully self-contained — no external requests, same
 // design language, same faces as the showcase deck.
@@ -43,8 +43,8 @@ for (const [ph, file] of [
 // (release.mjs writes it before calling this script); fall back to the local
 // build. Rounded to the nearest 10 KB to match the "~" approximate style.
 const shellFile = [
-  join(root, 'site/releases/slides/Bento_Slides.bento.html'),
-  join(root, 'slides/dist-single/Bento_Slides.bento.html'),
+  join(root, 'site/releases/slides/WebDeck.webdeck.html'),
+  join(root, 'slides/dist-single/WebDeck.webdeck.html'),
 ].find(existsSync)
 if (!shellFile) {
   throw new Error('no built shell found to size the Download pill — cut a release or run `npm run build:single` first')

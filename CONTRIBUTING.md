@@ -1,6 +1,6 @@
-# Contributing to Bento
+# Contributing to WebDeck
 
-Thanks for being here. Bento is "the office suite that fits in a file" — a
+Thanks for being here. WebDeck is "the office suite that fits in a file" — a
 single self-contained HTML document that is also its own viewer, presenter, and
 editor. Contributions of all sizes are welcome: bug reports, docs fixes,
 templates, and code.
@@ -16,8 +16,8 @@ This should bring in the right version of Node.js and npm. Alternatively, you ca
 There is no backend to run and no account to create — the whole app builds to one HTML file.
 
 ```bash
-git clone https://github.com/nyblnet/bento.git
-cd bento/slides
+git clone https://github.com/xuzhenpeng263/webdeck.git
+cd webdeck
 npm install
 npm run dev            # dev server at http://localhost:5173
 ```
@@ -27,12 +27,12 @@ The current app lives in `slides/`. Common commands (run from `slides/`):
 | Command | What it does |
 |---|---|
 | `npm run dev` | Vite dev server with hot reload. |
-| `npm run build:single` | Produces the shippable `dist-single/Bento_Slides.bento.html` — one file with the runtime, editor, and an empty document block. |
+| `npm run build:single` | Produces the shippable `dist-single/WebDeck.webdeck.html` — one file with the runtime, editor, and an empty document block. |
 | `node ../scripts/test-sync.ts` | The CRDT convergence rig. Run it after **any** change to `slides/src/sync/crdt.ts`; it has caught many ordering bugs. `SEEDS`, `STEPS`, and `ACTORS` env vars tune the fuzzing. |
 
 ## Where things live
 
-- `slides/src/model.ts` — the `bento/slides` JSON document model. **This is the
+- `slides/src/model.ts` — the `webdeck` JSON document model. **This is the
   format.**
 - `slides/src/render.ts` — the single model→DOM renderer shared by the editor
   canvas, thumbnails, present mode, and print.
@@ -40,7 +40,7 @@ The current app lives in `slides/`. Common commands (run from `slides/`):
 - `slides/src/sync/` — the in-house CRDT and the E2EE relay transport.
 - `server/sync-worker/` — the blind Cloudflare Worker relay (ciphertext only).
 - `scripts/` — build, release, and gallery tooling.
-- `docs/` — architecture, the `bento/slides` [format spec](docs/format.md),
+- `docs/` — architecture, the `webdeck` [format spec](docs/format.md),
   collaboration design, the AI agent guide, and releasing (index in
   [docs/README.md](docs/README.md)).
 
@@ -56,11 +56,11 @@ they go deep — **read them before a non-trivial change**:
 
 - **Vanilla TypeScript, no framework.** The editor is hand-written DOM. Match
   the surrounding style rather than introducing new patterns or dependencies.
-- **Earn every dependency.** Bento replaced GSAP, ECharts, and Yjs with small
+- **Earn every dependency.** WebDeck replaced GSAP, ECharts, and Yjs with small
   in-house engines shaped to its needs, because the whole runtime has to fit in
   a ~400 KB shell that travels inside every document. New runtime dependencies
   are a hard sell — bring numbers.
-- **The format is additive and stable.** `bento/slides` JSON is the interchange
+- **The format is additive and stable.** `webdeck` JSON is the interchange
   contract: old files must open in newer shells, and unknown fields are
   preserved through parse → serialize. Add optional fields; never repurpose or
   remove one. Element `id`s are identity (morphs, states, and links all key off
@@ -72,7 +72,7 @@ they go deep — **read them before a non-trivial change**:
 ## The single-file build & the splice contract
 
 `npm run build:single` inlines and compresses all JS + CSS into one HTML shell.
-The document lives in a **plaintext** `<script id="bento-doc">` block near the
+The document lives in a **plaintext** `<script id="webdeck-doc">` block near the
 top of the file, and everything downstream depends on that block staying
 spliceable:
 
@@ -90,15 +90,15 @@ release process gates on them. The details are in
 
 ## Before you build something substantial
 
-**Check what's already in flight, and claim it.** Bento moves fast and several
+**Check what's already in flight, and claim it.** WebDeck moves fast and several
 things are usually half-built at once — twice now, contributors have written
 thousands of lines that duplicated work already open as a PR. That is our
 fault, not theirs, so:
 
-1. Skim [open pull requests](https://github.com/nyblnet/bento/pulls) and the
+1. Skim [open pull requests](https://github.com/xuzhenpeng263/webdeck/pulls) and the
    pinned **What's in flight** issue.
 2. For anything beyond a small fix, open an issue (or a
-   [Discussion](https://github.com/nyblnet/bento/discussions) under *Ideas*)
+   [Discussion](https://github.com/xuzhenpeng263/webdeck/discussions) under *Ideas*)
    saying what you plan to do, before you write it. A maintainer will tell you
    quickly if it clashes with something unreleased or with a platform
    invariant.
@@ -139,12 +139,12 @@ worth more than any amount of polish.
 ## Questions, bugs & ideas
 
 - **Questions and help** — [Discussions →
-  Q&A](https://github.com/nyblnet/bento/discussions/categories/q-a). Answers
+  Q&A](https://github.com/xuzhenpeng263/webdeck/discussions/categories/q-a). Answers
   there are searchable and help the next person with the same question.
 - **Ideas and feature requests** — [Discussions →
-  Ideas](https://github.com/nyblnet/bento/discussions/categories/ideas).
+  Ideas](https://github.com/xuzhenpeng263/webdeck/discussions/categories/ideas).
 - **Bugs** — open a GitHub issue. Include your browser and OS, what you
-  expected, what happened, and — when you can — a minimal `.bento.html` that
+  expected, what happened, and — when you can — a minimal `.webdeck.html` that
   reproduces it.
 
 Security issues are different: please **do not** open a public issue. Follow

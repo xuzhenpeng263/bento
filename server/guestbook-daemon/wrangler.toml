@@ -1,4 +1,4 @@
-name = "bento-guestbook-daemon"
+name = "webdeck-guestbook-daemon"
 main = "src/worker.js"
 workers_dev = true
 compatibility_date = "2026-06-01"
@@ -6,8 +6,8 @@ compatibility_date = "2026-06-01"
 # Serves the current guestbook epoch from R2 (shadows GitHub Pages for this
 # one path — apex must be proxied/orange-cloud) + the admin surface.
 routes = [
-  { pattern = "bento.page/guestbook.bento.html*", zone_name = "bento.page" },
-  { pattern = "bento.page/guestbook-admin/*", zone_name = "bento.page" },
+  { pattern = "webdeck.page/guestbook.webdeck.html*", zone_name = "webdeck.page" },
+  { pattern = "webdeck.page/guestbook-admin/*", zone_name = "webdeck.page" },
 ]
 
 # Archivist snapshot + (if due) epoch roll. LAUNCH PHASE: every 30 min so the
@@ -22,11 +22,11 @@ id = "ac9eeb2800ea4e848ccf303e31d6620f"
 
 [vars]
 # where a fresh shell is fetched from at roll time (never bundled)
-SHELL_URL = "https://bento.page/releases/slides/Bento_Slides.bento.html"
+SHELL_URL = "https://webdeck.page/releases/slides/WebDeck.webdeck.html"
 # fallback origin if R2 has no current file (GitHub Pages direct)
 ORIGIN_FALLBACK = "https://nyblnet.github.io/bento-site"
 # relay host baked into newly minted epochs
-SYNC_HOST = "wss://sync.bento.page"
+SYNC_HOST = "wss://sync.webdeck.page"
 # automatic roll cadence in hours; 0 = manual rolls only (admin endpoint).
 # The scheduled handler can only roll as often as the cron above fires, so this
 # must be ≤ the cron interval to take effect. LAUNCH PHASE: 0.5 = every 30 min

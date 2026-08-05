@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
 // The isolated-world half of the bridge: a pure relay.
 //
@@ -13,7 +13,7 @@
 // forwards two message shapes and nothing else. Every decision that matters
 // lives on the extension side, which is the only side the page cannot reach.
 
-const CH = '__bento_tray__'
+const CH = '__webdeck_tray__'
 
 window.addEventListener('message', async (ev) => {
   const d = ev.data

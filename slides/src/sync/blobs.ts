@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Encrypted asset blobs — the client half of docs/blob-offload.md.
 //
 // WHY THIS EXISTS. An asset cannot travel as a CRDT op: a Durable Object
@@ -169,7 +169,7 @@ export async function decodeBlob(rawRoomKey: Uint8Array, blob: Uint8Array): Prom
 // slide that uses it, and re-fetching on each render would be absurd. Keyed by
 // the blob key, which is already content-addressed.
 
-const DB = 'bento-blobcache'
+const DB = 'webdeck-blobcache'
 const STORE = 'blobs'
 let dbP: Promise<IDBDatabase | null> | null = null
 
@@ -213,7 +213,7 @@ export async function cachePut(key: string, bytes: Uint8Array): Promise<void> {
 // --- transport ---------------------------------------------------------------
 
 export interface BlobEndpoint {
-  /** relay origin, e.g. https://sync.bento.page */
+  /** relay origin, e.g. https://sync.webdeck.page */
   base: string
   room: string
   tok: string

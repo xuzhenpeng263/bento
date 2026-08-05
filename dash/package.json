@@ -1,5 +1,5 @@
 {
-  "name": "bento-dash",
+  "name": "webdeck-dash",
   "private": true,
   "version": "0.2.0",
   "type": "module",
@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:single": "tsc -b && SINGLEFILE=1 vite build --outDir dist-single && mv dist-single/index.html dist-single/Bento_Dash.bento.html && node ../scripts/postbuild-compress.mjs dist-single/Bento_Dash.bento.html --generator bento-dash --title \"bento/dash\"",
+    "build:single": "tsc -b && SINGLEFILE=1 vite build --outDir dist-single && mv dist-single/index.html dist-single/WebDeck_Dash.webdeck.html && node ../scripts/postbuild-compress.mjs dist-single/WebDeck_Dash.webdeck.html --generator webdeck-dash --title \"webdeck-dash\"",
     "preview": "vite preview"
   },
   "devDependencies": {

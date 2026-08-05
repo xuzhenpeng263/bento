@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Direct on-canvas editing for line / curved-line / connector SHAPES — the
 // intuitive alternative to resizing a box and rotating it. A selected line
 // shows two draggable endpoint handles; a curve (path) shows its anchor points

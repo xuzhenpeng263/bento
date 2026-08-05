@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// What a fresh bento/spaces file opens with.
+// Copyright (c) 2026 The WebDeck authors
+// What a fresh webdeck-spaces file opens with.
 //
 // The brief slides set: the product demo, the launch asset and the feature
 // tour in one — every claim it makes is proven by the feature making it. So

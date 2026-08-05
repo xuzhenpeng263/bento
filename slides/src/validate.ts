@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
-// Document validation — `window.bento.validate()`.
+// Document validation — `window.webdeck.validate()`.
 //
 // WHY THIS EXISTS. Almost everything that goes wrong in a generated deck fails
 // SILENTLY. A typo'd property is ignored, so the styling just does not apply. A
@@ -16,7 +16,7 @@
 // whether a document is loadable at all.
 //
 // Text overflow needs real layout, so it goes through measure.ts — the same
-// path `window.bento.measure()` uses, which renders off-screen with the SAME
+// path `window.webdeck.measure()` uses, which renders off-screen with the SAME
 // renderer the editor and present mode use. One path means the validator and
 // the measuring tool cannot disagree about whether a box fits its text. Without
 // a DOM (node tooling) the measured checks are skipped and `measured` reports
@@ -143,7 +143,7 @@ export function validateDoc(doc: BentoDoc, opts: ValidateOpts = {}): ValidateRes
   for (const k of Object.keys(doc)) {
     if (!(MODEL_KEYS.doc as readonly string[]).includes(k)) {
       add({ code: 'unknown-key', severity: 'warning', path: k,
-        message: `Document key "${k}" is not part of the bento/slides format — it is ignored at render time.` })
+        message: `Document key "${k}" is not part of the webdeck format — it is ignored at render time.` })
     }
   }
   for (const f of doc.fonts ?? []) {
@@ -353,7 +353,7 @@ function validateChart(
 /**
  * Measure every text element and report the ones that do not fit.
  *
- * Goes through measure.ts, the same path `window.bento.measure()` uses, so the
+ * Goes through measure.ts, the same path `window.webdeck.measure()` uses, so the
  * validator and the measuring tool can never disagree about whether a given
  * box fits its text — which they would within a release if each had its own
  * copy of the arithmetic.

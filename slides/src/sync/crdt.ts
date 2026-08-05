@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento-sync M0 — the CRDT engine. Pure data, no DOM, no imports beyond the
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-sync M0 — the CRDT engine. Pure data, no DOM, no imports beyond the
 // model types: the same file runs in the browser session layer and in the
 // node convergence rig (scripts/test-sync.ts, node --experimental-strip-types).
 //

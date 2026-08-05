@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // The guestbook deck definition, shared by the local builder
 // (scripts/build-guestbook.mjs) and the Cloudflare daemon
 // (server/guestbook-daemon/) so epochs look identical wherever they are
@@ -85,7 +85,7 @@ export function buildGuestbookDoc({ epoch, docId, collab, fonts }) {
         '· The encryption keys travel <b>inside this file</b> — opening it is joining it<br>' +
         '· Edits sync end-to-end encrypted; the relay stores ciphertext and learns nothing<br>' +
         '· Every reset mints fresh keys — the old room simply stops existing<br>' +
-        '· Your saved copy keeps working forever, offline, like any Bento deck' }),
+        '· Your saved copy keeps working forever, offline, like any WebDeck deck' }),
       text({ x: 96, y: 600, w: 1000, h: 30, html: 'THIS IS THE SAME COLLAB THAT SHIPS IN EVERY DECK — NOTHING SPECIAL WAS BUILT FOR THIS STUNT', fontSize: 12, fontWeight: 700, letterSpacing: 2.5, color: 'rgba(20,34,54,0.5)' }),
     ],
   }
@@ -98,13 +98,13 @@ export function buildGuestbookDoc({ epoch, docId, collab, fonts }) {
       rect({ id: 'gb-close-b', x: 464, y: 230, w: 120, h: 180, fill: STEEL, radius: 26 }),
       rect({ id: 'gb-close-c', x: 700, y: 250, w: 120, h: 120, fill: TILE, radius: 24 }),
       text({ x: 140, y: 380, w: 1000, h: 120, html: 'Make a deck of your own.', fontSize: 66, fontFamily: FR, fontWeight: 900, color: '#fff', align: 'center', lineHeight: 1 }),
-      text({ x: 140, y: 520, w: 1000, h: 60, html: '<b>bento.page</b> — templates, the app, the whole story. One file each.', fontSize: 19, color: MIST, align: 'center', lineHeight: 1.6 }),
+      text({ x: 140, y: 520, w: 1000, h: 60, html: '<b>webdeck.page</b> — templates, the app, the whole story. One file each.', fontSize: 19, color: MIST, align: 'center', lineHeight: 1.6 }),
       text({ x: 140, y: 620, w: 1000, h: 24, html: 'SAVE A COPY OF THIS GUESTBOOK — IT’S YOUR SOUVENIR OF EPOCH ' + epoch, fontSize: 12, fontWeight: 700, letterSpacing: 2.5, color: 'rgba(255,158,138,0.8)', align: 'center' }),
     ],
   }
 
   return {
-    format: 'bento/slides', version: 1, title: `The Guestbook — epoch ${epoch}`,
+    format: 'webdeck', version: 1, title: `The Guestbook — epoch ${epoch}`,
     docId, collab, guestbookEpoch: epoch,
     size: { width: 1280, height: 720 },
     theme: { background: INK, color: '#fff', accent: PEACH, fontFamily: IN },
@@ -120,16 +120,16 @@ export function buildGuestbookDoc({ epoch, docId, collab, fonts }) {
 
 /** splice a doc into a shell (the format's one contract) */
 export function spliceDoc(shellText, doc) {
-  const blockRe = /<script type="application\/bento\+json" id="bento-doc">[\s\S]*?<\/script>/
+  const blockRe = /<script type="application\/bento\+json" id="webdeck-doc">[\s\S]*?<\/script>/
   const json = JSON.stringify(doc).replace(/</g, '\\u003c')
-  const out = shellText.replace(blockRe, `<script type="application/bento+json" id="bento-doc">\n${json}\n</scr` + 'ipt>')
+  const out = shellText.replace(blockRe, `<script type="application/webdeck+json" id="webdeck-doc">\n${json}\n</scr` + 'ipt>')
   if (!out.includes(json)) throw new Error('splice failed')
   return out
 }
 
-/** extract the doc JSON from a .bento.html file's plaintext block */
+/** extract the doc JSON from a .webdeck.html file's plaintext block */
 export function extractDoc(shellText) {
-  const m = shellText.match(/<script type="application\/bento\+json" id="bento-doc">\s*([\s\S]*?)\s*<\/script>/)
-  if (!m) throw new Error('no #bento-doc block')
+  const m = shellText.match(/<script type="application\/bento\+json" id="webdeck-doc">\s*([\s\S]*?)\s*<\/script>/)
+  if (!m) throw new Error('no #webdeck-doc block')
   return JSON.parse(m[1])
 }

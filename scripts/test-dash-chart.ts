@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento/dash chart-binding rig.
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-dash chart-binding rig.
 //
 //   node scripts/test-dash-chart.ts
 //

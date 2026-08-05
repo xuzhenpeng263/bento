@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 import type { BentoDoc, Slide, SlideElement } from './model'
 
 export type StoreEvent =
@@ -172,5 +172,5 @@ export class Store {
 }
 
 const EMPTY_SLIDE: Slide = Object.freeze({
-  id: '__bento-empty__', background: '#FFFFFF', transition: 'none', notes: '', elements: [],
+  id: '__webdeck-empty__', background: '#FFFFFF', transition: 'none', notes: '', elements: [],
 }) as Slide

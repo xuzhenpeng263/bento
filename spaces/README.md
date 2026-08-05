@@ -1,4 +1,4 @@
-# bento/spaces
+# webdeck-spaces
 
 A notes/wiki app where **one HTML file is a whole space**: a tree of pages, the
 reader that displays them, and the editor that writes them. No account, no
@@ -6,7 +6,7 @@ server, no sidecar folder — you can mail it, and the person who receives it ca
 read and edit it with nothing installed.
 
 Agents: `docs/spaces-agents.md` is the working guide (published at
-`bento.page/spaces/agents.md`). Before changing anything here read `AGENTS.md`,
+`webdeck.page/spaces/agents.md`). Before changing anything here read `AGENTS.md`,
 `docs/PLATFORM.md` and `docs/PARALLEL-WORK.md`. `spaces/` is this app's
 ownership zone; `kernel/` is not — kernel changes are serialized.
 
@@ -16,18 +16,18 @@ ownership zone; `kernel/` is not — kernel changes are serialized.
 cd spaces
 npm install
 npm run dev            # dev server (port 5196 via .claude/launch.json)
-npm run build:single   # → dist-single/Bento_Spaces.bento.html (the product)
+npm run build:single   # → dist-single/WebDeck_Spaces.webdeck.html (the product)
 ```
 
 ## The format
 
-`bento/spaces` version 1. Additive and permanent: every future version opens
+`webdeck-spaces` version 1. Additive and permanent: every future version opens
 files this one wrote, and unknown fields survive a round trip untouched. There
 is no server to migrate a file that someone has had on a disk for three years.
 
 ```jsonc
 {
-  "format": "bento/spaces", "version": 1,
+  "format": "webdeck-spaces", "version": 1,
   "docId": "…",                     // minted once, never regenerated
   "home": "p-intro",
   "pages": [                        // FLAT, pre-order; nesting is `parent`
@@ -92,13 +92,13 @@ pages are one document rather than one file each.
 
 ## Platform guarantees this app honours
 
-- **Splice contract** — `#bento-doc` stays plaintext with a stable id; the file
+- **Splice contract** — `#webdeck-doc` stays plaintext with a stable id; the file
   survives DOMParser → splice → `outerHTML`. Gated by
-  `node scripts/shell-gate.mjs spaces/dist-single/Bento_Spaces.bento.html`, the
+  `node scripts/shell-gate.mjs spaces/dist-single/WebDeck_Spaces.webdeck.html`, the
   same check the release runs before signing.
 - **No network to open, edit, read or save.** Updates are the only fetch, and
   they are opt-out.
-- **Autosave + recovery** in a per-app IndexedDB database (`bento-spaces-…`);
+- **Autosave + recovery** in a per-app IndexedDB database (`webdeck-spaces-…`);
   encrypted spaces are never snapshotted to disk in plaintext.
 - **Signed self-update** against `releases/spaces/manifest.json`, with this
   app's own release notes (`spaces/CHANGELOG.md` — never another app's).

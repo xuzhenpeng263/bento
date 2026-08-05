@@ -1,52 +1,52 @@
 ---
-name: bento-slides
+name: webdeck
 description: >-
-  Create and edit Bento presentations — single-file .bento.html decks whose
-  document is plain JSON in a "#bento-doc" script block. Use whenever the user
+  Create and edit WebDeck presentations — single-file .webdeck.html decks whose
+  document is plain JSON in a "#webdeck-doc" script block. Use whenever the user
   wants a slide deck or presentation: starting from NOTHING (it downloads the
-  latest Bento app from bento.page automatically), from source material, or by
-  improving an existing .bento.html. Maps content to the right feature
+  latest WebDeck app from webdeck.page automatically), from source material, or by
+  improving an existing .webdeck.html. Maps content to the right feature
   (charts, morph transitions, state slides, ken-burns, motion paths) instead
   of static text slides, then writes the document JSON in place. Full schema +
-  recipes at https://bento.page/agents.md.
+  recipes at https://webdeck.page/agents.md.
 ---
 
-# Authoring Bento decks
+# Authoring WebDeck decks
 
-A Bento deck is one self-contained `.bento.html` file. The document is plain
+A WebDeck deck is one self-contained `.webdeck.html` file. The document is plain
 JSON in a single block:
 
 ```html
-<script type="application/bento+json" id="bento-doc"> { "format":"bento/slides", ... } </script>
+<script type="application/webdeck+json" id="webdeck-doc"> { "format":"webdeck", ... } </script>
 ```
 
 You edit **that block only**, in place. Escape every `<` in the JSON as
 `\u003c` so it can never contain a literal `</script>`. Leave the rest of the
 file (the compressed runtime) untouched. In a chat context instead, the user
 copies the JSON out (*Save ▾ → Copy document JSON*) and pastes your
-replacement back (*Save ▾ → Replace from JSON…*); `window.bento.loadDoc(json)`
+replacement back (*Save ▾ → Replace from JSON…*); `window.webdeck.loadDoc(json)`
 does it from the console.
 
 ## Starting from nothing
 
-The user does NOT need Bento installed — the app ships inside every deck.
-When there is no `.bento.html` to edit, fetch the latest signed release
+The user does NOT need WebDeck installed — the app ships inside every deck.
+When there is no `.webdeck.html` to edit, fetch the latest signed release
 yourself and author into it:
 
 ```bash
-# name the file after the deck's topic, e.g. Q4_Review.bento.html
-curl -fsSL https://bento.page/releases/slides/Bento_Slides.bento.html -o "<Topic>.bento.html"
+# name the file after the deck's topic, e.g. Q4_Review.webdeck.html
+curl -fsSL https://webdeck.page/releases/slides/WebDeck.webdeck.html -o "<Topic>.webdeck.html"
 ```
 
-(Windows without curl: `iwr https://bento.page/releases/slides/Bento_Slides.bento.html -OutFile <Topic>.bento.html`.)
+(Windows without curl: `iwr https://webdeck.page/releases/slides/WebDeck.webdeck.html -OutFile <Topic>.webdeck.html`.)
 
-Then verify the download contains `id="bento-doc"`, and write your document
+Then verify the download contains `id="webdeck-doc"`, and write your document
 into that block. **The block is empty in the downloaded file** — a browser
 mints a showcase deck on first open, but on disk there is nothing to discard
 and nothing to copy from, so do not go looking for it.
 Rules for a fresh document:
 
-- **Fetch https://bento.page/agents.md BEFORE authoring** and start from its
+- **Fetch https://webdeck.page/agents.md BEFORE authoring** and start from its
   "Minimal valid document" skeleton. `size` and `theme` (including
   `theme.fontFamily`) are **required** — the app will not boot without them.
 - **Fully specify element fields** as the skeleton shows (shapes need
@@ -64,13 +64,13 @@ looked at is not finished.
 
 ## Workflow
 
-1. **Find the document.** Locate the `#bento-doc` block; parse its JSON. Note
+1. **Find the document.** Locate the `#webdeck-doc` block; parse its JSON. Note
    `doc.size` (canonical 1280×720), `doc.theme`, existing element `id`s, and
    whether `doc.template`/`doc.readonly` are set.
 2. **Read the source material the user gave you** and classify each piece —
    is it a stat? a table? a process? a definition to expand? a photo?
 3. **Map material → feature (do NOT default to bullet text).** This is the
-   step that makes it a Bento deck rather than a slideshow of paragraphs:
+   step that makes it a WebDeck deck rather than a slideshow of paragraphs:
    - numbers to compare visually (trend, magnitude, share) → a **chart** element
    - a comparison / spec / pricing / feature grid → a **table** element
      (`columns` weights + `rows` of `cells` + a `style` object)
@@ -90,7 +90,7 @@ looked at is not finished.
      (`kind: video|audio`); embed short clips as a data URI, link big ones by
      URL to keep the file small
 4. **Author** using the schema. Keep the full schema and copy-paste recipes
-   open: **fetch https://bento.page/agents.md** (it has the element shapes,
+   open: **fetch https://webdeck.page/agents.md** (it has the element shapes,
    the morph/chart/state/ken-burns snippets, and the gotchas). Respect one
    accent colour, ≤2 typefaces, 96px side margins (right-most x ≤ 1184),
    and write **speaker notes** on each slide.
@@ -101,7 +101,7 @@ looked at is not finished.
    - [ ] a drill-down that would work better as a **state slide**?
    - [ ] one accent colour, ≤2 typefaces, 96px margins?
    - [ ] speaker notes on every slide?
-6. **Write back** the edited `#bento-doc` block (escaping `<`), or return the
+6. **Write back** the edited `#webdeck-doc` block (escaping `<`), or return the
    replacement JSON. Never regenerate the whole HTML file.
 
 ## Critical gotchas
@@ -124,4 +124,4 @@ looked at is not finished.
   file boots straight into the show with no editor.
 
 Working examples of every technique: open any template at
-https://bento.page and read its `#bento-doc` block.
+https://webdeck.page and read its `#webdeck-doc` block.

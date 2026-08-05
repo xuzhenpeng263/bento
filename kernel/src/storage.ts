@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
 // Preference storage that cannot take the app down.
 //
@@ -12,7 +12,7 @@
 //
 // — and the only way to find out is to attempt it inside a `try`. One bare read
 // at module scope therefore takes the whole file down before it paints. That is
-// exactly what happened: `resolve()` in i18n.ts reads `bento-lang` on import, so
+// exactly what happened: `resolve()` in i18n.ts reads `webdeck-lang` on import, so
 // in a context without storage the shell caught the SecurityError and printed
 // "This file could not start" instead of opening the deck.
 //
@@ -24,7 +24,7 @@
 //     partitioned off
 //   · Safari private browsing, historically, on write
 //
-// In every one of them a Bento file should open and work. Preferences are
+// In every one of them a WebDeck file should open and work. Preferences are
 // preferences: not having them is what a first-time visitor looks like, which
 // is a path the app already handles well. Losing the DOCUMENT because we could
 // not read a language code is a bad trade.

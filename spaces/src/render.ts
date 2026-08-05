@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // model → DOM. ONE renderer for the editor, the reader, print and (later) the
 // file-manager preview, so those surfaces can never disagree about what a
 // document looks like.

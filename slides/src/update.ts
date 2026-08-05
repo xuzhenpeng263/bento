@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Facade: signed self-update lives in the shared kernel now
 // (kernel/src/update.ts). App identity (manifest url, manifest `app` id) is
 // supplied by configureApp() in main.ts — see docs/PLATFORM.md §6, §9.

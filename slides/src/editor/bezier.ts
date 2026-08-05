@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Exact cubic-bezier path model for true pen-tool editing. Unlike the old
 // Catmull-Rom approach (which SAMPLED the rendered curve back into approximate
 // anchors and re-smoothed on every edit — lossy, drifting, no real handles),

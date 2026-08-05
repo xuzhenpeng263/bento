@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// The ONE publish step for bento.page.
+// Copyright (c) 2026 The WebDeck authors
+// The ONE publish step for webdeck.page.
 //
 // `site/` is the assembled deploy tree: AUTHORED sources (landing, guestbook
 // page, agents.md, config — tracked in this repo) plus GENERATED artifacts
-// (the signed shell, the manifest, the gallery decks, the *.bento.html demos —
+// (the signed shell, the manifest, the gallery decks, the *.webdeck.html demos —
 // gitignored here, rebuilt by release.mjs / build-example-decks.mjs). This
 // script mirrors that tree into the public `bento-site` repo and pushes it, so
 // nothing is hand-copied file-by-file and the guestbook / gallery imagery can't
@@ -52,7 +52,7 @@ if (!dry && !message) die('a commit message is required (or pass --dry)')
 
 // ---- optional: regenerate the gallery --------------------------------------
 if (doGallery) {
-  const shell = join(root, 'slides/dist-single/Bento_Slides.bento.html')
+  const shell = join(root, 'slides/dist-single/WebDeck.webdeck.html')
   if (!existsSync(shell)) die('--gallery needs a built shell — run `npm run build:single` first')
   console.log('• regenerating gallery decks → site/gallery/')
   run('node', [join(root, 'scripts/build-example-decks.mjs'), join(site, 'gallery')])
@@ -62,10 +62,10 @@ if (doGallery) {
 // The gallery templates, the 404 deck AND the guestbook EMBED the shell, so
 // they have to be rebuilt/re-shelled whenever the shell changes (release.mjs
 // does this — the guestbook is re-shelled in place, preserving its room). Hash
-// the shell's app payload (the bento/deflate-b64 blocks) and refuse to publish
+// the shell's app payload (the webdeck/deflate-b64 blocks) and refuse to publish
 // if any embedded-shell deck carries a different one — otherwise a stale deck
 // would ship on top of a fresh shell.
-const shellFile = join(site, 'releases/slides/Bento_Slides.bento.html')
+const shellFile = join(site, 'releases/slides/WebDeck.webdeck.html')
 if (existsSync(shellFile)) {
   const appHash = (file) => {
     const blocks = [...readFileSync(file, 'utf8').matchAll(/type="bento\/deflate-b64"[^>]*>([A-Za-z0-9+/=]+)</g)].map((m) => m[1])
@@ -74,9 +74,9 @@ if (existsSync(shellFile)) {
   const shellHash = appHash(shellFile)
   const galleryDir = join(site, 'gallery')
   const decks = [
-    ...(existsSync(galleryDir) ? readdirSync(galleryDir).filter((f) => f.endsWith('.bento.html')).map((f) => join(galleryDir, f)) : []),
-    join(site, '404.bento.html'),
-    join(site, 'guestbook.bento.html'),
+    ...(existsSync(galleryDir) ? readdirSync(galleryDir).filter((f) => f.endsWith('.webdeck.html')).map((f) => join(galleryDir, f)) : []),
+    join(site, '404.webdeck.html'),
+    join(site, 'guestbook.webdeck.html'),
   ].filter(existsSync)
   const stale = decks.filter((d) => appHash(d) !== shellHash)
   if (stale.length) {
@@ -128,7 +128,7 @@ if (existsSync(packIndex)) {
 // the one artifact nobody can repair from their side.
 //
 // Caught before it happened: a publish from a tree staged at 1.0.11 while
-// bento.page served 1.0.13.
+// webdeck.page served 1.0.13.
 const manifestVersion = (file) => {
   try {
     const outer = JSON.parse(readFileSync(file, 'utf8'))
@@ -185,9 +185,9 @@ const cmpVersion = (a, b) => {
 // deck needs protecting, and only when this build has none to offer.
 const rsyncFlags = ['-a', '--delete', '--exclude', '.git']
 const excluded = ['.git']
-if (!existsSync(join(site, 'guestbook.bento.html'))) {
-  rsyncFlags.push('--exclude', 'guestbook.bento.html')
-  excluded.push('guestbook.bento.html')
+if (!existsSync(join(site, 'guestbook.webdeck.html'))) {
+  rsyncFlags.push('--exclude', 'guestbook.webdeck.html')
+  excluded.push('guestbook.webdeck.html')
   console.log('• no guestbook deck in this build (no local epoch) — leaving the published one untouched')
 }
 
@@ -241,7 +241,7 @@ if (!existsSync(join(site, 'guestbook.bento.html'))) {
   if (deletions.length) {
     if (!args.includes('--allow-deletions')) {
       die(
-        `this publish would DELETE ${deletions.length} file(s) that are live on bento.page:\n` +
+        `this publish would DELETE ${deletions.length} file(s) that are live on webdeck.page:\n` +
         groupDeletions(deletions).map(([g, n]) => `    · ${g}${n > 1 ? `  (${n} files)` : ''}`).join('\n') +
         '\n\n' +
         `  Full list: ${deletions.slice(0, 40).join(', ')}${deletions.length > 40 ? ', …' : ''}\n\n` +
@@ -302,16 +302,16 @@ console.log(`\n✓ published to bento-site @ ${head} (app v${ver})`)
 // uploaded, so re-running publish is always safe. NOT best-effort — unlike the
 // guestbook re-seed below, a failure here is reported loudly and exits non-zero,
 // because a silent skip is the exact failure being fixed.
-const releaseShell = join(site, 'releases/slides/Bento_Slides.bento.html')
+const releaseShell = join(site, 'releases/slides/WebDeck.webdeck.html')
 const tag = `v${ver}`
 // The title names the APP, not just the version: this repo ships more than one
-// (bento/spaces and bento/dash are starting), and a page titled 'v1.0.12' does
+// (webdeck-spaces and webdeck-dash are starting), and a page titled 'v1.0.12' does
 // not say which one the file below it is. v1.0.6 was titled by hand and got
 // this right; every release after it went through the automated step below and
 // came out as a bare tag, so the convention was lost until the six existing
 // releases were retitled on 2026-07-27. Hardcoding it here is what stops it
 // drifting a second time.
-const releaseTitle = `bento/slides ${tag}`
+const releaseTitle = `webdeck ${tag}`
 
 const ghAvailable = (() => {
   try { capture('gh', ['auth', 'status'], { stdio: ['ignore', 'pipe', 'pipe'] }); return true }
@@ -373,7 +373,7 @@ if (ver === '?') {
       try { return capture('gh', ['release', 'view', tag, '--json', 'assets', '-q', '.assets[].name']) }
       catch { return '' }
     })()
-    if (!assets.includes('Bento_Slides.bento.html')) {
+    if (!assets.includes('WebDeck.webdeck.html')) {
       run('gh', ['release', 'upload', tag, releaseShell, '--clobber'])
       console.log(`✓ attached the signed shell to the existing release ${tag}`)
     } else {
@@ -387,13 +387,13 @@ if (ver === '?') {
     try { return capture('gh', ['release', 'view', tag, '--json', 'assets', '-q', '.assets[].name']) }
     catch { return '' }
   })()
-  if (!check.includes('Bento_Slides.bento.html')) {
-    die(`GitHub release ${tag} is missing Bento_Slides.bento.html after publishing — attach it before announcing.`)
+  if (!check.includes('WebDeck.webdeck.html')) {
+    die(`GitHub release ${tag} is missing WebDeck.webdeck.html after publishing — attach it before announcing.`)
   }
 }
 
 // ---- keep the LIVE guestbook daemon on the freshly-published shell ---------
-// bento.page/guestbook.bento.html is served by the Cloudflare daemon from KV,
+// webdeck.page/guestbook.webdeck.html is served by the Cloudflare daemon from KV,
 // not from this static tree — so a new shell doesn't reach it until the daemon
 // is re-seeded. This round-trips the daemon's own current deck onto the fresh
 // shell (walls preserved) and is a no-op when it's already current. Best-effort:

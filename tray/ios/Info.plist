@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>CFBundleDisplayName</key><string>Bento Tray</string>
+  <key>CFBundleDisplayName</key><string>WebDeck Tray</string>
   <!-- Must be present and must reference the build setting: without it the app
        has no bundle id and `simctl install` refuses it ("Missing bundle ID"). -->
   <key>CFBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -18,7 +18,7 @@
   <key>CFBundleDocumentTypes</key>
   <array>
     <dict>
-      <key>CFBundleTypeName</key><string>Bento document</string>
+      <key>CFBundleTypeName</key><string>WebDeck document</string>
       <key>CFBundleTypeRole</key><string>Editor</string>
       <key>LSHandlerRank</key><string>Alternate</string>
       <key>LSItemContentTypes</key>

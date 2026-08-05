@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 
 import UIKit
 
@@ -27,24 +27,24 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController,
     ///    to do nothing while silently creating files. Placing the file means we
     ///    hold the URL and can open it directly, depending on no callback.
     /// 2. Naming collisions become ours to control. Letting the system rename
-    ///    produced "Untitled.bento 2.html", because it reads `.bento.html` as
+    ///    produced "Untitled.bento 2.html", because it reads `.webdeck.html` as
     ///    the name "Untitled.bento" plus extension "html" and inserts the
     ///    counter before the last extension only. Ours reads "Untitled 2".
     ///
-    /// The bundled seed is the only Bento version this app ships and it ages
+    /// The bundled seed is the only WebDeck version this app ships and it ages
     /// harmlessly: a new document self-updates through the normal signed
     /// channel the first time it checks.
     func documentBrowser(_ c: UIDocumentBrowserViewController,
                          didRequestDocumentCreationWithHandler handler:
                          @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
-        guard let seed = Bundle.main.url(forResource: "starter", withExtension: "bento.html"),
+        guard let seed = Bundle.main.url(forResource: "starter", withExtension: "webdeck.html"),
               let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         else { handler(nil, .none); return }
 
-        var dest = docs.appendingPathComponent("Untitled.bento.html")
+        var dest = docs.appendingPathComponent("Untitled.webdeck.html")
         var n = 2
         while FileManager.default.fileExists(atPath: dest.path) {
-            dest = docs.appendingPathComponent("Untitled \(n).bento.html")
+            dest = docs.appendingPathComponent("Untitled \(n).webdeck.html")
             n += 1
         }
         do { try FileManager.default.copyItem(at: seed, to: dest) } catch { handler(nil, .none); return }
@@ -87,14 +87,14 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController,
         // app container, so the URL must be scoped for the whole editing
         // session and released when the editor closes.
         let scoped = url.startAccessingSecurityScopedResource()
-        let doc = BentoDocument(fileURL: url)
+        let doc = WebDeckDocument(fileURL: url)
         doc.open { [weak self] ok in
             guard let self, ok else {
                 if scoped { url.stopAccessingSecurityScopedResource() }
                 return
             }
             let editor = EditorViewController(document: doc)
-            // Two extensions: "Q3-board.bento.html" -> "Q3-board".
+            // Two extensions: "Q3-board.webdeck.html" -> "Q3-board".
             editor.title = url.deletingPathExtension().deletingPathExtension().lastPathComponent
             let nav = DocumentNavigationController(rootViewController: editor)
             nav.modalPresentationStyle = .fullScreen

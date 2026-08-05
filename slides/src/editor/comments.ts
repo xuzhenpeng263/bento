@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Review comments. Threads live in Slide.comments (saved with the file,
 // never rendered in present/print). The editor shows them as small numbered
 // markers on the canvas — at the anchored element's top-right corner, or
@@ -14,20 +14,20 @@ import { lsGet, lsSet } from '../../../kernel/src/storage.ts'
 /** The commenter's name, remembered per browser (localStorage, never sent
  *  anywhere); asked for on first use. */
 export function commentAuthor(): string | null {
-  let name = lsGet('bento-author')
+  let name = lsGet('webdeck-author')
   if (!name) {
     name = window.prompt(t('Your name (shown on comments):'))?.trim() || ''
     if (!name) return null
-    lsSet('bento-author', name)
+    lsSet('webdeck-author', name)
   }
   return name
 }
 
 /** Re-ask for the name; existing threads keep their original author. */
 export function changeCommentAuthor(): string | null {
-  const next = window.prompt(t('Your name (shown on new comments):'), lsGet('bento-author') ?? '')?.trim()
+  const next = window.prompt(t('Your name (shown on new comments):'), lsGet('webdeck-author') ?? '')?.trim()
   if (!next) return null
-  lsSet('bento-author', next)
+  lsSet('webdeck-author', next)
   return next
 }
 
@@ -125,7 +125,7 @@ export class CommentsUI {
       : typeof c.x === 'number' ? t('Comment · point ({x}, {y})', { x: c.x!, y: c.y! }) : t('Comment · slide')
     const me = document.createElement('button')
     me.className = 'ed-comment-me'
-    me.textContent = t('you: {name} ✎', { name: lsGet('bento-author') ?? '—' })
+    me.textContent = t('you: {name} ✎', { name: lsGet('webdeck-author') ?? '—' })
     me.title = t('Change the name used for your new comments and replies')
     me.addEventListener('click', () => {
       const next = changeCommentAuthor()

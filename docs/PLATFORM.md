@@ -1,4 +1,4 @@
-# The Bento platform — invariants every app must honor
+# The WebDeck platform — invariants every app must honor
 
 Bento is growing from one app (Slides) into a suite (Spaces, Dash, …). This
 document is the contract that makes them all *Bento*: the properties a file
@@ -11,15 +11,15 @@ and the code disagree, the code that *shipped* wins — fix the doc.
 
 ## 1. One file is the product
 
-A Bento document is a single self-contained HTML file carrying the document
+A WebDeck document is a single self-contained HTML file carrying the document
 data, the viewer, and the editor. It must work from `file://`, from a static
 host, and from an email attachment — no backend, no CDN, no network required
 to open, edit, present, or save. Anything that adds a runtime network
 dependency to the core document lifecycle is off-platform.
 
 Byte order of a shipped shell (postbuild-compress):
-`chrome → NOTICE → tooling comment → plaintext #bento-doc → splash → compressed payloads`.
-Runtime JS/CSS ship deflated in `bento/deflate-b64` script blocks with a ~1KB
+`chrome → NOTICE → tooling comment → plaintext #webdeck-doc → splash → compressed payloads`.
+Runtime JS/CSS ship deflated in `webdeck/deflate-b64` script blocks with a ~1KB
 loader (DecompressionStream → blob import).
 
 ## 2. The splice contract (FROZEN)
@@ -28,14 +28,14 @@ Self-save and self-update work by re-splicing the document block into a shell.
 Updaters embedded in already-shipped files are frozen code, so every future
 build of every app must keep:
 
-- a `<script type="application/bento+json" id="bento-doc">` block that is
+- a `<script type="application/webdeck+json" id="webdeck-doc">` block that is
   **plaintext** (never inside the compressed payloads), same id, forever;
 - block content that is JSON with `<` escaped as `\u003c` — it can never
   contain `</script>`;
 - the SAME escaping on every other plaintext data block the shell carries
   (`application/bento+*`, written by `registerShellBlocks` — language packs
   today): their bodies are not authored by us, so an unescaped one could
-  close its own block or forge a second `#bento-doc` opening tag for an old
+  close its own block or forge a second `#webdeck-doc` opening tag for an old
   updater to splice into;
 - a file that survives `DOMParser → splice → outerHTML` round-trips, with
   balanced script tags and a v0.1.0-style *text* splice still producing a
@@ -47,9 +47,9 @@ checks) before any release.
 
 ## 3. Document identity & format
 
-- `doc.format` names the format (`bento/slides`, `bento/spaces`; `bento/dash`
+- `doc.format` names the format (`webdeck`, `webdeck-spaces`; `webdeck-dash`
   to come) with an integer format version in `doc.version`. The field is
-  `format` — `slides/src/model.ts` exports `FORMAT = 'bento/slides'` and writes
+  `format` — `slides/src/model.ts` exports `FORMAT = 'webdeck'` and writes
   it as `format`, and every reader keys off that.
 - **Formats are additive.** Every version opens files from every earlier
   version; unknown fields are preserved, not stripped. Breaking reads of old
@@ -62,9 +62,9 @@ checks) before any release.
 
 ## 4. Save, autosave, encryption
 
-- Self-save: capture the pristine shell at boot, swap the `#bento-doc` block,
+- Self-save: capture the pristine shell at boot, swap the `#webdeck-doc` block,
   re-serialize. File System Access API first, download fallback.
-- **Runtime-injected DOM must be marked `data-bento-transient`.** The pristine
+- **Runtime-injected DOM must be marked `data-webdeck-transient`.** The pristine
   capture clones the LIVE document, so anything the runtime adds before it —
   the compressed shell's inflated stylesheet, first of all — would otherwise be
   written into the saved file, then re-injected on the next boot and saved
@@ -76,7 +76,7 @@ checks) before any release.
   carries any payload's content as plaintext.
 - Autosave (IndexedDB) keeps a latest-recovery snapshot + a capped version
   timeline, keyed by `docId`. Read-only players skip autosave.
-- Password-protected docs use the `bento/enc` envelope (PBKDF2-SHA-256 300k →
+- Password-protected docs use the `webdeck/enc` envelope (PBKDF2-SHA-256 300k →
   AES-GCM-256 over the doc JSON) *inside* the plaintext block — the splice
   contract still holds. **Encrypted docs are never snapshotted to IndexedDB in
   plaintext**, and every write-back path stays encrypted while the password is
@@ -102,13 +102,13 @@ Authoritative spec: `docs/collab-design.md`. The non-negotiables:
 
 ## 6. Signed self-update
 
-- Shipped files check `https://bento.page/releases/<app>/manifest.json`
+- Shipped files check `https://webdeck.page/releases/<app>/manifest.json`
   (user-initiated or launch check) and verify: ECDSA P-256 signature over the
   manifest payload against the `PUBLIC_KEY_JWK` embedded in the shell, sha256
   of the fetched shell, and **version monotonicity**.
 - Manifest shape: `{ payload: "<json string>", sig: "<b64>" }` where payload
   carries `{ app, version, sha256, url, at }`.
-- The signing key lives offline (`~/.bento/release-key.json`), never in the
+- The signing key lives offline (`~/.webdeck/release-key.json`), never in the
   repo or CI. Releases are cut locally so the signed bytes are the served
   bytes (`docs/RELEASING.md`). Updates write a NEW file or keep an explicit
   FSA handle — the original stays as rollback.
@@ -119,9 +119,9 @@ Authoritative spec: `docs/collab-design.md`. The non-negotiables:
 
 The **document JSON** is the interchange unit for AI tooling — chat models
 can't emit multi-MB files. Every app exposes: copy document JSON / replace
-document from JSON (undoable), plus a scripting surface on `window.bento`
+document from JSON (undoable), plus a scripting surface on `window.webdeck`
 (`doc`, `serialize()`, `loadDoc(json)`, …). The shell carries a tooling
-comment pointing agents at `#bento-doc` and this API. Keep model JSON pure
+comment pointing agents at `#webdeck-doc` and this API. Keep model JSON pure
 data — template strings over functions (see charts: formatters are `{b}/{c}`
 templates, never code).
 
@@ -145,9 +145,9 @@ Four pack rules are platform-level, not app choices:
 - **A pack lives in the FILE and nowhere else.** No browser-local copy: the
   download comes from an https origin and the file is then opened from
   `file://`, so anything stored per-origin vanishes on the journey the product
-  encourages. A pack rides in an `application/bento+lang` block written by
+  encourages. A pack rides in an `application/webdeck+lang` block written by
   `registerShellBlocks` (kernel `save.ts`), under the same `\u003c`-escaping
-  and the same §2 splice contract as `#bento-doc` — `scripts/shell-gate.mjs`
+  and the same §2 splice contract as `#webdeck-doc` — `scripts/shell-gate.mjs`
   proves a pack-carrying shell conformant, with an adversarial pack, on every
   build.
 - **Adding is staged, and written on the next save.** Writing on click means a
@@ -170,7 +170,7 @@ the half that fixes real bugs (misplaced sentence-final punctuation).
 
 **Chrome direction belongs to the VIEWER and never enters the format.** The
 editor flips to RTL when the viewer's locale is RTL — the same viewer-scoped
-pattern as `bento-lang` and reduce-motion. `applyDirection()` runs AFTER
+pattern as `webdeck-lang` and reduce-motion. `applyDirection()` runs AFTER
 `capturePristine()`, so a saved file can never carry a `dir` attribute. Lay
 chrome out with logical properties (`inset-inline-start`, `margin-inline-end`,
 `text-align: start`) and it mirrors itself; only glyphs that encode a
@@ -192,7 +192,7 @@ direction in their SHAPE need flipping by hand.
 ## 9. What is kernel vs what is app
 
 Shared — **`kernel/src/`**, extracted and in use (evolve carefully, serialize
-changes — see `docs/PARALLEL-WORK.md`): `save.ts` (splice + bento/enc
+changes — see `docs/PARALLEL-WORK.md`): `save.ts` (splice + webdeck/enc
 encryption), `autosave.ts`, `update.ts`, `anim.ts`, `charts.ts`, the `i18n.ts`
 engine, `app.ts` (per-app identity via `configureApp`), `doc.ts` (the
 `KernelDoc` envelope). Apps import these through facades at their own paths.
@@ -209,13 +209,13 @@ the document model, the renderer, the editor UX, starter documents, panels.
 
 ## 10. New-app checklist
 
-A new Bento app is on-platform when it:
+A new WebDeck app is on-platform when it:
 
 - [ ] builds to ONE self-contained HTML file passing the §2 conformance gate
 - [ ] declares `doc.format` + `doc.version`; opens its own older files
 - [ ] mints and preserves `docId` per §3
 - [ ] self-saves (FSA + download) and autosaves per §4
-- [ ] supports the `bento/enc` envelope per §4 (or explicitly documents why not yet)
+- [ ] supports the `webdeck/enc` envelope per §4 (or explicitly documents why not yet)
 - [ ] ships collab dormant-by-default per §5, or ships without collab wired
       rather than with a half-secure version
 - [ ] verifies signed updates per §6 with its own manifest path

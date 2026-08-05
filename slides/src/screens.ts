@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // The speaker-notes window. It outlives any single present session: the editor
 // opens it (its own user gesture) BEFORE presenting, and present mode adopts it.
 // Opening the notes and going fullscreen are then two separate gestures, so
@@ -60,7 +60,7 @@ export function paintSpeaker(w: Window, title: string, bodyHtml: string): void {
   if (!d.head.querySelector('style')) {
     for (const st of document.querySelectorAll('style')) d.head.appendChild(d.importNode(st, true))
   }
-  d.body.className = 'bento-speaker'
+  d.body.className = 'webdeck-speaker'
   d.body.innerHTML = bodyHtml
 }
 
@@ -80,7 +80,7 @@ export function openSpeakerWindow(title: string, bodyHtml: string): Window | nul
     paintSpeaker(speakerWin, title, bodyHtml)
     return speakerWin
   }
-  const w = window.open('', 'bento-speaker', speakerFeatures())
+  const w = window.open('', 'webdeck-speaker', speakerFeatures())
   if (!w) return null
   paintSpeaker(w, title, bodyHtml)
   speakerWin = w

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Guarded preference-storage rig.
 //
 //   node scripts/test-storage.ts        (Node ≥ 23.6 strips types natively)
@@ -12,11 +12,11 @@
 // paints. Measured: in a sandboxed iframe without `allow-same-origin`, a deck
 // showed "This file could not start: Failed to read the 'localStorage'
 // property from 'Window'" — the shell caught it and gave up, because
-// `resolve()` in i18n.ts reads `bento-lang` on import.
+// `resolve()` in i18n.ts reads `webdeck-lang` on import.
 //
 // The contexts are ordinary: an opaque origin, a browser set to block site
 // data, an embedded webview with storage partitioned off, Safari private
-// browsing. In all of them a Bento file must still OPEN. Preferences are
+// browsing. In all of them a WebDeck file must still OPEN. Preferences are
 // preferences; losing the document because a language code was unreadable is
 // the wrong trade.
 //
@@ -63,12 +63,12 @@ function fakeStorage(opts: { writable?: boolean } = {}) {
 // ---- 1. the property itself throws (an opaque origin) -----------------------
 // This is the case that took the app down. `backing()` must swallow it.
 withStorage({ get() { throw new Error('SecurityError: The document is sandboxed and lacks the allow-same-origin flag') } }, () => {
-  ok(lsGet('bento-lang') === null, 'a throwing localStorage property reads as null, not an exception')
-  ok(lsSet('bento-lang', 'ja') === false, 'a write reports false rather than throwing')
+  ok(lsGet('webdeck-lang') === null, 'a throwing localStorage property reads as null, not an exception')
+  ok(lsSet('webdeck-lang', 'ja') === false, 'a write reports false rather than throwing')
   ok(lsJson('bento-panel-open', { a: 1 }).a === 1, 'lsJson falls back when the property throws')
   ok(storageAvailable() === false, 'storageAvailable is false')
   let threw = false
-  try { lsDel('bento-lang') } catch { threw = true }
+  try { lsDel('webdeck-lang') } catch { threw = true }
   ok(!threw, 'lsDel is a no-op rather than an exception')
 })
 
@@ -84,11 +84,11 @@ withStorage({ get() { throw new Error('SecurityError: The document is sandboxed 
 
 // ---- 3. a working store round-trips ----------------------------------------
 withStorage({ value: fakeStorage() }, () => {
-  ok(lsSet('bento-author', 'Ada') === true, 'a write to a working store reports true')
-  ok(lsGet('bento-author') === 'Ada', 'and reads back')
+  ok(lsSet('webdeck-author', 'Ada') === true, 'a write to a working store reports true')
+  ok(lsGet('webdeck-author') === 'Ada', 'and reads back')
   ok(storageAvailable() === true, 'storageAvailable is true')
-  lsDel('bento-author')
-  ok(lsGet('bento-author') === null, 'lsDel removes it')
+  lsDel('webdeck-author')
+  ok(lsGet('webdeck-author') === null, 'lsDel removes it')
   ok(lsSetJson('bento-ed-panels', { left: 260 }) === true, 'lsSetJson stores')
   ok(lsJson<{ left: number }>('bento-ed-panels', { left: 0 }).left === 260, 'lsJson reads it back')
 })
@@ -108,7 +108,7 @@ withStorage({ value: fakeStorage() }, () => {
 })
 
 // ---- 6. THE REGRESSION: importing a module that reads storage on load -------
-// i18n.ts calls resolve() at module scope, which reads `bento-lang`. Under a
+// i18n.ts calls resolve() at module scope, which reads `webdeck-lang`. Under a
 // throwing localStorage that import used to blow up the whole boot. Nothing
 // else in this rig would catch that, because it is not about the accessor's
 // return value — it is about whether the file can be loaded at all.

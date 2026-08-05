@@ -1,5 +1,5 @@
 {
-  "name": "bento-spaces",
+  "name": "webdeck-spaces",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:single": "tsc -b && SINGLEFILE=1 vite build --outDir dist-single && mv dist-single/index.html dist-single/Bento_Spaces.bento.html && node ../scripts/postbuild-compress.mjs dist-single/Bento_Spaces.bento.html --generator bento-spaces --title \"bento/spaces\"",
+    "build:single": "tsc -b && SINGLEFILE=1 vite build --outDir dist-single && mv dist-single/index.html dist-single/WebDeck_Spaces.webdeck.html && node ../scripts/postbuild-compress.mjs dist-single/WebDeck_Spaces.webdeck.html --generator webdeck-spaces --title \"webdeck-spaces\"",
     "preview": "vite preview"
   },
   "devDependencies": {

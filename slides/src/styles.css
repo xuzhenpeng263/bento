@@ -1,4 +1,4 @@
-/* ————— bento/slides chrome ————— */
+/* ————— webdeck chrome ————— */
 
 :root {
   --ink: #1e2a3a;
@@ -65,7 +65,7 @@ option { background: #fff; color: #1e2a3a; }
 
    So every surface that draws slide content is pinned back to LTR:
 
-   - .bento-slide is the SHARED root of the canvas stage, sidebar thumbnails,
+   - .webdeck-slide is the SHARED root of the canvas stage, sidebar thumbnails,
      present sections, print pages and the speaker view's frames (render.ts
      renderSlide), so this one rule covers all four surfaces at once. The
      containers are pinned too, belt and braces, because they also carry
@@ -80,12 +80,12 @@ option { background: #fff; color: #1e2a3a; }
    Text INSIDE elements still resolves its own direction per element, from the
    content the author typed (render.ts sets dir="auto"). That is the content
    half of RTL and is unaffected by any of this. */
-.bento-slide,
-.bento-thumb-surface,
+.webdeck-slide,
+.webdeck-thumb-surface,
 .ed-scroll,
-.bento-present-overlay,
+.webdeck-present-overlay,
 .moveable-control-box,
-#bento-print {
+#webdeck-print {
   direction: ltr;
 }
 
@@ -102,7 +102,7 @@ option { background: #fff; color: #1e2a3a; }
      corners, island and indicator together.
      Each max() also lists var(--tray-safe-*). Inside a WKWebView host,
      env(safe-area-inset-*) reads 0px even when the device genuinely has insets
-     (measured: native 62/0/34/0, CSS 0px), so bento/tray publishes the real
+     (measured: native 62/0/34/0, CSS 0px), so webdeck/tray publishes the real
      numbers under those names. In a browser the variables are undefined, resolve
      to 0px, and env() does the work as normal.
      max() keeps the normal padding on every device that reports 0. The
@@ -132,10 +132,10 @@ option { background: #fff; color: #1e2a3a; }
 .ed-title:focus { border-color: var(--blue); outline: none; background: #fff; }
 
 /* The file this deck is open AS — quieter than the deck title beside it.
-   Shows the BASE name only: every Bento file ends in ".bento.html", so the
+   Shows the BASE name only: every WebDeck file ends in ".webdeck.html", so the
    extension is the one part that identifies nothing (a first attempt truncated
    from the right and rendered "…tml", which is worse than showing nothing).
-   Never shrinks — it competed with the title input and squeezed it to "Bento S"
+   Never shrinks — it competed with the title input and squeezed it to "WebDeck S"
    — and it leaves the bar entirely at the same width the button labels do. */
 .ed-filechip {
   font-size: 12px;
@@ -268,7 +268,7 @@ a.ed-btn { text-decoration: none; }  /* the update block's "What's new" link is 
 .ed-thumb:hover .ed-thumb-tools { display: flex; }
 .ed-thumb-tools .ed-btn { padding: 3px; background: rgb(255 255 255 / 0.9); }
 
-.bento-thumb-surface { overflow: hidden; pointer-events: none; }
+.webdeck-thumb-surface { overflow: hidden; pointer-events: none; }
 
 .ed-add-slide { border: 1.5px dashed var(--line); justify-content: center; color: var(--muted); align-self: stretch; }
 
@@ -412,18 +412,18 @@ a.ed-btn { text-decoration: none; }  /* the update block's "What's new" link is 
 
 /* ————— slide surface (shared by canvas, thumbs, present) ————— */
 
-.bento-slide { position: relative; overflow: hidden; }
+.webdeck-slide { position: relative; overflow: hidden; }
 
-.bento-el { position: absolute; contain: layout style; }
-.bento-el-text .bento-text-inner {
+.webdeck-el { position: absolute; contain: layout style; }
+.webdeck-el-text .webdeck-text-inner {
   overflow-wrap: break-word;
   outline: none;
   cursor: default;
 }
-.ed-stage .bento-el { cursor: grab; }
-.ed-stage .bento-el:active { cursor: grabbing; }
+.ed-stage .webdeck-el { cursor: grab; }
+.ed-stage .webdeck-el:active { cursor: grabbing; }
 .ed-stage .bento-editing { cursor: text; }
-.ed-stage .bento-editing .bento-text-inner {
+.ed-stage .bento-editing .webdeck-text-inner {
   cursor: text;
   user-select: text;
   box-shadow: 0 0 0 1.5px var(--blue);
@@ -716,17 +716,17 @@ a.ed-btn { text-decoration: none; }  /* the update block's "What's new" link is 
 
 /* ————— present overlay ————— */
 
-.bento-present-overlay {
+.webdeck-present-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
   background: #000;
 }
-.bento-present-overlay .reveal,
-.bento-present-overlay .reveal-viewport {
+.webdeck-present-overlay .reveal,
+.webdeck-present-overlay .reveal-viewport {
   background: #000;
 }
-.bento-present-overlay .reveal {
+.webdeck-present-overlay .reveal {
   width: 100%;
   height: 100%;
   --r-background-color: #000;
@@ -740,36 +740,36 @@ a.ed-btn { text-decoration: none; }  /* the update block's "What's new" link is 
   --r-overlay-element-bg-color: 255, 255, 255;
   --r-overlay-element-fg-color: 0, 0, 0;
 }
-.bento-present-overlay .reveal .slides section { padding: 0; }
+.webdeck-present-overlay .reveal .slides section { padding: 0; }
 /* Presenter laser: viewport-level so its screen-space size stays constant at
    every Reveal scale. The visual layer stays pointer-transparent so slide
    links, hover effects, charts and media remain interactive while it is armed. */
-.bento-laser-layer {
+.webdeck-laser-layer {
   position: absolute;
   inset: 0;
   z-index: 59;
   pointer-events: none;
 }
-.bento-present-overlay.laser-over-slide .bento-slide,
-.bento-present-overlay.laser-over-slide .bento-slide * { cursor: none !important; }
-.bento-laser-trail {
+.webdeck-present-overlay.laser-over-slide .webdeck-slide,
+.webdeck-present-overlay.laser-over-slide .webdeck-slide * { cursor: none !important; }
+.webdeck-laser-trail {
   position: absolute;
   inset: 0;
   display: block;
   overflow: hidden;
   pointer-events: none;
 }
-.bento-laser-trail-segment {
+.webdeck-laser-trail-segment {
   fill: none;
   stroke-linecap: butt;
   vector-effect: non-scaling-stroke;
 }
-.bento-laser-trail-segment.halo { stroke: rgb(255 255 255 / 0.9); }
-.bento-laser-trail-segment.core { stroke: #ef252f; }
-.bento-laser-trail-segment.tail-tip { stroke: none; }
-.bento-laser-trail-segment.tail-tip.halo { fill: rgb(255 255 255 / 0.9); }
-.bento-laser-trail-segment.tail-tip.core { fill: #ef252f; }
-.bento-laser-dot {
+.webdeck-laser-trail-segment.halo { stroke: rgb(255 255 255 / 0.9); }
+.webdeck-laser-trail-segment.core { stroke: #ef252f; }
+.webdeck-laser-trail-segment.tail-tip { stroke: none; }
+.webdeck-laser-trail-segment.tail-tip.halo { fill: rgb(255 255 255 / 0.9); }
+.webdeck-laser-trail-segment.tail-tip.core { fill: #ef252f; }
+.webdeck-laser-dot {
   position: absolute;
   width: 12px;
   height: 12px;
@@ -783,16 +783,16 @@ a.ed-btn { text-decoration: none; }  /* the update block's "What's new" link is 
   transform: translate(-50%, -50%);
   transition: opacity 0.08s linear;
 }
-.bento-laser-dot.visible { opacity: 1; }
-.bento-present-overlay.reduce-motion .bento-laser-trail { display: none; }
-.bento-present-overlay.reduce-motion .bento-laser-dot { transition: none; }
+.webdeck-laser-dot.visible { opacity: 1; }
+.webdeck-present-overlay.reduce-motion .webdeck-laser-trail { display: none; }
+.webdeck-present-overlay.reduce-motion .webdeck-laser-dot { transition: none; }
 /* Reduced motion (M / speaker toggle / OS prefers-reduced-motion): JS fx are
    skipped in present.ts; this neutralises CSS-driven motion too — Reveal's
    slide transitions cut instantly and svg keyframe animations don't play. */
-.bento-present-overlay.reduce-motion .reveal .slides section { transition: none !important; }
-.bento-present-overlay.reduce-motion .bento-el-svg * { animation: none !important; }
+.webdeck-present-overlay.reduce-motion .reveal .slides section { transition: none !important; }
+.webdeck-present-overlay.reduce-motion .webdeck-el-svg * { animation: none !important; }
 /* dual-screen: one-click permission grant + transient toast */
-.bento-present-grant {
+.webdeck-present-grant {
   position: fixed;
   left: 50%;
   bottom: 28px;
@@ -808,8 +808,8 @@ a.ed-btn { text-decoration: none; }  /* the update block's "What's new" link is 
   cursor: pointer;
   opacity: 0.94;
 }
-.bento-present-grant:hover { opacity: 1; }
-.bento-present-toast {
+.webdeck-present-grant:hover { opacity: 1; }
+.webdeck-present-toast {
   position: fixed;
   left: 50%;
   bottom: 28px;
@@ -824,9 +824,9 @@ a.ed-btn { text-decoration: none; }  /* the update block's "What's new" link is 
   max-width: 80vw;
   text-align: center;
 }
-.bento-present-overlay .bento-el[data-link] { cursor: pointer; }
-.bento-present-overlay .bento-el[data-link]:hover {
-  outline: 2.5px solid var(--bento-accent, #f7a600);
+.webdeck-present-overlay .webdeck-el[data-link] { cursor: pointer; }
+.webdeck-present-overlay .webdeck-el[data-link]:hover {
+  outline: 2.5px solid var(--webdeck-accent, #f7a600);
   outline-offset: 3px;
   border-radius: 999px;
 }
@@ -1009,7 +1009,7 @@ a.ed-btn { text-decoration: none; }  /* the update block's "What's new" link is 
 .ed-chart-grid .ed-btn-icon:hover { color: #c9302c; }
 
 /* inline code spans inside text elements — editor, present and print alike */
-.bento-el-text code {
+.webdeck-el-text code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.9em;
   background: rgb(127 127 127 / 0.16);
@@ -1369,19 +1369,19 @@ body.ed-col-resizing { cursor: col-resize; user-select: none; }
 
 /* interactive states read as secondary in Reveal's overview grid
    (!important: Reveal positions overview sections with inline styles) */
-.bento-present-overlay .reveal.overview section[data-bento-state] {
+.webdeck-present-overlay .reveal.overview section[data-bento-state] {
   opacity: 0.35 !important;
   outline: 2px dashed rgb(255 255 255 / 0.35);
   outline-offset: -2px;
 }
 
 /* PDF export: each linear slide is one exact 1600×900 page */
-#bento-print { display: none; }
+#webdeck-print { display: none; }
 @media print {
-  #app, #bento-splash, .bento-present-overlay, .ed-toast { display: none !important; }
-  #bento-print { display: block; }
+  #app, #webdeck-splash, .webdeck-present-overlay, .ed-toast { display: none !important; }
+  #webdeck-print { display: block; }
   @page { size: 1600px 900px; margin: 0; }
-  #bento-print .bp-page {
+  #webdeck-print .bp-page {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     width: 1600px;
@@ -1398,7 +1398,7 @@ body.ed-col-resizing { cursor: col-resize; user-select: none; }
 }
 
 /* ————— speaker view popup ————— */
-.bento-speaker {
+.webdeck-speaker {
   margin: 0;
   background: #14181d;
   color: #e9edf3;
@@ -1548,16 +1548,16 @@ body.ed-col-resizing { cursor: col-resize; user-select: none; }
 .ed-le-anchor:hover { fill: #eaf1ff; }
 
 /* audience blackout — a plain black cover over the slides overlay */
-.bento-blackout {
+.webdeck-blackout {
   position: absolute;
   inset: 0;
   z-index: 60;
   background: #000;
 }
-.bento-blackout[hidden] { display: none; }
+.webdeck-blackout[hidden] { display: none; }
 
 /* transient confirmation pill in present mode (e.g. Reduced motion on/off) */
-.bento-present-toast {
+.webdeck-present-toast {
   position: absolute;
   left: 50%;
   bottom: 48px;
@@ -1572,7 +1572,7 @@ body.ed-col-resizing { cursor: col-resize; user-select: none; }
   opacity: 0;
   transition: opacity 0.25s ease;
 }
-.bento-present-toast.show { opacity: 1; }
+.webdeck-present-toast.show { opacity: 1; }
 
 /* --- live collaboration ----------------------------------------------- */
 .ed-avatars {
@@ -2265,13 +2265,13 @@ dialog.ed-pwdialog .ed-pwerr { color: #C33; }
 }
 
 /* ————— tables ————— */
-.bento-el-table { overflow: visible; }
-.bento-el-table .bento-cell-inner { min-height: 1em; }
+.webdeck-el-table { overflow: visible; }
+.webdeck-el-table .webdeck-cell-inner { min-height: 1em; }
 /* editor-only affordances */
-.ed-root .bento-el-table td { cursor: text; }
-.bento-col-handle { border-radius: 3px; }
-.bento-col-handle:hover { background: rgba(94, 118, 153, 0.35); }
-.bento-el-table.bento-editing td { cursor: text; }
+.ed-root .webdeck-el-table td { cursor: text; }
+.webdeck-col-handle { border-radius: 3px; }
+.webdeck-col-handle:hover { background: rgba(94, 118, 153, 0.35); }
+.webdeck-el-table.bento-editing td { cursor: text; }
 
 /* table properties: steppers + toggle */
 .ed-stepper { display: inline-flex; align-items: center; gap: 6px; }
@@ -2349,7 +2349,7 @@ input.ed-toggle { width: 16px; height: 16px; accent-color: #5E7699; cursor: poin
    matches the boot splash so the transition is seamless — the splash fades
    out and the welcome card fades in over the same dark gradient. */
 
-#bento-welcome {
+#webdeck-welcome {
   position: fixed;
   inset: 0;
   z-index: 10000;
@@ -2380,26 +2380,10 @@ input.ed-toggle { width: 16px; height: 16px; accent-color: #5E7699; cursor: poin
 
 /* Logo mark — same geometry as the splash */
 .bw-mark {
-  position: relative;
   width: 80px;
   height: 80px;
   border-radius: 18px;
-  background: #16273e;
   box-shadow: 0 0 36px rgba(255,238,214,.18), 0 6px 20px rgba(0,0,0,.45);
-  overflow: hidden;
-}
-.bw-mark i {
-  position: absolute;
-  border-radius: 6px;
-  opacity: 0;
-  animation: bwTile .45s cubic-bezier(.25,1.5,.45,1) forwards;
-}
-.bw-mark .bw-b { left: 9px; top: 9px; width: 18px; height: 62px; background: #5e7699; animation-delay: .1s; }
-.bw-mark .bw-a { right: 9px; top: 9px; width: 38px; height: 28px; background: #ff9e8a; animation-delay: .22s; }
-.bw-mark .bw-c { right: 9px; bottom: 9px; width: 38px; height: 28px; background: #f0ebe0; animation-delay: .34s; }
-@keyframes bwTile {
-  from { opacity: 0; transform: scale(.7); }
-  to   { opacity: 1; transform: scale(1); }
 }
 
 .bw-word {

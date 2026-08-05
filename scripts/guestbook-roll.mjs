@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // The guestbook daemon's one command — a COMPLETE, load-hardened epoch roll.
 //
 //   node scripts/guestbook-roll.mjs --snapshot-only
@@ -13,7 +13,7 @@
 //       bento-site (Pages fallback) + site/ staging → SEED THE DAEMON (which
 //       serves from KV and is what actually makes the roll go live).
 //
-//   flags: --base <url> (default https://bento.page) · --no-daemon (skip the
+//   flags: --base <url> (default https://webdeck.page) · --no-daemon (skip the
 //          daemon snapshot + seed, e.g. offline/local testing)
 //
 // Hardening (learned the hard way during the HN #1 surge):
@@ -32,11 +32,11 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
-const live = join(root, 'working/guestbook-live/guestbook.bento.html')
+const live = join(root, 'working/guestbook-live/guestbook.webdeck.html')
 const siteRepo = join(root, '../bento-site')
 const args = process.argv.slice(2)
 const opt = (name, fb) => { const i = args.indexOf(`--${name}`); return i >= 0 && args[i + 1] ? args[i + 1] : fb }
-const base = opt('base', 'https://bento.page').replace(/\/$/, '')
+const base = opt('base', 'https://webdeck.page').replace(/\/$/, '')
 const useDaemon = !args.includes('--no-daemon')
 
 const run = (cmd, a, cwd = root) => execFileSync(cmd, a, { cwd, stdio: 'inherit' })
@@ -86,10 +86,10 @@ if (args.includes('--snapshot-only')) process.exit(0)
 run('node', [join(root, 'scripts/build-guestbook.mjs')])
 
 // 3 · publish the static fallback: bento-site (Pages) + site/ staging
-copyFileSync(live, join(siteRepo, 'guestbook.bento.html'))
+copyFileSync(live, join(siteRepo, 'guestbook.webdeck.html'))
 copyFileSync(join(root, 'site-src/guestbook.html'), join(siteRepo, 'guestbook/index.html'))
-if (existsSync(join(root, 'site/guestbook.bento.html'))) copyFileSync(live, join(root, 'site/guestbook.bento.html'))
-run('git', ['add', 'guestbook.bento.html', 'guestbook/index.html'], siteRepo)
+if (existsSync(join(root, 'site/guestbook.webdeck.html'))) copyFileSync(live, join(root, 'site/guestbook.webdeck.html'))
+run('git', ['add', 'guestbook.webdeck.html', 'guestbook/index.html'], siteRepo)
 run('git', ['commit', '-m', 'Guestbook: roll epoch'], siteRepo)
 run('git', ['push', 'origin', 'HEAD:main'], siteRepo)
 

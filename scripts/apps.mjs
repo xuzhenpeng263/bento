@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
 // The app registry the release pipeline builds from.
 //
@@ -19,10 +19,10 @@
  */
 export const APPS = {
   slides: {
-    appId: 'bento-slides',
+    appId: 'webdeck',
     dir: 'slides',
-    shell: 'Bento_Slides.bento.html',
-    /** the whole bento.page site — landing, gallery, guides — is slides-derived today */
+    shell: 'WebDeck.webdeck.html',
+    /** the whole webdeck.page site — landing, gallery, guides — is slides-derived today */
     ownsSiteContent: true,
     /** where this app's release notes come from. The notes ride in the SIGNED
      *  manifest and are what a reader sees when offered an update, so an app
@@ -35,9 +35,9 @@ export const APPS = {
     packs: true,
   },
   spaces: {
-    appId: 'bento-spaces',
+    appId: 'webdeck-spaces',
     dir: 'spaces',
-    shell: 'Bento_Spaces.bento.html',
+    shell: 'WebDeck_Spaces.webdeck.html',
     ownsSiteContent: false,
     // No pack catalog yet: build-i18n/sign-packs are slides-hardcoded and the
     // channel does not exist. Deferring packs is fine; deferring the CHANNEL
@@ -47,9 +47,9 @@ export const APPS = {
     agents: 'docs/spaces-agents.md',
   },
   dash: {
-    appId: 'bento-dash',
+    appId: 'webdeck-dash',
     dir: 'dash',
-    shell: 'Bento_Dash.bento.html',
+    shell: 'WebDeck_Dash.webdeck.html',
     ownsSiteContent: false,
     // Same reasoning as spaces: no pack catalog yet, and deferring the CATALOG
     // is fine where deferring the CHANNEL would not be.

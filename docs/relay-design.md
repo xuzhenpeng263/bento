@@ -1,7 +1,7 @@
 # bento relay — design
 
 *Design document, July 2026. Status: **proposed** — nothing built. The relay
-is a product in its own right, separate from `bento/vault` and with its own
+is a product in its own right, separate from `webdeck-vault` and with its own
 release train. Today's collab relay (`server/sync-worker/`) is a narrower
 ancestor of this; the two converge —
 see* Relationship to the collab relay *below.*
@@ -125,7 +125,7 @@ Tracing an 8 MB binary asset through today's path:
 
 Two rounds of base64, each ×1.333, compounding to ×1.78.
 
-**Base64 #1 is inherent to the document and correct** — a `.bento.html` is JSON
+**Base64 #1 is inherent to the document and correct** — a `.webdeck.html` is JSON
 in a script tag. It is *not* inherent to the wire.
 
 **Base64 #2 is pure waste.** It exists only because frames are JSON text
@@ -266,7 +266,7 @@ also the only thing that makes maintaining two implementations affordable.
 ## Two implementations
 
 - **Hosted** — Cloudflare Worker + Durable Object (+ R2 for the dead-drop).
-  Reference deployment; what `bento.page` runs, for people who will never run
+  Reference deployment; what `webdeck.page` runs, for people who will never run
   a server.
 - **Portable** — a single Node or Go binary in a Docker image. One process,
   one config file, no cloud account. This is what a homelabber runs, very

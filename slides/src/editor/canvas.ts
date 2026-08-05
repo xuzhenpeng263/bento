@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // The editing canvas: renders the current slide at fit-to-window scale and
 // wires Moveable (drag/resize/rotate/snap) + Selecto (click & rubber-band
 // selection) + contenteditable text editing on top of it.
@@ -162,7 +162,7 @@ export class SlideCanvas {
     this.selecto = new Selecto({
       container: this.scroller,
       dragContainer: this.scroller,
-      selectableTargets: ['.bento-el'],
+      selectableTargets: ['.webdeck-el'],
       selectByClick: true,
       selectFromInside: false,
       toggleContinueSelect: 'shift',
@@ -248,9 +248,9 @@ export class SlideCanvas {
     }, true)
 
     this.stage.addEventListener('dblclick', (ev) => {
-      const textEl = (ev.target as HTMLElement).closest<HTMLElement>('.bento-el-text')
+      const textEl = (ev.target as HTMLElement).closest<HTMLElement>('.webdeck-el-text')
       if (textEl) { this.startTextEdit(textEl); return }
-      const td = (ev.target as HTMLElement).closest<HTMLElement>('.bento-el-table td[data-c]')
+      const td = (ev.target as HTMLElement).closest<HTMLElement>('.webdeck-el-table td[data-c]')
       if (td) this.editCellFromTd(td)
     })
 
@@ -738,7 +738,7 @@ export class SlideCanvas {
     const targets = this.editing || this.pathEditor?.active || handled ? [] : this.selectedNodes()
     // snap against slide bounds/center and every non-selected element
     const others = this.surface
-      ? [this.surface, ...Array.from(this.surface.querySelectorAll<HTMLElement>('.bento-el'))].filter(
+      ? [this.surface, ...Array.from(this.surface.querySelectorAll<HTMLElement>('.webdeck-el'))].filter(
           (n) => !targets.includes(n),
         )
       : []
@@ -760,7 +760,7 @@ export class SlideCanvas {
 
   /** Show draggable dividers on the boundaries of a lone selected table. */
   private updateTableHandles() {
-    this.surface?.querySelectorAll('.bento-col-handle').forEach((h) => h.remove())
+    this.surface?.querySelectorAll('.webdeck-col-handle').forEach((h) => h.remove())
     if (this.editing) return
     const ids = this.store.selection
     if (ids.length !== 1) return
@@ -773,7 +773,7 @@ export class SlideCanvas {
     for (let i = 0; i < el.columns.length - 1; i++) {
       acc += el.columns[i].w || 0
       const handle = document.createElement('div')
-      handle.className = 'bento-col-handle'
+      handle.className = 'webdeck-col-handle'
       handle.style.cssText =
         `position:absolute;top:0;height:${el.h}px;width:11px;` +
         `left:${(acc / total) * el.w - 5.5}px;cursor:col-resize;z-index:5;`
@@ -796,7 +796,7 @@ export class SlideCanvas {
     const pair = w0 + w1
     const min = pair * 0.12
     const cols = node.querySelectorAll<HTMLElement>('col')
-    const handles = [...node.querySelectorAll<HTMLElement>('.bento-col-handle')]
+    const handles = [...node.querySelectorAll<HTMLElement>('.webdeck-col-handle')]
     const total = el.columns.reduce((s, c) => s + (c.w || 0), 0) || 1
     let live0 = w0
     let live1 = w1
@@ -1063,7 +1063,7 @@ export class SlideCanvas {
     if (this.store.readOnly) return // live viewer — no inline editing
     if (this.editing === node) return
     this.commitTextEdit()
-    const inner = node.querySelector<HTMLElement>('.bento-text-inner')
+    const inner = node.querySelector<HTMLElement>('.webdeck-text-inner')
     if (!inner) return
     // fields ({{page}} etc.) and math ($…$) render RESOLVED; while editing,
     // show the raw source so the author edits the token, not the computed value
@@ -1130,7 +1130,7 @@ export class SlideCanvas {
     if (this.editingCell) { this.commitCellEdit(node); return }
     this.editing = null
     this.onTextEditChange?.(undefined)
-    const inner = node.querySelector<HTMLElement>('.bento-text-inner')
+    const inner = node.querySelector<HTMLElement>('.webdeck-text-inner')
     const id = node.dataset.elId
     node.classList.remove('bento-editing')
     if (!inner || !id) return
@@ -1170,7 +1170,7 @@ export class SlideCanvas {
 
   /** Enter cell editing from a clicked/dbl-clicked <td> (re-queries fresh). */
   private editCellFromTd(td: HTMLElement) {
-    const tableNode = td.closest<HTMLElement>('.bento-el-table')
+    const tableNode = td.closest<HTMLElement>('.webdeck-el-table')
     const id = tableNode?.dataset.elId
     if (!id) return
     this.editCellAt(id, Number(td.dataset.r), Number(td.dataset.c))
@@ -1183,8 +1183,8 @@ export class SlideCanvas {
     const td = this.surface?.querySelector<HTMLElement>(
       `[data-el-id="${CSS.escape(id)}"] td[data-r="${r}"][data-c="${c}"]`)
     if (!td) return
-    const node = td.closest<HTMLElement>('.bento-el-table')
-    const inner = td.querySelector<HTMLElement>('.bento-cell-inner')
+    const node = td.closest<HTMLElement>('.webdeck-el-table')
+    const inner = td.querySelector<HTMLElement>('.webdeck-cell-inner')
     if (!node || !inner) return
     this.editing = node
     this.editingCell = { r, c }
@@ -1224,7 +1224,7 @@ export class SlideCanvas {
     this.onTextEditChange?.(undefined)
     node.classList.remove('bento-editing')
     const inner = node.querySelector<HTMLElement>(
-      `td[data-r="${cell.r}"][data-c="${cell.c}"] .bento-cell-inner`)
+      `td[data-r="${cell.r}"][data-c="${cell.c}"] .webdeck-cell-inner`)
     if (!inner || !id) return
     inner.contentEditable = 'false'
     const html = sanitizeHtml(inner.innerHTML.replace(/\u200B/g, '').replace(/\\([*_~`-])/g, '$1'))

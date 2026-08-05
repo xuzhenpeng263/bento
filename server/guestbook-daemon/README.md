@@ -1,4 +1,4 @@
-# bento-guestbook-daemon
+# webdeck-guestbook-daemon
 
 The sustainable home of the public guestbook (see `working/guestbook-design.md`):
 a Cloudflare Worker that serves the current epoch from Workers KV, archives the live
@@ -13,22 +13,22 @@ openssl rand -hex 24 | npx wrangler secret put ADMIN_KEY   # keep a copy
 npx wrangler deploy
 ```
 
-DNS: the `bento.page` apex record must be **proxied** (orange cloud) for the
-`bento.page/guestbook.bento.html` route to shadow GitHub Pages. Until then,
+DNS: the `webdeck.page` apex record must be **proxied** (orange cloud) for the
+`webdeck.page/guestbook.webdeck.html` route to shadow GitHub Pages. Until then,
 the worker is still reachable on its workers.dev URL (admin + cron work).
 
 ## Arming / operating
 
 ```bash
 # seed the current epoch (built locally by scripts/build-guestbook.mjs)
-curl -X PUT https://bento.page/guestbook-admin/seed \
+curl -X PUT https://webdeck.page/guestbook-admin/seed \
   -H "Authorization: Bearer $ADMIN_KEY" \
-  --data-binary @../../working/guestbook-live/guestbook.bento.html
+  --data-binary @../../working/guestbook-live/guestbook.webdeck.html
 
-curl -H "Authorization: Bearer $ADMIN_KEY" https://bento.page/guestbook-admin/status
-curl -X POST -H "Authorization: Bearer $ADMIN_KEY" https://bento.page/guestbook-admin/snapshot
-curl -X POST -H "Authorization: Bearer $ADMIN_KEY" https://bento.page/guestbook-admin/roll
-curl -X POST -H "Authorization: Bearer $ADMIN_KEY" https://bento.page/guestbook-admin/kill
+curl -H "Authorization: Bearer $ADMIN_KEY" https://webdeck.page/guestbook-admin/status
+curl -X POST -H "Authorization: Bearer $ADMIN_KEY" https://webdeck.page/guestbook-admin/snapshot
+curl -X POST -H "Authorization: Bearer $ADMIN_KEY" https://webdeck.page/guestbook-admin/roll
+curl -X POST -H "Authorization: Bearer $ADMIN_KEY" https://webdeck.page/guestbook-admin/kill
 ```
 
 - **snapshot** — join the room read-only, archive real content to KV

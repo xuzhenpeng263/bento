@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento-guestbook-daemon — the sustainable home of the public guestbook.
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-guestbook-daemon — the sustainable home of the public guestbook.
 // Storage: Workers KV (R2 is not enabled on this account; KV fits — values
 // are ~500 KB against a 25 MB limit, archives pruned to the newest 90).
 //
-//   · serves bento.page/guestbook.bento.html from KV (current epoch)
+//   · serves webdeck.page/guestbook.webdeck.html from KV (current epoch)
 //   · cron: daily read-only archivist snapshot of the room → KV archives/
 //   · rolls epochs (fresh room+key, seeded deck) on demand or on cadence
 //   · admin surface under /guestbook-admin/* (Authorization: Bearer ADMIN_KEY)
@@ -17,7 +17,7 @@
 import { SyncState } from '../../../slides/src/sync/crdt.ts'
 import { buildGuestbookDoc, spliceDoc, extractDoc } from '../../../scripts/guestbook-deck.mjs'
 
-const CURRENT = 'current.bento.html'
+const CURRENT = 'current.webdeck.html'
 const META = 'meta.json'
 
 const b64u = {
@@ -136,7 +136,7 @@ async function snapshot(env) {
   if (frozen.collab) frozen.collab.on = false
   frozen.title = `The Guestbook — epoch ${stats.epoch} (archived)`
   const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')
-  const name = `archives/epoch-${stats.epoch}-${stamp}.bento.html`
+  const name = `archives/epoch-${stats.epoch}-${stamp}.webdeck.html`
   await env.STORE.put(name, spliceDoc(shellText, frozen))
   // prune: keep the newest 90 archives (KV free tier is 1 GB)
   const list = await env.STORE.list({ prefix: 'archives/' })
@@ -186,7 +186,7 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url)
 
-    if (url.pathname === '/guestbook.bento.html') {
+    if (url.pathname === '/guestbook.webdeck.html') {
       const m = await meta(env)
       if (m.killed) return Response.redirect(url.origin + '/404.html', 302)
       const cur = await env.STORE.get(CURRENT, 'stream')
@@ -199,7 +199,7 @@ export default {
         })
       }
       // KV empty: fall through to the static copy on GitHub Pages
-      return fetch(env.ORIGIN_FALLBACK + '/guestbook.bento.html')
+      return fetch(env.ORIGIN_FALLBACK + '/guestbook.webdeck.html')
     }
 
     if (url.pathname.startsWith('/guestbook-admin/')) {
@@ -260,7 +260,7 @@ export default {
       }
     }
 
-    return new Response('bento-guestbook-daemon', { status: 200 })
+    return new Response('webdeck-guestbook-daemon', { status: 200 })
   },
 
   async scheduled(_ctrl, env, ctx) {

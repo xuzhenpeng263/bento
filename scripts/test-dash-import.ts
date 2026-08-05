@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento/dash import rig.
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-dash import rig.
 //
 //   node scripts/test-dash-import.ts        (Node ≥ 23.6 strips types natively)
 //
@@ -165,12 +165,12 @@ ok(inferColumn(['', '  ']).type === 'text', 'an entirely blank column is text, n
 
   // the imported sheet must be a legal document
   const doc = {
-    format: 'bento/dash', version: 1, policy: 'bento-dash-1',
+    format: 'webdeck-dash', version: 1, policy: 'webdeck-dash-1',
     docId: 'd', title: 'Q1', sheets: [r.sheet],
   }
   const parsed = parseDoc(JSON.stringify(doc))
   ok(parsed.ok === true && parsed.repairs.length === 0,
-    'and the result parses as a bento/dash document with nothing to repair')
+    'and the result parses as a webdeck-dash document with nothing to repair')
 }
 
 console.log(`\n${checks - failures}/${checks} checks passed`)

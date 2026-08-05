@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Autosave per-app database rig.
 //
 //   esbuild scripts/test-autosave.ts --bundle --platform=node --format=esm ...
-//   BENTO_TEST_APP=bento-slides node <bundle>
-//   BENTO_TEST_APP=bento-spaces node <bundle>
+//   BENTO_TEST_APP=webdeck node <bundle>
+//   BENTO_TEST_APP=webdeck-spaces node <bundle>
 //
 // (bundled so `fake-indexeddb` resolves from slides/node_modules, matching
 // test-clipboard and test-validate)
 //
 // WHAT THIS PROVES. Every app used to share one IndexedDB database,
-// `bento-autosave`, and one `DB_VERSION`. Two failures, one shared:
+// `webdeck-autosave`, and one `DB_VERSION`. Two failures, one shared:
 //
 //   1. Snapshots from different apps piled into one store wherever they share
-//      an origin — bento.page, or any local server. bento/spaces has been
-//      writing into bento/slides' database since its scaffold landed.
+//      an origin — webdeck.page, or any local server. webdeck-spaces has been
+//      writing into webdeck' database since its scaffold landed.
 //   2. Worse, and asymmetric: DB_VERSION was shared too. A new app bumping it
 //      to 2 makes every ALREADY-SHIPPED shell of every other app throw
 //      VersionError on open and lose autosave outright. Shipped shells are
@@ -33,9 +33,9 @@ import 'fake-indexeddb/auto'
 import { configureApp } from '../kernel/src/app.ts'
 import { putRecovery, getRecovery, addVersion, listVersions } from '../kernel/src/autosave.ts'
 
-const APP = process.env.BENTO_TEST_APP || 'bento-slides'
+const APP = process.env.BENTO_TEST_APP || 'webdeck'
 const EXPECTED_DB = `${APP}-autosave`
-const LEGACY = 'bento-autosave'
+const LEGACY = 'webdeck-autosave'
 
 let failures = 0
 let checks = 0

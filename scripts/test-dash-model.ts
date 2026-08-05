@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento/dash document model rig.
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-dash document model rig.
 //
 //   node scripts/test-dash-model.ts        (Node ≥ 23.6 strips types natively)
 //
@@ -40,7 +40,7 @@ function ok(cond: boolean, msg: string) {
 const minimal = () => ({
   format: FORMAT,
   version: FORMAT_VERSION,
-  policy: 'bento-dash-1',
+  policy: 'webdeck-dash-1',
   docId: 'doc-test',
   title: 'test',
   sheets: [{
@@ -58,16 +58,16 @@ ok(parseDoc('').ok === false && (parseDoc('') as any).err === 'empty',
 ok((parseDoc('   ') as any).err === 'empty', 'whitespace is empty too')
 ok((parseDoc('{oops') as any).err === 'json', 'malformed JSON is err:"json", not empty')
 ok((parseDoc('[]') as any).err === 'shape', 'a JSON array is err:"shape", not empty')
-ok((parseDoc('{"format":"bento/slides","slides":[]}') as any).err === 'format',
+ok((parseDoc('{"format":"webdeck","slides":[]}') as any).err === 'format',
   'a slides document is err:"format", not empty')
-ok((parseDoc('{"format":"bento/slides","slides":[]}') as any).found === 'bento/slides',
+ok((parseDoc('{"format":"webdeck","slides":[]}') as any).found === 'webdeck',
   'the format failure reports what it actually found, so the gate can name it')
 ok((parseDoc(JSON.stringify({ format: FORMAT, version: 1, docId: 'd', title: 't' })) as any).err === 'shape',
-  'a bento/dash document with no sheets array is err:"shape"')
+  'a webdeck-dash document with no sheets array is err:"shape"')
 ok(parseDoc(JSON.stringify(minimal())).ok === true, 'a well-formed document parses')
 
 // THE POINT OF THE TYPE: every failure is distinguishable from 'empty'.
-const failures_ = ['{oops', '[]', '{"format":"bento/slides"}', '{"format":"bento/dash","version":1}']
+const failures_ = ['{oops', '[]', '{"format":"webdeck"}', '{"format":"webdeck-dash","version":1}']
 ok(failures_.every((j) => { const r = parseDoc(j) as any; return r.ok === false && r.err !== 'empty' }),
   'NO malformed input is ever reported as empty — the starter is unreachable from a parse failure')
 
@@ -110,9 +110,9 @@ if (parsedExotic.ok) {
 const futureVersion = parseDoc(JSON.stringify({ ...minimal(), version: FORMAT_VERSION + 1 }))
 ok(futureVersion.ok === true && futureVersion.frozen === 'version',
   'a future version OPENS, frozen — it does not refuse')
-const futurePolicy = parseDoc(JSON.stringify({ ...minimal(), policy: 'bento-dash-2' }))
+const futurePolicy = parseDoc(JSON.stringify({ ...minimal(), policy: 'webdeck-dash-2' }))
 ok(futurePolicy.ok === true && futurePolicy.frozen === 'policy', 'an unknown policy opens frozen')
-const both = parseDoc(JSON.stringify({ ...minimal(), version: 9, policy: 'bento-dash-9' }))
+const both = parseDoc(JSON.stringify({ ...minimal(), version: 9, policy: 'webdeck-dash-9' }))
 ok(both.ok === true && both.frozen === 'version', 'version wins when both are unknown')
 
 // A frozen document is never rewritten, not even a duplicate id: the file
@@ -203,7 +203,7 @@ if (dupCol.ok) {
 const doc = (parseDoc(JSON.stringify(minimal())) as any).doc as DashDoc
 ok(rowCount(doc) === 3, 'rowCount reads the run-length encoded ids')
 ok(docBytes(doc) === JSON.stringify(doc).length,
-  'docBytes is the serialized length — #bento-doc is plaintext, so file size IS JSON size')
+  'docBytes is the serialized length — #webdeck-doc is plaintext, so file size IS JSON size')
 ok(docBudget(true) === DOC_BUDGET_FSA && docBudget(false) === DOC_BUDGET_DOWNLOAD,
   'the budget scales with whether this browser can write in place')
 ok(DOC_BUDGET_DOWNLOAD < DOC_BUDGET_FSA,

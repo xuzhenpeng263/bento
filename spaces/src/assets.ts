@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Images: content-addressed storage, and downscaling that says so.
 //
 // Images are the only thing that makes a space large — prose is essentially
@@ -23,7 +23,7 @@ export const SPACE_WEIGHT_WARN = 25 * 1024 * 1024
  * `s` = sha256 via crypto.subtle. `f` = a synchronous FNV-1a fallback, which
  * exists ONLY so a missing crypto.subtle degrades to "the image still inserts"
  * rather than throwing — not as support for insecure origins, where signed
- * update and bento/enc are dead too.
+ * update and webdeck/enc are dead too.
  *
  * The alg tag is IN the key so two builds never mint one key from two different
  * hashes. FNV-1a has little real entropy, and a collision in content-addressed

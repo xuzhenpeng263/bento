@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// Sign a bento/slides release: produce the manifest.json that shipped files
+// Copyright (c) 2026 The WebDeck authors
+// Sign a webdeck release: produce the manifest.json that shipped files
 // poll (on user request only) to learn about updates.
 //
-//   node scripts/sign-release.mjs slides/dist-single/Bento_Slides.bento.html \
-//     [--url https://bento.page/releases/slides/Bento_Slides.bento.html] \
-//     [--version 0.2.0] [--notes "What changed"] [--notes-from '{"1.0.13":[…]}'] [--key ~/.bento/release-key.json] \
+//   node scripts/sign-release.mjs slides/dist-single/WebDeck.webdeck.html \
+//     [--url https://webdeck.page/releases/slides/WebDeck.webdeck.html] \
+//     [--version 0.2.0] [--notes "What changed"] [--notes-from '{"1.0.13":[…]}'] [--key ~/.webdeck/release-key.json] \
 //     [--out manifest.json]
 //
 // The manifest is { payload: "<json string>", sig: "<base64>" } — the
@@ -45,12 +45,12 @@ const opt = (name, fallback) => {
 // another app even though the signing key is shared platform-wide
 // (kernel/src/update.ts checks it against appConfig().appId), so getting this
 // wrong ships an update channel that every file silently refuses.
-const app = opt('app', 'bento-slides')
+const app = opt('app', 'webdeck')
 const version = opt('version', JSON.parse(readFileSync(join(root, 'slides/package.json'), 'utf8')).version)
 // Kept as the slides URL rather than derived from `app`: release.mjs passes
 // --url explicitly for every app, so a derivation here would be untested
 // cleverness on the one field a shipped file uses to FETCH its own update.
-const url = opt('url', 'https://bento.page/releases/slides/Bento_Slides.bento.html')
+const url = opt('url', 'https://webdeck.page/releases/slides/WebDeck.webdeck.html')
 const notes = opt('notes', '')
 // Per-version lead-ins, so a client can show exactly the versions it skipped.
 // ADDITIVE: `notes` stays a plain string for every already-shipped file, whose

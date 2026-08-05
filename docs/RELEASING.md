@@ -1,26 +1,26 @@
-# Releasing bento/slides
+# Releasing webdeck
 
 Releases are cut **locally** — the signing key never leaves the maintainer's
 machine, and the signed bytes are exactly the served bytes (no CI rebuild can
 drift from the manifest hash). Shipped files check
-`https://bento.page/releases/slides/manifest.json` (user-initiated only) and
+`https://webdeck.page/releases/slides/manifest.json` (user-initiated only) and
 verify the manifest signature against the public key embedded in every shell.
 
 ## One-time setup
 
 1. **Signing key** (already done): `node scripts/keygen.mjs` →
-   `~/.bento/release-key.json`. Keep an offline backup (password manager or
+   `~/.webdeck/release-key.json`. Keep an offline backup (password manager or
    printed). Losing it orphans the update channel for every shipped file;
    leaking it hands the update channel to an attacker. Never commit it, never
    put it in CI secrets.
 2. **Two repos** (GitHub Pages needs a public repo on the free plan; source
-   stays private until launch): private `nyblnet/bento` (this repo, `main`
-   only) + public `nyblnet/bento-site` (the published site — a sibling clone
+   stays private until launch): private `xuzhenpeng263/webdeck` (this repo, `main`
+   only) + public `xuzhenpeng263/webdeck-site` (the published site — a sibling clone
    at `../bento-site`, deployed by Pages from its `main` branch, root). The
    `CNAME` file in the site sets the custom domain; after the certificate is
    issued, tick *Enforce HTTPS* (mandatory for `.page` anyway). Release
    artifacts never enter the source repo's history.
-3. **DNS at the registrar** for the apex `bento.page`:
+3. **DNS at the registrar** for the apex `webdeck.page`:
    - `A` records → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
    - `AAAA` records → `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
    - Optional `www` `CNAME` → `<user>.github.io`
@@ -156,7 +156,7 @@ verify the manifest signature against the public key embedded in every shell.
    > **Publish site-only changes from a tree whose `site/releases/` is current.**
    > `site/` is local staging, and releases are assembled from a clean checkout
    > of the tag (step 3) — so an everyday working tree can hold a months-old
-   > manifest while bento.page serves something far newer. Mirroring that would
+   > manifest while webdeck.page serves something far newer. Mirroring that would
    > republish the older signed shell over the newer one and break the update
    > channel for every deck already in the world.
    >
@@ -168,7 +168,7 @@ verify the manifest signature against the public key embedded in every shell.
 
 6. **The GitHub release is created for you** by `publish-site.mjs` — it makes
    the release for the tag, attaches
-   `site/releases/slides/Bento_Slides.bento.html`, and takes the notes from
+   `site/releases/slides/WebDeck.webdeck.html`, and takes the notes from
    this version's CHANGELOG section (so the two can't drift). It is idempotent:
    an existing release is left alone and only a missing asset is uploaded, so
    re-running publish is safe.
@@ -182,8 +182,8 @@ verify the manifest signature against the public key embedded in every shell.
    things no local gate can prove, and some are only exercisable once published:
 
    ```sh
-   curl -s https://bento.page/releases/slides/manifest.json | head -c 200
-   curl -s -o /dev/null -w '%{http_code}\n' https://bento.page/releases/slides/packs.json
+   curl -s https://webdeck.page/releases/slides/manifest.json | head -c 200
+   curl -s -o /dev/null -w '%{http_code}\n' https://webdeck.page/releases/slides/packs.json
    gh release view vX.Y.Z --json body --jq '.body | length'
    ```
 
@@ -266,7 +266,7 @@ is the right trade for a NEW language and the wrong one for an existing pack.
 
 ### Testing the pack UI locally
 
-Point a shell at a local pack channel with the `bento-packs-url` localStorage
+Point a shell at a local pack channel with the `webdeck-packs-url` localStorage
 override — but the local server must be **the same origin as the page**, because
 the pack fetch is a cross-origin XHR and `python -m http.server` sends no CORS
 headers. Serving the shell on one port and the packs on another silently yields
@@ -275,7 +275,7 @@ build with nothing to install. Serve both from one directory tree:
 
 ```sh
 node scripts/build-i18n.mjs --packs /tmp/site/packs
-cp slides/dist-single/Bento_Slides.bento.html /tmp/site/
+cp slides/dist-single/WebDeck.webdeck.html /tmp/site/
 ```
 
 Then open the shell from that server and set the override to the same origin.
@@ -312,16 +312,16 @@ npx wrangler login          # one-time, opens the browser
 npx wrangler deploy         # builds + publishes; prints the workers.dev URL
 ```
 
-`wrangler.toml` requests the custom domain `sync.bento.page` — with the
+`wrangler.toml` requests the custom domain `sync.webdeck.page` — with the
 zone on the same Cloudflare account this is provisioned automatically at
 deploy (DNS + cert). Verify with:
 
 ```sh
-curl https://sync.bento.page/        # → "bento-sync relay — see https://bento.page"
+curl https://sync.webdeck.page/        # → "webdeck-sync relay — see https://webdeck.page"
 ```
 
 Local development: `npx wrangler dev --port 8787` (no account needed), and
-in the editor set `localStorage['bento-sync-url'] = 'ws://localhost:8787'`
+in the editor set `localStorage['webdeck-sync-url'] = 'ws://localhost:8787'`
 before starting a share session.
 
 The relay stores ONLY ciphertext (room-key-encrypted frames) and a hash of
@@ -330,10 +330,10 @@ after ~30 idle days — the file is the durable artifact.
 
 ## The guestbook daemon and the shell (why the guestbook can lag)
 
-`bento.page/guestbook.bento.html` is **NOT served from the static site** — a
+`webdeck.page/guestbook.webdeck.html` is **NOT served from the static site** — a
 separate Cloudflare daemon (`server/guestbook-daemon/`) serves it from KV so it
 can archive/roll epochs. `release.mjs` re-shells the *static*
-`site/guestbook.bento.html` (only the KV-empty fallback), so a shell release does
+`site/guestbook.webdeck.html` (only the KV-empty fallback), so a shell release does
 **not** by itself update what visitors see — the daemon keeps serving the deck in
 its KV until it's re-seeded. (Tell: the plain URL shows an old app-hash while
 `?cb=1` — GitHub Pages — shows the new one.)

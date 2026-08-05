@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // charts-lite: Bento's own chart engine (replaces ECharts — see git history).
 //
 // A `chart` element stores a plain-JSON option in the ECharts option SHAPE —
-// the format is unchanged; this module interprets the subset Bento uses:
+// the format is unchanged; this module interprets the subset WebDeck uses:
 //   bar / line / pie / scatter · category+value axes with nice ticks ·
 //   legend · axis/item tooltips · inside wheel-zoom + drag-pan · transitions
 //   between options (same-type data tweens; cross-type staged sweep).
 // Unknown option keys are ignored gracefully. Rendering is pure SVG on the
-// same substrate as the rest of Bento (anim.ts drives all motion), so the
+// same substrate as the rest of WebDeck (anim.ts drives all motion), so the
 // whole engine is ~one file and every byte of it is ours (MIT).
 //
 // Two render paths, same API as always:
@@ -890,13 +890,13 @@ export function mountChart(el: ChartLike, host: HTMLElement, fromOption?: Record
     draw(option)
   }
 
-  ;(host as HTMLElement & { __bentoChart?: unknown }).__bentoChart = { option, redraw: () => draw(option), view }
+  ;(host as HTMLElement & { __webdeckChart?: unknown }).__webdeckChart = { option, redraw: () => draw(option), view }
 
   return () => {
     disposed = true
     anim.killTweensOf(clock)
     tipEl.remove()
-    delete (host as HTMLElement & { __bentoChart?: unknown }).__bentoChart
+    delete (host as HTMLElement & { __webdeckChart?: unknown }).__webdeckChart
     host.innerHTML = ''
   }
 }

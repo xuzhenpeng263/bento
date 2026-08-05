@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // App-registry rig.
 //
 //   node scripts/test-release-apps.mjs
@@ -74,7 +74,7 @@ for (const [key, app] of Object.entries(APPS)) {
       `${key}: shell fetches /releases/${app.dir}/ (found "${url}")`)
   }
 
-  // Exactly one app may own the shared bento.page content, or a release either
+  // Exactly one app may own the shared webdeck.page content, or a release either
   // regenerates it from a shell it did not build, or nobody ever rebuilds it.
   ok(typeof app.ownsSiteContent === 'boolean', `${key}: declares ownsSiteContent`)
 

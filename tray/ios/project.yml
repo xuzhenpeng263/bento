@@ -1,13 +1,13 @@
 # XcodeGen spec — `brew install xcodegen && cd tray/ios && xcodegen` produces
-# BentoTray.xcodeproj. The project file is generated, never committed, so it
+# WebDeckTray.xcodeproj. The project file is generated, never committed, so it
 # can't rot into a merge-conflict magnet the way .pbxproj does.
-name: BentoTray
+name: WebDeckTray
 options:
   bundleIdPrefix: page.bento
   deploymentTarget:
     iOS: "16.0"   # WKURLSchemeHandler + modern UIDocumentBrowser behaviour
 targets:
-  BentoTray:
+  WebDeckTray:
     type: application
     platform: iOS
     sources:
@@ -20,8 +20,8 @@ targets:
       # normal signed channel the first time it checks.
       - name: Stage starter shell
         script: |
-          SRC="$SRCROOT/../../slides/dist-single/Bento_Slides.bento.html"
-          DST="$SRCROOT/Resources/starter.bento.html"
+          SRC="$SRCROOT/../../slides/dist-single/WebDeck.webdeck.html"
+          DST="$SRCROOT/Resources/starter.webdeck.html"
           if [ -f "$SRC" ]; then
             mkdir -p "$(dirname "$DST")" && cp "$SRC" "$DST"
           elif [ ! -f "$DST" ]; then

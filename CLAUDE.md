@@ -1,4 +1,4 @@
-# Bento — self-contained office documents
+# WebDeck — self-contained office documents
 
 One HTML file = the document + viewer + editor. See `README.md` for the vision.
 `slides/` is the first app (PowerPoint replacement); **Bento Spaces**
@@ -7,7 +7,7 @@ names provisional.
 
 ## Multi-app coordination (read first when working beyond slides/)
 
-- `docs/PLATFORM.md` — invariants EVERY Bento app must honor (splice contract,
+- `docs/PLATFORM.md` — invariants EVERY WebDeck app must honor (splice contract,
   docId, format additivity, collab, signed updates). Breaking these bricks
   shipped files.
 - `docs/PARALLEL-WORK.md` — ownership zones + branch/merge discipline for the
@@ -19,7 +19,7 @@ names provisional.
 
 ## Architecture (slides/)
 
-- `src/model.ts` — the `bento/slides` JSON document model. This is the format.
+- `src/model.ts` — the `webdeck` JSON document model. This is the format.
 - `src/starterdeck.ts` — the showcase starter deck (what a fresh build opens
   with): four 'sd-tile-*' elements morph through EVERY slide (the id-continuity
   demo), one deliberate 'fade' beat exists because entrance staggers/count-ups
@@ -30,14 +30,14 @@ names provisional.
   across the element box (vertical lines = rotation), keep 96px side margins
   (x ≤ 1184 for right-most content).
 - `src/save.ts` — the self-save trick: clone the document at boot (`capturePristine`),
-  swap the `#bento-doc` data block, re-serialize. JSON is `<`-escaped (`\u003c`) so it can
+  swap the `#webdeck-doc` data block, re-serialize. JSON is `<`-escaped (`\u003c`) so it can
   never contain `</script>`. File System Access API first, download fallback.
 - `src/preview.ts` + kernel `registerPreview` — **static first-page preview for
   file-manager thumbnails**. Thumbnailers (iOS Files, macOS QuickLook/Finder,
-  Bento Tray) render HTML with JS OFF, so every deck used to thumbnail as the
+  WebDeck Tray) render HTML with JS OFF, so every deck used to thumbnail as the
   same boot splash. Every save now writes a still render of page one into the
-  shell as a plain `[data-bento-preview]` element, followed IMMEDIATELY by a
-  parser-blocking `<script data-bento-preview>` that deletes both. The
+  shell as a plain `[data-webdeck-preview]` element, followed IMMEDIATELY by a
+  parser-blocking `<script data-webdeck-preview>` that deletes both. The
   thumbnailer keeps the preview (it runs no script); the reader never sees it
   (the remover executes before the browser paints — measured: at removal
   `readyState` is `loading` and `getEntriesByType('paint')` is EMPTY). **NOT
@@ -62,13 +62,13 @@ names provisional.
   UNCONDITIONAL (replace-never-append: `capturePristine` already holds the last
   save's copy, and a newly-encrypted deck must LOSE its preview).
   **Encrypted decks NEVER get a preview** (`previewAllowed` = no password flag
-  AND body is not a `bento/enc` envelope) — a plaintext title slide beside the
+  AND body is not a `webdeck/enc` envelope) — a plaintext title slide beside the
   ciphertext is the leak the password exists to prevent. `PREVIEW_BUDGET`
   (64KB, model.ts) tiers the output: full → images dropped for tinted boxes →
   title card. Guards: `scripts/test-preview.ts` + shell-gate's
   preview-carrying-shell invariant. Full rationale in docs/DECISIONS.md.
 - `src/autosave.ts` (v0.9.8) — auto-save + local version history, IndexedDB
-  (`bento-autosave`, two stores: `recovery` single-latest-per-docId, `versions`
+  (`webdeck-autosave`, two stores: `recovery` single-latest-per-docId, `versions`
   capped timeline). Editor debounces (2.5s) on `doc` events: writes a recovery
   snapshot (plain doc JSON, NOT the shell) + a throttled version, and — when a
   FSA handle exists — silently rewrites the real file (`writeUpdatedFile`, shows
@@ -108,20 +108,20 @@ names provisional.
   authors edit the field, not the computed value. The starter deck's furniture +
   ghost numerals use `{{page:2}}` (they can't drift). Groundwork for the office
   suite's field/cross-reference system.
-- `src/editor/clipboard.ts` (v0.9.9) — system-clipboard copy/paste. Bento content
-  is written as JSON tagged `__bento:"clip"` (kind elements|slides) with referenced
+- `src/editor/clipboard.ts` (v0.9.9) — system-clipboard copy/paste. WebDeck content
+  is written as JSON tagged `__webdeck:"clip"` (kind elements|slides) with referenced
   assets/fonts embedded, so it round-trips across decks/tabs; asset-key collisions
   remap. Editor: ⌘C copies selected elements, or the current slide when nothing is
   selected (→ `navigator.clipboard.writeText`); a document `paste` listener handles
   external images (embed as data-URI image element), plain text (→ text element),
-  and Bento payloads (insert elements on the current slide / slides after it, fresh
+  and WebDeck payloads (insert elements on the current slide / slides after it, fresh
   ids). Pasted slides drop `stateOf`. Guarded to skip when a text field is focused.
   Also v0.9.9: a `?` help overlay (editor.openHelp — shortcuts + tips, topbar ?
   button) and richer toolbar tooltips.
 - `src/anim.ts` — in-house animation engine (no GSAP): to/fromTo tweens with
   channels opacity/y/scale/color/strokeDashoffset/attr{}/motionPath, delay/
   repeat/yoyo/ease, per-channel overwrite, killTweensOf/getTweensOf, manual
-  clock for tests (window.bento.anim). Transform channels compose via a
+  clock for tests (window.webdeck.anim). Transform channels compose via a
   per-element registry that preserves the model's rotate() — call resetXform
   after applyElementFrame or stale y/scale re-emerge on the next tween.
 - `src/present.ts` — Reveal.js overlay; slides with `transition:'morph'` morph
@@ -136,7 +136,7 @@ names provisional.
   groups). Present arrows are handled capture-phase (focus-proof). Editing UI for
   fx/link lives in the panel's "Presenting" section.
   **Reduced motion (v1.0.8)**: a VIEWER/PRESENTER preference (localStorage
-  `bento-reduce-motion` 'on'/'off', default = OS `prefers-reduced-motion`),
+  `webdeck-reduce-motion` 'on'/'off', default = OS `prefers-reduced-motion`),
   never in the doc — mirrors how locale is viewer-scoped. Toggle with `M` or the
   ⏸ speaker-view button (`setReduceMotion`/`toggleReduceMotion`). When on, the
   fx call sites in `slidechanged`/init are gated OFF (no runMorph/runEnterFx/
@@ -197,8 +197,8 @@ names provisional.
   Full spec + threat model in docs/collab-design.md.
 - **File modes (v0.9.0)**: `doc.readonly` = PLAYER file (boots straight into
   the show; exit lands on a minimal card, never the editor; "Save read-only
-  copy…" strips collab). Password encryption: the #bento-doc block can hold a
-  `bento/enc` envelope (PBKDF2-SHA-256 300k + AES-GCM-256 over the doc JSON) —
+  copy…" strips collab). Password encryption: the #webdeck-doc block can hold a
+  `webdeck/enc` envelope (PBKDF2-SHA-256 300k + AES-GCM-256 over the doc JSON) —
   boot shows a password gate; the password is held in memory so ⌘S and
   self-update keep writing encrypted (save.ts serializeAuto/serializeDocInto
   are THE encryption-aware paths; serializeFile stays plain for tooling).
@@ -208,27 +208,27 @@ names provisional.
   connect only if the doc ARRIVED carrying collab (a saved/shared file) OR
   the user opted in this session (saved, or "Start live session" →
   enableSharing()). A never-saved starter/template stays dormant so the
-  anonymous bento.page/slides demo and template tire-kickers never phone
+  anonymous webdeck.page/slides demo and template tire-kickers never phone
   home (v0.9.1 fix — v0.9.0 connected every visitor). "Stop sharing" opts
   out; Offline mode hard-blocks regardless.
 - `src/update.ts` — signed self-update: checks a release manifest at LAUNCH
-  by default (localStorage 'bento-auto-check'='off' disables; toggle in the
+  by default (localStorage 'webdeck-auto-check'='off' disables; toggle in the
   About dialog; found updates badge the topbar sync button) and on demand via
-  About/topbar (`bento.page`; dev override localStorage 'bento-update-url'),
+  About/topbar (`webdeck.page`; dev override localStorage 'webdeck-update-url'),
   verifies ECDSA P-256 signature against the embedded
   PUBLIC_KEY_JWK + sha256 of the fetched shell + version monotonicity, then
   re-splices the current doc into the new shell (`save.serializeWith`) and
   downloads it as a NEW file (original untouched = rollback). APP_VERSION baked
   from package.json via vite define. Private key: `scripts/keygen.mjs` →
-  `~/.bento/release-key.json` (offline, NEVER commit/CI); sign releases with
+  `~/.webdeck/release-key.json` (offline, NEVER commit/CI); sign releases with
   `scripts/sign-release.mjs`. Docs carry a stable `docId` (uuid, minted at
   creation/load) — identity for future sync/merge; never regenerate it.
-  Scripting: `window.bento.updates.{version,check,build,apply}`.
+  Scripting: `window.webdeck.updates.{version,check,build,apply}`.
 - `src/i18n.ts` + `src/i18n/*.ts` — internationalization: ~1KB t() with
   ENGLISH-STRING-AS-KEY (gettext style; missing key = English fallback),
   {placeholder} interpolation, catalogs compiled in (ja, zh-Hans, zh-Hant, es,
   fr, de, it — 7 locales + English fallback = 8 UI languages);
-  locale follows the VIEWER (navigator.language; localStorage 'bento-lang'
+  locale follows the VIEWER (navigator.language; localStorage 'webdeck-lang'
   override; picker in About rebuilds the workspace). Language never enters the
   document format. select() localizes DISPLAY labels only (values stay model
   words). GOTCHAS: never call t() in module-level consts (frozen at import —
@@ -244,7 +244,7 @@ names provisional.
   type change bar⇄pie = staged fade+sweep). Pure SVG on anim.ts. Options stay
   PURE JSON (template formatters {b}/{c}/{d}, never functions). Editor
   canvas/thumbs/print use chartSnapshotSvg (cached); present mounts live
-  (host exposes `__bentoChart`). Unknown option keys are ignored gracefully —
+  (host exposes `__webdeckChart`). Unknown option keys are ignored gracefully —
   exotic ECharts configs degrade, don't crash. Bar/line series data must be
   PLAIN NUMBERS ({value,itemStyle} item objects coerce to 0 — only pie takes
   {name,value}); per-item bar colors unsupported, color by series. New charts
@@ -294,7 +294,7 @@ names provisional.
   (headerBg/Color, zebra, borderColor/Width, cellPad X/Y, fontSize, color,
   radius). Cells edit on canvas via contentEditable (canvas.ts editCellAt/
   commitCellEdit, mirroring text edit; Tab/Enter navigate, Tab off the end
-  appends a row). Column widths drag via `.bento-col-handle` overlays
+  appends a row). Column widths drag via `.webdeck-col-handle` overlays
   (updateTableHandles/startColResize — live DOM update during drag, commit on
   release; needs real-mouse QA like Moveable). Panel: row/col steppers, header
   toggle, style presets (Lined/Zebra/Boxed/Minimal), colours, and a
@@ -318,7 +318,7 @@ names provisional.
   autoplay so `defaultMedia` mutes video. Panel 'Source & playback'
   (buildMediaProps): embedded/linked status+size, Choose/Replace file, URL,
   controls/autoplay/loop/muted, and (video) fit/corner/poster.
-- **Diagram philosophy**: complex diagrams are ordinary Bento elements (rects, texts,
+- **Diagram philosophy**: complex diagrams are ordinary WebDeck elements (rects, texts,
   `path` shapes) with groups — interactivity = linked state slides + morph (filters,
   era sequences), hover = focus-group, motion = fx.loop. Opaque `svg` elements are
   the fallback for geography/static artwork only.
@@ -342,10 +342,10 @@ names provisional.
   editor/comments.ts; never in present/print). Anchors: element id, POINT
   (x/y slide coords — "📍 Comment at a point" arms a one-shot crosshair
   click, Esc cancels), or the slide. Author name in localStorage
-  'bento-author'; unresolved threads badge the sidebar thumb. ONE entry
+  'webdeck-author'; unresolved threads badge the sidebar thumb. ONE entry
   point: the topbar 💬 tool (C) — armed click on an element anchors there,
   on empty canvas anchors the point; OFF the slide (grey canvas) anchors the WHOLE SLIDE; near-full-slide backdrops never
-  capture (a comment on scenery means the spot). While armed, hover previews the pending anchor (amber outline on elements, pin+coords elsewhere); fresh markers pulse. `window.bento.comments()`
+  capture (a comment on scenery means the spot). While armed, hover previews the pending anchor (amber outline on elements, pin+coords elsewhere); fresh markers pulse. `window.webdeck.comments()`
   returns the flat typed-anchor list — the entry point for AI agents
   processing flagged issues in a deck.
 - **Hover content is in-slide, not states**: `showOnHover` sets + slide
@@ -354,7 +354,7 @@ names provisional.
 - **Speaker view (presenter view)**: OUR OWN popup (present.ts openSpeaker) —
   a PowerPoint-style presenter surface: elapsed timer (click resets) + clock,
   current + next slide (renderSlide/svSlide), notes, a **nav bar** (first/prev/
-  next/last + live counter), a **black-screen** toggle (`.bento-blackout` over
+  next/last + live counter), a **black-screen** toggle (`.webdeck-blackout` over
   the audience overlay), a clickable **thumbnail rail** (all non-state slides,
   current highlighted + scrolled into view), and a lazy **all-slides grid**
   overlay. The popup has its OWN keydown handler (its keys fire in its own
@@ -396,7 +396,7 @@ names provisional.
   persisted per title in localStorage; Presenting/Interactivity/Layout
   default closed. Add new panel content under a section header and the
   accordion picks it up automatically.
-- `src/sync/` — **bento-sync live collaboration** (design: docs/collab-design.md).
+- `src/sync/` — **webdeck-sync live collaboration** (design: docs/collab-design.md).
   `crdt.ts` is the engine (pure data, runs in node too): element node
   identity is the COMPOSITE `slideId U+001F elementId` (elKey) — bare ids
   repeat across slides (the morph idiom), each per-slide copy is its own
@@ -425,7 +425,7 @@ names provisional.
   editor already listens to (zero editor rewrites). Actor ids are fresh PER
   SESSION INSTANCE (a reloaded tab is a new replica; the engine skips "own"
   ops on apply — a persisted actor id would make relay replay a no-op).
-  Same-machine tabs always sync (BroadcastChannel `bento-sync-<docId>`);
+  Same-machine tabs always sync (BroadcastChannel `webdeck-sync-<docId>`);
   `online.ts` adds the E2EE relay (AES-GCM, key in `doc.collab.key`, ?tok=
   hash-of-key possession proof; replay bookmark is MEMORY-ONLY — it's valid
   only with the CRDT state it was earned with). Credentials are minted AT
@@ -442,7 +442,7 @@ names provisional.
   room's replay lacked. "Duplicate as new deck…" (About) = identity fork:
   new docId + fresh creds, never syncs with its ancestor. Relay:
   `server/sync-worker/` (blind DO, ciphertext-only storage — verified;
-  `npx wrangler dev --port 8787` + localStorage 'bento-sync-url' for local
+  `npx wrangler dev --port 8787` + localStorage 'webdeck-sync-url' for local
   testing; NEVER pipe wrangler dev through `head` — SIGPIPE kills it).
   **The DO MUST use the WebSocket Hibernation API** (`state.acceptWebSocket` +
   `webSocketMessage`/`webSocketClose` handlers, `getWebSockets()` for fan-out,
@@ -464,7 +464,7 @@ names provisional.
   **Fine-grained access v2 (v1.0.3, collab.v=2)**: the room id commits to an
   OWNER pubkey; `mintCollab` mints owner keys; "Invite to edit…" saves a copy
   carrying an owner-signed INVITE keypair (`mintInvite`); each device mints its
-  own member key (localStorage `bento-member-<docId>`, never in the file) and
+  own member key (localStorage `webdeck-member-<docId>`, never in the file) and
   joins via the owner→invite→member signature chain, verified PER SOCKET by the
   relay (wire params + sig texts in docs/collab-design.md "Phase 1 wire
   format"). Presence carries pub+role → key-bound People panel with per-member
@@ -473,7 +473,7 @@ names provisional.
   unchanged; deploy the relay BEFORE a client that depends on new verification.
   **Guestbook is a v2 room now**: public deck carries a PUBLIC writer invite
   (anyone writes, individually keyed); the OWNER deck lives in gitignored
-  working/guestbook-live/guestbook-owner.bento.html (moderation = open it →
+  working/guestbook-live/guestbook-owner.webdeck.html (moderation = open it →
   People → Remove). Daemon ROLL_HOURS=0 — rolls are manual (re-mint would
   orphan the held owner file); build-guestbook.mjs emits public + owner decks.
   **Share exports** (invite/viewonly/presentonly/template) pass a filename
@@ -588,30 +588,30 @@ names provisional.
    controls get padded transparent `link` overlay rects, not links on the text itself.
 
 - **Compressed shell (Phase 1)**: `scripts/postbuild-compress.mjs` (runs in
-  build:single) deflates runtime JS+CSS into base64 `bento/deflate-b64` script
+  build:single) deflates runtime JS+CSS into base64 `webdeck/deflate-b64` script
   blocks + ~1KB loader (DecompressionStream → blob import; pre-2023 browsers
   get a plain-HTML message). Byte order: chrome → NOTICE → tooling comment →
-  PLAINTEXT #bento-doc → splash → payloads last. Shell ~560KB (was 1.33MB).
-  The loader's injected `<style>` carries `data-bento-transient` and
+  PLAINTEXT #webdeck-doc → splash → payloads last. Shell ~560KB (was 1.33MB).
+  The loader's injected `<style>` carries `data-webdeck-transient` and
   `serializeBody` (kernel/src/save.ts) strips marked nodes from the clone —
   `capturePristine()` clones the LIVE document, so without that the inflated
   CSS was saved back as plaintext and re-appended each boot (+100KB per save,
   forever). Anything injected before the pristine capture must be marked.
-  SPLICE CONTRACT (old updaters are frozen code): #bento-doc stays plaintext/
+  SPLICE CONTRACT (old updaters are frozen code): #webdeck-doc stays plaintext/
   same id, file survives DOMParser→splice→outerHTML, no stray script-close —
   release.mjs runs a conformance GATE before signing every release.
 - **AI round-trip**: the DOCUMENT is the interchange unit (chat AIs can't emit
   1MB+ files). Save → "Copy document JSON" / "Replace from JSON…"
-  (store.replaceDoc, undoable); `window.bento.loadDoc(json)` for scripts; the
-  shell carries a Tooling-note comment pointing AIs at #bento-doc + the API.
+  (store.replaceDoc, undoable); `window.webdeck.loadDoc(json)` for scripts; the
+  shell carries a Tooling-note comment pointing AIs at #webdeck-doc + the API.
   Agent harnesses edit files in place; chat AIs round-trip the JSON.
 
 ## Commands
 
 - `npm run dev` (in slides/) — dev server; `.claude/launch.json` has `slides-dev` (:5199)
   and `serve-built` (:5198, serves dist-single).
-- `npm run build:single` — the shippable `dist-single/Bento_Slides.bento.html`.
-- In-page scripting/testing API: `window.bento` → `{ doc, serialize() }`.
+- `npm run build:single` — the shippable `dist-single/WebDeck.webdeck.html`.
+- In-page scripting/testing API: `window.webdeck` → `{ doc, serialize() }`.
 
 ## Testing gotcha
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Right-hand properties panel. Shows slide properties when nothing is
 // selected, element properties otherwise. Bursts of 'input' events collapse
 // into a single undo checkpoint.
@@ -1676,7 +1676,7 @@ export class PropsPanel {
         if (!file) return
         if (file.size > MEDIA_EMBED_BUDGET) {
           const mb = Math.round(file.size / (1024 * 1024))
-          if (!confirm(t('This file is {mb} MB. Embedding makes the .bento.html large and slow to open and save. Embed anyway?', { mb }))) return
+          if (!confirm(t('This file is {mb} MB. Embedding makes the .webdeck.html large and slow to open and save. Embed anyway?', { mb }))) return
         }
         const reader = new FileReader()
         // interned, not inline — same reason as every other embed site: only

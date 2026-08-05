@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // tray/webext page-bridge rig.
 //
 //   node scripts/test-webext-bridge.ts
@@ -37,7 +37,7 @@ function load(opts: { version?: string; pathname?: string } = {}) {
   const nativeCalls: any[] = []
   const posted: any[] = []
   const win: any = {
-    location: { pathname: opts.pathname ?? '/Users/x/Decks/Q3.bento.html' },
+    location: { pathname: opts.pathname ?? '/Users/x/Decks/Q3.webdeck.html' },
     addEventListener() {},
     postMessage(msg: any) { posted.push(msg) },
     showSaveFilePicker(o: any) { nativeCalls.push(o); return Promise.resolve({ __native: true }) },
@@ -60,30 +60,30 @@ function load(opts: { version?: string; pathname?: string } = {}) {
 {
   const { win, nativeCalls } = load({ version: '1.0.15' })
   let threw: any = null
-  await win.showSaveFilePicker({ id: 'bento-copy', suggestedName: 'Q3.bento.html' }).catch((e: any) => { threw = e })
+  await win.showSaveFilePicker({ id: 'webdeck-copy', suggestedName: 'Q3.webdeck.html' }).catch((e: any) => { threw = e })
   ok(threw === null, `declining does not throw (${threw ? threw.name + ': ' + threw.message : 'clean'})`)
   ok(nativeCalls.length === 1, 'and it reaches the native picker')
 }
 
 // ---- the three purposes ----------------------------------------------------
 for (const [id, shouldDefer] of [
-  ['bento-copy', true],
-  ['bento-share', true],
-  ['bento-doc', false],
+  ['webdeck-copy', true],
+  ['webdeck-share', true],
+  ['webdeck-doc', false],
 ] as const) {
   const { win, nativeCalls, posted } = load({ version: '1.0.15' })
-  const p = win.showSaveFilePicker({ id, suggestedName: 'Q3.bento.html' })
+  const p = win.showSaveFilePicker({ id, suggestedName: 'Q3.webdeck.html' })
   await new Promise((r) => setTimeout(r, 0))
   const deferred = nativeCalls.length === 1
   ok(deferred === shouldDefer,
     `${id} ${shouldDefer ? 'defers to the native picker' : 'is claimed by the host'}`)
   if (!shouldDefer) {
-    ok(posted.some((m) => m.op === 'claim'), 'bento-doc asks the extension to claim the file')
+    ok(posted.some((m) => m.op === 'claim'), 'webdeck-doc asks the extension to claim the file')
   }
   p.catch(() => {})
 }
 
-// ---- the version gate: a deck older than #213 sends bento-doc for EVERYTHING
+// ---- the version gate: a deck older than #213 sends webdeck-doc for EVERYTHING
 for (const [version, trusted] of [
   [undefined, false],
   ['1.0.11', false],
@@ -93,11 +93,11 @@ for (const [version, trusted] of [
   ['2.0.0', true],
 ] as const) {
   const { win, nativeCalls } = load({ version })
-  win.showSaveFilePicker({ id: 'bento-doc', suggestedName: 'Q3.bento.html' }).catch(() => {})
+  win.showSaveFilePicker({ id: 'webdeck-doc', suggestedName: 'Q3.webdeck.html' }).catch(() => {})
   await new Promise((r) => setTimeout(r, 0))
   const claimed = nativeCalls.length === 0
   ok(claimed === trusted,
-    `runtime ${version ?? '(absent)'} is ${trusted ? 'trusted' : 'NOT trusted'} to mean what bento-doc says`)
+    `runtime ${version ?? '(absent)'} is ${trusted ? 'trusted' : 'NOT trusted'} to mean what webdeck-doc says`)
 }
 
 // ---- a polyfilled handle must never reach the native picker ----------------
@@ -105,8 +105,8 @@ for (const [version, trusted] of [
 // as `startIn`, where a real FileSystemHandle is required.
 {
   const { win, nativeCalls } = load({ version: '1.0.15' })
-  const fake = { name: 'Q3.bento.html', kind: 'file', createWritable() {} }
-  await win.showSaveFilePicker({ id: 'bento-share', suggestedName: 'x-viewonly.bento.html', startIn: fake })
+  const fake = { name: 'Q3.webdeck.html', kind: 'file', createWritable() {} }
+  await win.showSaveFilePicker({ id: 'webdeck-share', suggestedName: 'x-viewonly.webdeck.html', startIn: fake })
     .catch(() => {})
   ok(nativeCalls.length === 1, 'a share export reaches the native picker')
   ok(!('startIn' in nativeCalls[0]), 'and a non-FileSystemHandle startIn is stripped before it gets there')
@@ -115,7 +115,7 @@ for (const [version, trusted] of [
   const { win, nativeCalls } = load({ version: '1.0.15' })
   class RealHandle {}
   const real = Object.create((global as any).FileSystemHandle?.prototype ?? RealHandle.prototype)
-  await win.showSaveFilePicker({ id: 'bento-copy', suggestedName: 'copy.bento.html', startIn: real })
+  await win.showSaveFilePicker({ id: 'webdeck-copy', suggestedName: 'copy.webdeck.html', startIn: real })
     .catch(() => {})
   ok(nativeCalls.length === 1, 'a copy reaches the native picker')
 }

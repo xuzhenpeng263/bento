@@ -1,4 +1,4 @@
-# Deploy the Bento Slides editor to GitHub Pages.
+# Deploy the WebDeck Slides editor to GitHub Pages.
 #
 # Triggered by version tags (v*) — push a tag like v1.0.16 and the editor
 # at https://xuzhenpeng263.github.io/bento/ updates automatically.
@@ -43,20 +43,20 @@ jobs:
         # itself is placed alongside so it works offline if saved.
         run: |
           mkdir -p pages-root
-          cp slides/dist-single/Bento_Slides.bento.html pages-root/Bento_Slides.bento.html
-          cp slides/dist-single/Bento_Slides.bento.html pages-root/index.html
+          cp slides/dist-single/WebDeck.webdeck.html pages-root/WebDeck.webdeck.html
+          cp slides/dist-single/WebDeck.webdeck.html pages-root/index.html
 
           # A small landing hint for first-time visitors. The editor is the
           # index — opening the page lands straight in the app.
           cat > pages-root/README.txt << 'EOF'
-          Bento Slides — https://xuzhenpeng263.github.io/bento/
+          WebDeck Slides — https://xuzhenpeng263.github.io/bento/
 
           Visit the page to open the editor. From there you can:
           - Start editing the built-in starter deck
-          - File → Open to edit a local .bento.html file
+          - File → Open to edit a local .webdeck.html file
           - File → Save to download your work
 
-          The same Bento_Slides.bento.html file works as a local copy too —
+          The same WebDeck.webdeck.html file works as a local copy too —
           download it and open it in any browser.
           EOF
 

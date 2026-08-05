@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
 // The extension side: the only place that holds the folder grant and the only
 // place that writes.
@@ -27,7 +27,7 @@
 //    else's deck in the granted folder and overwrite it. The path comes from
 //    the sender, and a payload path is ignored even if present.
 
-const DB = 'bento-tray'
+const DB = 'webdeck-tray'
 const STORE = 'grant'
 
 const open = () => new Promise((res, rej) => {
@@ -82,7 +82,7 @@ export async function findByName(dir, name, depth = 0, found = []) {
 /**
  * Resolve the writable handle for a sender's own file, or say why not.
  *
- * THE MATCHING PROBLEM. A page is at `/Users/…/Decks/Q3.bento.html`; a
+ * THE MATCHING PROBLEM. A page is at `/Users/…/Decks/Q3.webdeck.html`; a
  * `FileSystemDirectoryHandle` knows its own NAME but not its path, and no API
  * exposes one, so the two cannot be compared directly. This searches the
  * granted tree for that file name and requires EXACTLY ONE match — unambiguous

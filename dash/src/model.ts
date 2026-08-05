@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// The bento/dash document model. This JSON is what lives inside the #bento-doc
+// Copyright (c) 2026 The WebDeck authors
+// The webdeck-dash document model. This JSON is what lives inside the #webdeck-doc
 // block — the format IS the product (docs/PLATFORM.md §3).
 //
 // ONE FILE = ONE WORKBOOK: sheets of typed columns, stored COLUMNAR, with an
@@ -20,7 +20,7 @@
 // beats dictionary-columnar is an opaque deflate blob that forfeits PLATFORM §7
 // and reships the whole column on every edit under collab.
 
-export const FORMAT = 'bento/dash'
+export const FORMAT = 'webdeck-dash'
 export const FORMAT_VERSION = 1
 
 /**
@@ -32,7 +32,7 @@ export const FORMAT_VERSION = 1
  *
  * Copied from spaces (spaces/src/model.ts:26), which reached it independently.
  */
-export type Policy = 'bento-dash-1' | (string & {})
+export type Policy = 'webdeck-dash-1' | (string & {})
 
 /**
  * Transform ops this build knows. `Step.op` is `string`, NOT this union — an
@@ -364,7 +364,7 @@ export interface Repair {
 }
 
 /**
- * The result of reading a `#bento-doc` block.
+ * The result of reading a `#webdeck-doc` block.
  *
  * NEVER null-then-starter. `parseDoc` returning null let the caller fall back to
  * the starter document, which means opening a slides file — or a workbook with
@@ -378,7 +378,7 @@ export interface Repair {
  *
  * `unreadable` is dash's addition, and it exists because the kernel cannot tell
  * the two empty cases apart: `readEmbeddedDoc` (kernel/src/save.ts:42) returns
- * `text || null`, collapsing "no #bento-doc element" and "element present with
+ * `text || null`, collapsing "no #webdeck-doc element" and "element present with
  * an empty text node" into one answer. Measured: past the parser's limit the
  * block IS present with exactly one zero-length text node and no throw — so
  * treating that as 'empty' boots the starter over live data, which is the exact
@@ -415,7 +415,7 @@ const isObj = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v)
 
 /**
- * Read a `#bento-doc` body into a document, or say precisely why not.
+ * Read a `#webdeck-doc` body into a document, or say precisely why not.
  *
  * Never throws, never returns null, never silently discards a field it did not
  * recognise — every level spreads the source object so unknown keys survive.
@@ -444,7 +444,7 @@ export function parseDoc(json: string): ParseResult {
     }
   }
   if (!Array.isArray(raw.sheets)) {
-    return { ok: false, err: 'shape', detail: 'a bento/dash document needs a "sheets" array' }
+    return { ok: false, err: 'shape', detail: 'a webdeck-dash document needs a "sheets" array' }
   }
 
   const version = typeof raw.version === 'number' ? raw.version : FORMAT_VERSION
@@ -452,7 +452,7 @@ export function parseDoc(json: string): ParseResult {
   // Version wins if both: a future version implies rules we cannot name.
   const frozen: 'policy' | 'version' | undefined =
     version > FORMAT_VERSION ? 'version'
-      : policy !== undefined && policy !== 'bento-dash-1' ? 'policy'
+      : policy !== undefined && policy !== 'webdeck-dash-1' ? 'policy'
         : undefined
 
   const repairs: Repair[] = []
@@ -545,7 +545,7 @@ export function parseDoc(json: string): ParseResult {
 }
 
 /**
- * Bytes this document would occupy in the file. `#bento-doc` is plaintext
+ * Bytes this document would occupy in the file. `#webdeck-doc` is plaintext
  * forever (PLATFORM §2), so file size IS JSON size — there is no compression
  * between the model and the disk, which is why the budget can be checked here.
  */

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Minimal inline icon set (lucide-style, stroke = currentColor). No deps.
 
 const svg = (body: string, viewBox = '0 0 24 24') =>
@@ -50,6 +50,7 @@ export const ICONS = {
   triangle: svg('<path d="M12 4 21 20H3z"/>'),
   arrow: svg('<line x1="3" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>'),
   line: svg('<line x1="4" y1="19" x2="20" y2="5"/>'),
+  x: svg('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
 } as const
 
 export type IconName = keyof typeof ICONS

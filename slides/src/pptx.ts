@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Editable PowerPoint export. Screen-only behaviours (hover, particle/morph
 // runtime, media playback) intentionally degrade; ordinary objects stay native.
 
@@ -35,8 +35,8 @@ export async function exportPptx(doc: BentoDoc, fileName: string): Promise<void>
   const pptH = PPT_W * doc.size.height / doc.size.width
   pptx.defineLayout({ name: 'BENTO', width: PPT_W, height: pptH })
   pptx.layout = 'BENTO'
-  pptx.author = doc.meta?.author || 'bento/slides'
-  pptx.company = doc.meta?.company || 'bento'
+  pptx.author = doc.meta?.author || 'webdeck'
+  pptx.company = doc.meta?.company || 'webdeck'
   pptx.subject = doc.meta?.subject || ''
   pptx.title = doc.title
   pptx.theme = {

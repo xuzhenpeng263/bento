@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Document validation rig.
 //
 //   esbuild scripts/test-validate.ts --bundle --platform=node --format=esm ...
@@ -50,7 +50,7 @@ ok(starter.measured === false, 'measured is false without a DOM rather than sile
 
 // ------------------------------------------------------------- a clean deck
 const clean: BentoDoc = {
-  format: 'bento/slides', version: '1.0.0', docId: 'test', title: 'clean',
+  format: 'webdeck', version: '1.0.0', docId: 'test', title: 'clean',
   size: { width: 1280, height: 720 }, theme: { accent: '#F7A600', fontFamily: 'system-ui' },
   assets: {}, fonts: null,
   slides: [{

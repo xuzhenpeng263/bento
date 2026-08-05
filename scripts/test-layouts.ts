@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Built-in layout geometry rig.
 //
 //   node scripts/test-layouts.ts        (Node ≥ 23.6 strips types natively)

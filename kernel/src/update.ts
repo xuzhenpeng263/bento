@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// Self-update: a shipped Bento file asks the release origin whether a newer
+// Copyright (c) 2026 The WebDeck authors
+// Self-update: a shipped WebDeck file asks the release origin whether a newer
 // app shell exists — automatically at launch (per-browser opt-out in the
 // About dialog) or on demand — and rebuilds itself as "same document, newer
 // app": the data block re-spliced into the fetched shell via the exact
@@ -42,31 +42,31 @@ export const APP_VERSION: string = typeof __APP_VERSION__ !== 'undefined' ? __AP
  */
 export const offlineEnabled = (): boolean => {
   try {
-    return lsGet('bento-offline') === 'on'
+    return lsGet('webdeck-offline') === 'on'
   } catch {
     return false
   }
 }
 export const setOffline = (on: boolean): void => {
   try {
-    lsSet('bento-offline', on ? 'on' : 'off')
+    lsSet('webdeck-offline', on ? 'on' : 'off')
   } catch {
     /* storage unavailable */
   }
 }
 
-export const autoCheckEnabled = (): boolean => lsGet('bento-auto-check') !== 'off'
+export const autoCheckEnabled = (): boolean => lsGet('webdeck-auto-check') !== 'off'
 export const setAutoCheck = (on: boolean): void => {
-  if (on) lsDel('bento-auto-check')
-  else lsSet('bento-auto-check', 'off')
+  if (on) lsDel('webdeck-auto-check')
+  else lsSet('webdeck-auto-check', 'off')
 }
 
 /** Where shipped files look for releases (per-app, from configureApp).
- *  Dev override: localStorage 'bento-update-url'. */
+ *  Dev override: localStorage 'webdeck-update-url'. */
 export const updateManifestUrl = (): string => appConfig().manifestUrl
 
 // Release signing PUBLIC key. The private half lives offline with the
-// maintainer (scripts/keygen.mjs → ~/.bento/release-key.json) and signs
+// maintainer (scripts/keygen.mjs → ~/.webdeck/release-key.json) and signs
 // manifests via scripts/sign-release.mjs. Rotating this key orphans every
 // previously shipped file — guard the private key instead.
 const PUBLIC_KEY_JWK = {
@@ -215,7 +215,7 @@ async function verifyManifest(raw: string): Promise<ReleaseInfo> {
 
 /** Ask the release origin for the latest version. */
 export async function checkForUpdates(manifestUrl?: string): Promise<UpdateCheck> {
-  const url = manifestUrl ?? lsGet('bento-update-url') ?? updateManifestUrl()
+  const url = manifestUrl ?? lsGet('webdeck-update-url') ?? updateManifestUrl()
   try {
     const res = await fetch(url, { cache: 'no-store' })
     if (!res.ok) throw new Error(`release server answered ${res.status}`)
@@ -230,7 +230,7 @@ export async function checkForUpdates(manifestUrl?: string): Promise<UpdateCheck
 
 /**
  * Fetch the release shell, verify its hash against the signed manifest, and
- * return the full updated .bento.html: this document inside the new app.
+ * return the full updated .webdeck.html: this document inside the new app.
  */
 /**
  * Run by buildUpdatedFile once the new version is known and verified, BEFORE
@@ -258,8 +258,8 @@ export async function buildUpdatedFile(release: ReleaseInfo, doc: KernelDoc): Pr
     throw new Error('the downloaded update failed its integrity check — refusing it')
 
   const shell = new DOMParser().parseFromString(new TextDecoder().decode(bytes), 'text/html')
-  if (!shell.getElementById('bento-doc'))
-    throw new Error('the downloaded update is not a Bento shell')
+  if (!shell.getElementById('webdeck-doc'))
+    throw new Error('the downloaded update is not a WebDeck shell')
 
   // BEST EFFORT, never fatal. If refreshing throws — offline, the new
   // version's packs not published yet, anything — the update must still
@@ -279,7 +279,7 @@ export async function buildUpdatedFile(release: ReleaseInfo, doc: KernelDoc): Pr
 
 /** Build the updated file and hand it to the user as a fresh download.
  *  Named after the file they have open, not the deck title — an update
- *  REPLACES that file, so "Q3-board.bento.html" is the answer even when the
+ *  REPLACES that file, so "Q3-board.webdeck.html" is the answer even when the
  *  deck is titled "Q3 Board Review". */
 export async function applyUpdate(release: ReleaseInfo, doc: KernelDoc): Promise<void> {
   downloadFile(await buildUpdatedFile(release, doc), openedFileName() ?? suggestedFileName(doc))
@@ -310,7 +310,7 @@ export async function applyUpdateInPlace(release: ReleaseInfo, doc: KernelDoc): 
   const current = openedFileName()
   if (hasFileHandle()) {
     const base = fileBase(current ?? suggestedFileName(doc))
-    downloadFile(await serializeAuto(doc), `${base}.v${APP_VERSION}-backup.bento.html`)
+    downloadFile(await serializeAuto(doc), `${base}.v${APP_VERSION}-backup.webdeck.html`)
     await writeUpdatedFile(html)
     return true
   }

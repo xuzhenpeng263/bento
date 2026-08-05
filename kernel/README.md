@@ -1,7 +1,7 @@
-# Bento kernel
+# WebDeck kernel
 
-The app-agnostic machinery every Bento app shares: document lifecycle
-(save/splice, `bento/enc` encryption, autosave/version history), signed
+The app-agnostic machinery every WebDeck app shares: document lifecycle
+(save/splice, `webdeck/enc` encryption, autosave/version history), signed
 self-update, the i18n engine, the animation engine, and charts-lite. The
 kernel/app boundary is defined in `docs/PLATFORM.md` §9 — the kernel never
 sees an app's content shape (slides, blocks, cells); it reads only the
@@ -34,8 +34,8 @@ shared dependency ever appears, convert then, in one mechanical sweep.
   app → kernel, only.
 - New envelope fields on `KernelDoc` are platform decisions, not
   conveniences.
-- Frozen contracts that live here: the `#bento-doc` splice (save.ts), the
-  `bento/enc` envelope (save.ts), the update-manifest verification
+- Frozen contracts that live here: the `#webdeck-doc` splice (save.ts), the
+  `webdeck/enc` envelope (save.ts), the update-manifest verification
   (update.ts). Treat every byte as shipped-file compatibility surface.
 
 ## Typecheck

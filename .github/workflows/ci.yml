@@ -92,7 +92,7 @@ jobs:
         run: npm run build:single
 
       - name: Splice conformance gate
-        run: node scripts/shell-gate.mjs slides/dist-single/Bento_Slides.bento.html
+        run: node scripts/shell-gate.mjs slides/dist-single/WebDeck.webdeck.html
 
       # spaces: a second app proving the kernel seam — same pipeline, same gate.
       - name: Install (spaces)
@@ -108,7 +108,7 @@ jobs:
         run: npm run build:single
 
       - name: Splice conformance gate (spaces)
-        run: node scripts/shell-gate.mjs spaces/dist-single/Bento_Spaces.bento.html
+        run: node scripts/shell-gate.mjs spaces/dist-single/WebDeck_Spaces.webdeck.html
 
       - name: Spaces i18n packed table is current
         # The per-locale catalogs are the source of truth; packed.ts is
@@ -151,7 +151,7 @@ jobs:
         run: npm run build:single
 
       - name: Splice conformance gate (dash)
-        run: node scripts/shell-gate.mjs dash/dist-single/Bento_Dash.bento.html
+        run: node scripts/shell-gate.mjs dash/dist-single/WebDeck_Dash.webdeck.html
 
       - name: Language pack verification rig
         # Packs come off the network, so the signature + hash-pin chain is the
@@ -217,8 +217,8 @@ jobs:
           slides/node_modules/.bin/esbuild scripts/test-autosave.ts --bundle --platform=node --format=esm \
             --alias:fake-indexeddb/auto=./slides/node_modules/fake-indexeddb/auto/index.js \
             --outfile="$RUNNER_TEMP/test-autosave.mjs"
-          BENTO_TEST_APP=bento-slides node "$RUNNER_TEMP/test-autosave.mjs"
-          BENTO_TEST_APP=bento-spaces node "$RUNNER_TEMP/test-autosave.mjs"
+          BENTO_TEST_APP=webdeck node "$RUNNER_TEMP/test-autosave.mjs"
+          BENTO_TEST_APP=webdeck-spaces node "$RUNNER_TEMP/test-autosave.mjs"
 
       - name: Publish deletion-gate rig
         # A publish assembles site/ for ONE app and mirrors it authoritatively.
@@ -243,7 +243,7 @@ jobs:
           slides/node_modules/.bin/esbuild scripts/test-validate.ts --bundle --platform=node --format=esm --outfile="$RUNNER_TEMP/test-validate.mjs"
           node "$RUNNER_TEMP/test-validate.mjs"
 
-      - name: bento/dash model rig
+      - name: webdeck-dash model rig
         # The format is permanent — additive forever, no server to migrate a
         # single file. Two failures are unrecoverable once files exist: dropping
         # a field this build does not recognise, and letting anything but an
@@ -251,14 +251,14 @@ jobs:
         # data on the first save). Both are asserted from both sides.
         run: node scripts/test-dash-model.ts
 
-      - name: bento/dash store + undo rig
+      - name: webdeck-dash store + undo rig
         # Undo is a patch log rather than document snapshots, which buys history
         # that costs what the EDIT costs — and risks a failure a snapshot cannot
         # have: an inverse that does not restore what it displaced. Every op is
         # checked apply → undo → identical, because that failure is silent.
         run: node scripts/test-dash-store.ts
 
-      - name: bento/dash import rig
+      - name: webdeck-dash import rig
         # Import is where a data tool does its damage, because every mistake is
         # SILENT: the file opens, the grid fills, the totals compute, and the
         # numbers are wrong. Two guards matter most and are checked from both

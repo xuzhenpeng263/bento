@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Build and sign the LANGUAGE PACK INDEX — releases/slides/packs.json.
 //
 //   node scripts/sign-packs.mjs <packs-dir> [--out packs.json]
-//     [--version 1.0.11] [--url-base packs] [--key ~/.bento/release-key.json]
+//     [--version 1.0.11] [--url-base packs] [--key ~/.webdeck/release-key.json]
 //     [--dry]
 //
 // The index is `{ payload: "<json string>", sig: "<base64>" }` — the SAME
@@ -42,7 +42,7 @@ import { fileURLToPath } from 'node:url'
 import { defaultKeyPath, envelopeJson, haveKey, releasePublicKey, signPayload, verifyEnvelope } from './sign-payload.mjs'
 
 /** The app id in the SIGNED INDEX — same value the update manifest uses. */
-const INDEX_APP = 'bento-slides'
+const INDEX_APP = 'webdeck'
 /** The app id inside a PACK file, as build-i18n.mjs writes it. */
 const PACK_APP = 'slides'
 
@@ -73,8 +73,8 @@ export function listPacks(packsDir, { urlBase = 'packs' } = {}) {
       label: pack.label,
       version: pack.version,
       // RELATIVE to the channel by default. The client resolves a relative url
-      // against channel(), so a local channel (localStorage 'bento-packs-url')
-      // serves its OWN packs instead of silently reaching back to bento.page —
+      // against channel(), so a local channel (localStorage 'webdeck-packs-url')
+      // serves its OWN packs instead of silently reaching back to webdeck.page —
       // and the whole tree can be mirrored to another host unchanged. Pass
       // --url-base <absolute> if a release ever needs absolute urls; the
       // signed sha256 is what pins the bytes either way.

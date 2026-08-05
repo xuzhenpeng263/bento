@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Traditional Chinese — machine-drafted, native review welcome.
 //
 // The English string is the KEY: it must match the source byte-for-byte,
@@ -126,10 +126,10 @@ export const zh_Hant: Catalog = {
   "This file": "此檔案",
   "This file could not be opened": "無法開啟此檔案",
   "This file declares rules this build does not know. It is open read-only so nothing is lost.": "此檔案宣告了這個版本不認識的規則。已以唯讀方式開啟，以免遺失任何內容。",
-  "This file was written by a newer version of bento/spaces. It is open read-only so nothing is lost.": "此檔案是由較新版本的 bento/spaces 寫入的。已以唯讀方式開啟，以免遺失任何內容。",
+  "This file was written by a newer version of webdeck-spaces. It is open read-only so nothing is lost.": "此檔案是由較新版本的 webdeck-spaces 寫入的。已以唯讀方式開啟，以免遺失任何內容。",
   "This image is {size} and travels inside the file, making it that much bigger for everyone you send it to. Embed it anyway?": "這張圖片有 {size}，而且會跟著檔案一起走，你傳給的每個人拿到的檔案都會大這麼多。仍要嵌入嗎？",
   "This image was resized to keep the file small. Click to replace it with the original.": "這張圖片已縮小尺寸以保持檔案小巧。點按可換回原始圖片。",
-  "This is not a bento/spaces document — {detail}.": "這不是 bento/spaces 文件 — {detail}。",
+  "This is not a webdeck-spaces document — {detail}.": "這不是 webdeck-spaces 文件 — {detail}。",
   "This page only": "僅此頁面",
   "This space has no pages.": "此空間沒有任何頁面。",
   "This space is encrypted. Saves stay encrypted.": "此空間已加密。往後的儲存也會維持加密。",
@@ -147,7 +147,7 @@ export const zh_Hant: Catalog = {
   "Wrong password — try again": "密碼錯誤 — 請重試",
   "You have the newest version ({v}).": "你已是最新版本 ({v})。",
   "archived": "已封存",
-  "bento/spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "bento/spaces {version} · {pages} 個頁面、{blocks} 個區塊。文件、編輯器和搜尋全都在這一個檔案裡。",
+  "webdeck-spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "webdeck-spaces {version} · {pages} 個頁面、{blocks} 個區塊。文件、編輯器和搜尋全都在這一個檔案裡。",
   "none": "無",
   "{i} of {n}": "{i} / {n}",
   "{n} duplicate or missing id(s) were repaired so links and pages resolve.": "已修復 {n} 個重複或遺失的 id，讓連結與頁面能正確對應。",

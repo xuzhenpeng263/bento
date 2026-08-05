@@ -1,10 +1,10 @@
 # Changelog
 
-All notable changes to **bento/slides**. The app version is baked into every
+All notable changes to **webdeck**. The app version is baked into every
 shell as `APP_VERSION` (from `slides/package.json`) and shown in the About
 dialog; a shipped file updates itself through the signed release channel.
 
-The format (`bento/slides`, version `1`) is additive and stable — every version
+The format (`webdeck`, version `1`) is additive and stable — every version
 below opens files from every earlier version, and unknown fields are preserved.
 This project's versions roughly follow semantic-ish `0.MINOR.PATCH` while it is
 pre-1.0.
@@ -44,7 +44,7 @@ pre-1.0.
   location.
 
   Underneath, this makes the *intent* of a save visible to anything hosting
-  Bento — `tray/ios`, and browser hosts — which previously could not tell ⌘S
+  WebDeck — `tray/ios`, and browser hosts — which previously could not tell ⌘S
   from "Save a copy…" at all, because both arrived with identical arguments.
 
 - **Fix: the topbar came back in the wrong order after the window narrowed and
@@ -88,7 +88,7 @@ pre-1.0.
   The Typography panel now has a button that sets the box to exactly the height
   its text needs, and tells you what that is before you press it.
 
-  Underneath is `window.bento.measure()`, which answers the question the format
+  Underneath is `window.webdeck.measure()`, which answers the question the format
   could not: how tall is this string at this width, in this font? Ask it with a
   spec and you can size a box *before* creating the element, which is what turns
   generating a deck from guess-then-correct into laying it out right the first
@@ -116,7 +116,7 @@ pre-1.0.
   that goes wrong in a generated deck fails quietly: a typo'd property is
   ignored, a `dash-march` loop on a solid stroke animates nothing, a typeface
   the file never carried falls back to something else, and text overflows its
-  box while the JSON looks perfect. `window.bento.validate()` reports all of it
+  box while the JSON looks perfect. `window.webdeck.validate()` reports all of it
   in one structured pass, including text overflow measured against the real
   renderer. It only reads — it never changes the document.
 
@@ -187,15 +187,15 @@ pre-1.0.
   old name — and only one of them answers *what does ⌘S overwrite?* The tab and
   a small chip beside the title now show the file, whenever the two differ.
 
-- **Save offers the file you are looking at.** Opening `Q3-board.bento.html`
-  and pressing ⌘S used to propose saving `Bento_Slides_Showcase.bento.html` —
+- **Save offers the file you are looking at.** Opening `Q3-board.webdeck.html`
+  and pressing ⌘S used to propose saving `WebDeck_Showcase.webdeck.html` —
   the name was built from the deck's title, so an ordinary save quietly
   suggested a *second* file beside the real one. It now offers the file you
   actually opened. (Exports — share copies, templates — still name themselves;
   those are deliberately new files.)
 
 - **Drop a deck onto an open editor to switch to it.** With a deck already open,
-  dragging another `.bento.html` in from Finder opens it in place of the current
+  dragging another `.webdeck.html` in from Finder opens it in place of the current
   one. On Chrome and Edge it arrives with permission to write back, so ⌘S saves
   it without a dialog — which a deck opened by double-clicking cannot do, since
   the browser gives such a page no way to write to its own file.
@@ -266,7 +266,7 @@ pre-1.0.
   touch-sized Save button.
 
 - **Decks carry a page-one preview, so Finder and Files thumbnail them
-  properly.** Every Bento file used to thumbnail as the same dark box, because
+  properly.** Every WebDeck file used to thumbnail as the same dark box, because
   thumbnails are drawn without running a page's JavaScript and, until Bento
   boots, every deck genuinely is the same bytes plus the same boot splash.
   Saving now writes a still picture of page one into the file, which is what
@@ -301,25 +301,25 @@ pre-1.0.
   updating.** When an update is available the About dialog now lists the
   headlines from that release inline, instead of only a version number and a
   link off to GitHub — and because they travel in the signed manifest, they
-  can't be tampered with. After the update lands and you reload, Bento says
+  can't be tampered with. After the update lands and you reload, WebDeck says
   once which version you're now on, with a link to the full notes. It only
   says it if you actually upgraded: someone opening a deck you sent them never
   sees it.
 
 - **A Screen Wake Lock is held for the length of a presentation.** Phones and
   laptops used to dim and lock partway through a talk if you left a slide up
-  for a couple of minutes. Bento now holds the screen on for the length of the
+  for a couple of minutes. WebDeck now holds the screen on for the length of the
   show and lets go when you exit — and takes the lock again if you switch away
   and come back.
 
 - **Honest save messaging where the File System Access API is missing.** Those
   browsers (and every browser on iPhone and iPad) can't rewrite a file in
-  place — Bento hands back an updated copy instead. The editor used to say the
+  place — WebDeck hands back an updated copy instead. The editor used to say the
   opposite in its tooltips and only admit it in a passing message *after* the
   first save. It now says what will actually happen before any work is at
   stake, once per browser, and the Save button describes the real behaviour.
 
-  Those browsers also now show that your work *is* being kept safe. Bento has
+  Those browsers also now show that your work *is* being kept safe. WebDeck has
   always snapshotted the deck into the browser as you edit and offered it back
   when you reopen, but on Safari and Firefox nothing ever said so — the only
   signal was an amber dot that never cleared. It now reports when it last
@@ -329,8 +329,8 @@ pre-1.0.
 
 - **The update save dialog pre-fills the open file's own name.** It offers the
   name of the deck you have open rather than one derived from its title — so a
-  file called `Q3-board.bento.html` no longer offers to save itself as
-  `Q3_Board_Review.bento.html`. The backup written alongside an in-place
+  file called `Q3-board.webdeck.html` no longer offers to save itself as
+  `Q3_Board_Review.webdeck.html`. The backup written alongside an in-place
   update follows the same name. Where the save dialog opens is set by the
   browser and can't be pointed at a folder by the page, but it now remembers
   the last place you saved, so the second update onwards starts in the right
@@ -339,7 +339,7 @@ pre-1.0.
 - **The starter deck is called “Bento Slides Showcase” again.** The lowercase
   rebrand swept the deck's own title along with the app's, but a deck title is
   a document name — it shows in the window title and becomes the suggested
-  filename — so it reads better in title case. The `bento/slides` wordmark is
+  filename — so it reads better in title case. The `webdeck` wordmark is
   unchanged.
 
 - **Charts honour axis and legend text styles, and measure CJK correctly.**
@@ -429,7 +429,7 @@ pre-1.0.
   instead of looping). The size limit itself roughly doubled. Larger media
   still can't be added mid-session; that needs a deeper change, and it's next.
 
-- **The wordmark is lowercase.** `bento/slides`, matching what the file has
+- **The wordmark is lowercase.** `webdeck`, matching what the file has
   always called itself internally, and the website now uses the `bento/.`
   platform mark.
 
@@ -465,7 +465,7 @@ pre-1.0.
 
 - **First-run Slideshow hint.** New editors get a peach neon-runner cue tracing
   the Slideshow button until they present once (and again on hover); the About
-  dialog now links back to bento.page.
+  dialog now links back to webdeck.page.
 - **Fix: live edits no longer lose focus when a collaborator changes something.**
   A remote collab op used to trigger a full canvas repaint that tore down the
   text (or table-cell) node you were typing in — stealing focus and resetting
@@ -491,7 +491,7 @@ pre-1.0.
 
 - **In-place update keeps its handle.** When a deck opened *without* a File
   System Access handle (e.g. double-clicked from disk) is updated via "Update
-  this file…", Bento now keeps the handle the save-picker grants — so this and
+  this file…", WebDeck now keeps the handle the save-picker grants — so this and
   every later update rewrite the file in place silently, instead of re-prompting
   each time. (A double-clicked file gives the browser no handle on open, so the
   first update still needs you to overwrite the file you have open in the save
@@ -563,10 +563,10 @@ pre-1.0.
   `.ed-root` does for the whole drag-driven UI. Form fields (`select`, `input`,
   `textarea`, contenteditable) now restore `user-select: auto` explicitly.
 
-- **Skill renamed `bento-deck` → `bento-slides`** and moved into a Claude Code
-  plugin marketplace at the repo root (`/plugin marketplace add nyblnet/bento`,
-  then `/plugin install bento-slides@bento`). Also published as a claude.ai
-  uploadable zip (`bento.page/skills/bento-slides.zip`); the old
+- **Skill renamed `bento-deck` → `webdeck`** and moved into a Claude Code
+  plugin marketplace at the repo root (`/plugin marketplace add xuzhenpeng263/webdeck`,
+  then `/plugin install webdeck@bento`). Also published as a claude.ai
+  uploadable zip (`webdeck.page/skills/webdeck.zip`); the old
   `skills/bento-deck/SKILL.md` URL keeps serving the current skill. The skill
   now bootstraps from nothing: it downloads the latest signed release itself,
   so "make me a deck" works in an empty folder.
@@ -702,15 +702,15 @@ pre-1.0.
 ## [0.9.0 – 0.9.2]
 
 - **File modes**: read-only **player** files (boot straight into the show) and
-  **password encryption** (`bento/enc` envelope, PBKDF2 + AES-GCM; the block
+  **password encryption** (`webdeck/enc` envelope, PBKDF2 + AES-GCM; the block
   stays spliceable).
 - Live-by-default decks, gated so the anonymous demo never phones home.
 - **AI-native**: an embedded agent briefing + cookbook, the `bento-deck` skill,
-  and `window.bento.loadDoc` round-trip.
+  and `window.webdeck.loadDoc` round-trip.
 
 ## [0.8.0 – 0.8.11]
 
-- **Live collaboration (bento-sync)** — an in-house op-based CRDT with
+- **Live collaboration (webdeck-sync)** — an in-house op-based CRDT with
   same-machine sync (BroadcastChannel) and an optional end-to-end-encrypted
   blind relay (Cloudflare Durable Object). Offline forks merge two-way. The
   saved file stays a complete standalone document.
@@ -724,7 +724,7 @@ pre-1.0.
 - **charts-lite** — the in-house, dependency-free chart engine (bar/line/pie/
   scatter). ECharts/zrender removed (it was ~47% of the shell).
 - **Compressed self-extracting shell**: runtime JS+CSS deflated into base64
-  blocks with a ~1 KB loader; the `#bento-doc` block stays plaintext. Shell
+  blocks with a ~1 KB loader; the `#webdeck-doc` block stays plaintext. Shell
   dropped from ~1.33 MB to ~373 KB.
 - **AI round-trip**: copy/replace document JSON; the shell points agents at the
   document block and API.

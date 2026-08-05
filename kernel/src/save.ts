@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// Self-saving: a Bento file writes itself back to disk with updated data.
+// Copyright (c) 2026 The WebDeck authors
+// Self-saving: a WebDeck file writes itself back to disk with updated data.
 //
 // At boot (before the app mutates the DOM) we deep-clone the document. On save
 // we swap the clone's data block content for the current model JSON and
@@ -10,9 +10,9 @@
 import type { KernelDoc } from './doc.ts'
 import { appConfig } from './app.ts'
 
-const DATA_BLOCK_ID = 'bento-doc'
+const DATA_BLOCK_ID = 'webdeck-doc'
 // Split so the literal never appears in the bundle (it would terminate the
-// inline <script> that carries this very code inside a built Bento file).
+// inline <script> that carries this very code inside a built WebDeck file).
 const SCRIPT_CLOSE = '</scr' + 'ipt>'
 
 /**
@@ -30,7 +30,7 @@ const SCRIPT_CLOSE = '</scr' + 'ipt>'
  * is stripped from every serialized shell. The kernel does not care what the
  * node is — only that the app declared it runtime-owned.
  */
-const TRANSIENT_SELECTOR = '[data-bento-transient]'
+const TRANSIENT_SELECTOR = '[data-webdeck-transient]'
 
 let pristine: Document | null = null
 
@@ -49,8 +49,8 @@ export function pickerIdFor(p: SavePurpose): string {
   if (p === 'in-place') return DATA_BLOCK_ID
   // Copy and share must both be distinguishable from in-place AND from each
   // other — a collapse here would mean "Save a copy" overwrites the open deck.
-  if (p === 'share') return 'bento-share'
-  return 'bento-copy'
+  if (p === 'share') return 'webdeck-share'
+  return 'webdeck-copy'
 }
 
 export function readEmbeddedDoc(): string | null {
@@ -63,7 +63,7 @@ export function readEmbeddedDoc(): string | null {
  * Extra plaintext blocks the app wants written into every saved shell —
  * language packs today (docs/i18n-packs.md), whatever else later. The kernel
  * stays ignorant of what they mean: it is told an id, a type and a JSON body,
- * and guarantees only that they survive a save the same way #bento-doc does.
+ * and guarantees only that they survive a save the same way #webdeck-doc does.
  *
  * The full set is re-declared on every serialize, so dropping one from the
  * list removes it from the next saved file — that is how "remove from this
@@ -133,7 +133,7 @@ function serializeBody(shell: Document, body: string, doc: KernelDoc): string {
   let block = clone.getElementById(DATA_BLOCK_ID)
   if (!block) {
     block = clone.createElement('script')
-    block.setAttribute('type', 'application/bento+json')
+    block.setAttribute('type', 'application/webdeck+json')
     block.id = DATA_BLOCK_ID
     clone.head.appendChild(block)
   }
@@ -156,8 +156,8 @@ function serializeBody(shell: Document, body: string, doc: KernelDoc): string {
 
 // --- static first-page preview (file-manager thumbnails) ---------------------
 //
-// THE PROBLEM. A Bento file is one HTML document, and thumbnailers — iOS
-// Files, macOS QuickLook/Finder, the Bento Tray app — render HTML with
+// THE PROBLEM. A WebDeck file is one HTML document, and thumbnailers — iOS
+// Files, macOS QuickLook/Finder, the WebDeck Tray app — render HTML with
 // JavaScript DISABLED (verified: `qlmanage -t` renders <noscript> content).
 // Until our runtime boots, every deck genuinely IS the same bytes plus the
 // boot splash, so every deck thumbnailed as the same dark box.
@@ -171,7 +171,7 @@ function serializeBody(shell: Document, body: string, doc: KernelDoc): string {
 // after all, the preview is simply never rendered and we are back to today's
 // behaviour: a regression is not possible, only an improvement.
 //
-// It is shell FURNITURE, not document data: nothing here enters `#bento-doc`,
+// It is shell FURNITURE, not document data: nothing here enters `#webdeck-doc`,
 // no format field is added, and a file saved by an older build (which has no
 // preview) opens identically.
 //
@@ -179,7 +179,7 @@ function serializeBody(shell: Document, body: string, doc: KernelDoc): string {
 // placement, the replace-don't-append rule, the encryption veto and the
 // output-safety check; the app hands back a ready-made element.
 
-const PREVIEW_ATTR = 'data-bento-preview'
+const PREVIEW_ATTR = 'data-webdeck-preview'
 
 /** Builds the app's static first-page rendering. Return null for "no preview". */
 export type PreviewProvider = (doc: KernelDoc) => HTMLElement | null
@@ -196,7 +196,7 @@ export function registerPreview(fn: PreviewProvider): void {
  * May this saved file carry a plaintext preview of its first page?
  *
  * NO for an encrypted deck, and this is the single most important rule here.
- * The whole point of the `bento/enc` envelope is that the content is
+ * The whole point of the `webdeck/enc` envelope is that the content is
  * unreadable on disk without the password; rendering page one in plaintext
  * beside the ciphertext would hand an attacker the title slide — usually the
  * most disclosive page in the deck — and would do it silently, because the
@@ -215,7 +215,7 @@ export function previewAllowed(body: string, encrypted = isEncryptionActive()): 
 }
 
 // Built by concatenation for the usual reason (AGENTS.md #1): these literals
-// must never appear in a Bento bundle, which is itself inline script.
+// must never appear in a WebDeck bundle, which is itself inline script.
 // Note the close forms carry no ">": an HTML parser ends a script element at
 // `</script` followed by whitespace, `/` or `>`, so `</script foo>` closes it
 // just as surely as the tidy form does.
@@ -230,7 +230,7 @@ const NOSCRIPT_CLOSE = '</nosc' + 'ript'
  * `<script>`/`</script>` in it would break the open/close balance the frozen
  * splice contract (and `scripts/shell-gate.mjs`) depends on. `</noscript>` is
  * still refused although the preview no longer lives in a `<noscript>`: it
- * costs nothing, and a document written by an older Bento may still carry one.
+ * costs nothing, and a document written by an older WebDeck may still carry one.
  *
  * This check got MORE load-bearing when the preview left `<noscript>`. It is no
  * longer inert markup that only a scripting-less renderer ever parses — it now
@@ -320,7 +320,7 @@ function writePreview(clone: Document, body: string, doc: KernelDoc): void {
   // the ~550KB of compressed payload at the end of the body. The remover goes
   // immediately after the host: any markup between them is markup the parser
   // could paint first.
-  const splash = clone.getElementById('bento-splash')
+  const splash = clone.getElementById('webdeck-splash')
   const parent = splash?.parentNode ?? clone.body ?? clone.documentElement
   const after = splash?.parentNode ? splash.nextSibling : null
   parent.insertBefore(host, after)
@@ -328,7 +328,7 @@ function writePreview(clone: Document, body: string, doc: KernelDoc): void {
 }
 
 /**
- * Serialize `doc` into an arbitrary app shell (a parsed Bento HTML document).
+ * Serialize `doc` into an arbitrary app shell (a parsed WebDeck HTML document).
  * Used with the boot-time pristine copy on every save, and by the self-update
  * flow with a freshly fetched NEWER shell — same document, new app around it.
  * PLAIN output — encryption-aware callers use serializeDocInto/serializeAuto.
@@ -337,7 +337,7 @@ export function serializeWith(shell: Document, doc: KernelDoc): string {
   return serializeBody(shell, JSON.stringify(doc), doc)
 }
 
-/** The full .bento.html file content with `doc` embedded (plain). */
+/** The full .webdeck.html file content with `doc` embedded (plain). */
 export function serializeFile(doc: KernelDoc): string {
   if (!pristine) throw new Error('capturePristine() was not called at boot')
   return serializeWith(pristine, doc)
@@ -345,14 +345,14 @@ export function serializeFile(doc: KernelDoc): string {
 
 // --- password encryption ----------------------------------------------------
 //
-// An encrypted file keeps the SAME plaintext #bento-doc block (the splice
-// contract old updaters rely on) — but the block holds a bento/enc envelope
+// An encrypted file keeps the SAME plaintext #webdeck-doc block (the splice
+// contract old updaters rely on) — but the block holds a webdeck/enc envelope
 // instead of the document: AES-GCM-256 over the doc JSON, key derived from
 // the password with PBKDF2-SHA-256. The password is held in memory for the
 // session so ⌘S and self-update keep writing encrypted output.
 
 export interface EncEnvelope {
-  format: 'bento/enc'
+  format: 'webdeck/enc'
   v: 1
   it: number
   salt: string
@@ -389,7 +389,7 @@ export const isEncryptionActive = () => encPassword !== null
 export function parseEnvelope(text: string): EncEnvelope | null {
   try {
     const env = JSON.parse(text)
-    if (env && env.format === 'bento/enc' && env.v === 1 && env.data && env.salt && env.iv) {
+    if (env && env.format === 'webdeck/enc' && env.v === 1 && env.data && env.salt && env.iv) {
       return env as EncEnvelope
     }
   } catch {
@@ -415,7 +415,7 @@ async function encryptBody(json: string, password: string): Promise<string> {
   const ct = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv: iv as BufferSource }, key, new TextEncoder().encode(json))
   const env: EncEnvelope = {
-    format: 'bento/enc', v: 1, it: ENC_ITERATIONS,
+    format: 'webdeck/enc', v: 1, it: ENC_ITERATIONS,
     salt: eb64.enc(salt), iv: eb64.enc(iv), data: eb64.enc(new Uint8Array(ct)),
   }
   return JSON.stringify(env)
@@ -452,7 +452,7 @@ export async function serializeAuto(doc: KernelDoc): Promise<string> {
 
 export function suggestedFileName(doc: KernelDoc, suffix = ''): string {
   const base = doc.title.replace(/[^\w\d-]+/g, '_').replace(/^_+|_+$/g, '') || 'Untitled'
-  return `${base}${suffix ? `-${suffix}` : ''}.bento.html`
+  return `${base}${suffix ? `-${suffix}` : ''}.webdeck.html`
 }
 
 // --- writing to disk --------------------------------------------------------
@@ -489,8 +489,8 @@ async function pickHandle(
   try {
     // The name to offer is the file the user is ALREADY looking at, when we know
     // it. suggestedFileName() derives from doc.title, and the two drift apart
-    // constantly — a deck called "Bento Slides Showcase" living in
-    // Q3-board.bento.html offered to save as Bento_Slides_Showcase.bento.html,
+    // constantly — a deck called "WebDeck Slides Showcase" living in
+    // Q3-board.webdeck.html offered to save as WebDeck_Showcase.webdeck.html,
     // so an ordinary ⌘S silently proposed a SECOND file beside the real one.
     // A suffixed export (share copies) still names itself, hence the suffix
     // check: those are deliberately new files.
@@ -503,7 +503,7 @@ async function pickHandle(
       // browser remembers the last directory used under this id, so the second
       // update onwards opens where the first one saved.
       ...(fileHandle ? { startIn: fileHandle } : {}),
-      id: 'bento-doc',
+      id: 'webdeck-doc',
       types: [{ description: appConfig().appName, accept: { 'text/html': ['.html'] } }],
     })
   } catch (err: any) {
@@ -531,7 +531,7 @@ export function downloadFile(html: string, name: string) {
  * Save the document. Chrome/Edge: File System Access API (picker on first
  * save, silent rewrite after). Firefox/Safari: download a copy.
  *
- * Format-aware: when the held handle is a .bento.json file we write plain
+ * Format-aware: when the held handle is a .webdeck.json file we write plain
  * JSON instead of the full HTML shell. A new picker always defaults to HTML;
  * use saveDocJson() for an explicit JSON save.
  */
@@ -568,10 +568,10 @@ export const currentFileName = () => fileHandle?.name ?? null
  * Why this exists: a deck double-clicked from disk opens on `file://` with NO
  * handle, so every ⌘S re-runs the picker and the user re-navigates to a file
  * they are already looking at. A drop yields a real handle, so adopting it
- * turns that document into one Bento can rewrite in place.
+ * turns that document into one WebDeck can rewrite in place.
  *
  * The caller MUST have obtained readwrite permission first — this only records
- * the handle. It is deliberately not exported through `window.bento`: adopting
+ * the handle. It is deliberately not exported through `window.webdeck`: adopting
  * a handle silently redirects where ⌘S writes, which is a user gesture, never
  * something a script should do behind their back.
  */
@@ -583,11 +583,11 @@ export function adoptFileHandle(handle: FsFileHandle): void {
  * The name of the file this document is actually open AS, when knowable.
  *
  * Two sources, best first: a held FS Access handle, else this document's own
- * URL. The URL case is the one that matters — a `.bento.html` double-clicked
+ * URL. The URL case is the one that matters — a `.webdeck.html` double-clicked
  * from disk grants no handle, which is exactly when a save picker appears with
  * nothing useful in it.
  *
- * Only a name ending in `.bento.html` counts. That deliberately excludes the
+ * Only a name ending in `.webdeck.html` counts. That deliberately excludes the
  * hosted demo (`/slides/`, `index.html`), so the anonymous try-it deck still
  * falls back to naming itself after its title instead of "index".
  */
@@ -601,7 +601,7 @@ export function openedFileName(): string | null {
   }
 }
 
-/** Strip the document extension: "Q3-board.bento.html" -> "Q3-board". */
+/** Strip the document extension: "Q3-board.webdeck.html" -> "Q3-board". */
 export const fileBase = (name: string) => name.replace(/\.bento\.html$/i, '').replace(/\.html$/i, '')
 
 // --- self-update writing ----------------------------------------------------
@@ -659,7 +659,7 @@ export async function writeUpdatedFileAs(
 // --- file open & JSON-only save (static editor mode) --------------------------
 
 /**
- * Open a file picker for Bento files, requesting write permission at open time.
+ * Open a file picker for WebDeck files, requesting write permission at open time.
  *
  * Chrome/Edge: File System Access API. The handle's readwrite permission is
  * requested INSIDE the same user gesture as the open — without that a later
@@ -683,12 +683,12 @@ export async function openFilePicker(): Promise<{
             accept: { 'text/html': ['.html'], 'application/json': ['.json'] },
           },
         ],
-        id: 'bento-open',
+        id: 'webdeck-open',
       })
       const name: string = handle.name
       // ORDER MATTERS: requestPermission needs the live user gesture, and the
       // open picker IS that gesture. Reading the file (>600KB for a full
-      // .bento.html) could spend the activation, so request first.
+      // .webdeck.html) could spend the activation, so request first.
       let writable = false
       if (handle.requestPermission) {
         try {
@@ -709,7 +709,7 @@ export async function openFilePicker(): Promise<{
   return new Promise((resolve) => {
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = '.bento.html,.bento.json,application/json,text/html'
+    input.accept = '.webdeck.html,.webdeck.json,application/json,text/html'
     const cleanup = () => input.remove()
     input.addEventListener('change', async () => {
       const file = input.files?.[0]
@@ -734,15 +734,15 @@ export async function openFilePicker(): Promise<{
 /**
  * Extract document JSON from a file's raw text content.
  *
- * - `.bento.json` files: the whole file IS the document JSON.
- * - `.bento.html` files: the document lives in `<script id="bento-doc">`.
- *   An empty block means the file is a pristine Bento shell, not a saved deck.
+ * - `.webdeck.json` files: the whole file IS the document JSON.
+ * - `.webdeck.html` files: the document lives in `<script id="webdeck-doc">`.
+ *   An empty block means the file is a pristine WebDeck shell, not a saved deck.
  */
 export function extractDocJson(content: string, name: string): string | null {
   if (/\.json$/i.test(name)) {
     try { JSON.parse(content); return content } catch { return null }
   }
-  // .bento.html: extract from the data block
+  // .webdeck.html: extract from the data block
   const el = new DOMParser().parseFromString(content, 'text/html').querySelector(`#${DATA_BLOCK_ID}`)
   return el?.textContent?.trim() || null
 }
@@ -751,15 +751,15 @@ export function extractDocJson(content: string, name: string): string | null {
  * Download the document as a standalone JSON file (no HTML shell).
  *
  * This is the lightweight interchange format: small enough for AI chats,
- * version-control friendly, and still a valid Bento document that any
- * Bento editor can open.
+ * version-control friendly, and still a valid WebDeck document that any
+ * WebDeck editor can open.
  */
 export function downloadDocJson(doc: KernelDoc, name?: string): void {
   const json = JSON.stringify(doc, null, 2)
   const base = name
     ? fileBase(name)
     : (doc.title || 'Untitled').replace(/[^\w\d-]+/g, '_').replace(/^_+|_+$/g, '')
-  const filename = `${base || 'Untitled'}.bento.json`
+  const filename = `${base || 'Untitled'}.webdeck.json`
   const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
   const a = document.createElement('a')
   a.href = url
@@ -771,9 +771,9 @@ export function downloadDocJson(doc: KernelDoc, name?: string): void {
 /**
  * Save only the document JSON to disk.
  *
- * When the open file was itself a `.bento.json` AND we hold a writable
+ * When the open file was itself a `.webdeck.json` AND we hold a writable
  * handle, we rewrite it in place. Otherwise we download a copy — mixing
- * JSON content into a `.bento.html` handle would break the format the
+ * JSON content into a `.webdeck.html` handle would break the format the
  * user chose at open time.
  */
 export async function saveDocJson(doc: KernelDoc): Promise<SaveResult> {

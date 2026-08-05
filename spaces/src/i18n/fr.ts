@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // French — machine-drafted, native review welcome.
 //
 // The English string is the KEY: it must match the source byte-for-byte,
@@ -126,10 +126,10 @@ export const fr: Catalog = {
   "This file": "Ce fichier",
   "This file could not be opened": "Ce fichier n’a pas pu être ouvert",
   "This file declares rules this build does not know. It is open read-only so nothing is lost.": "Ce fichier déclare des règles que cette version ne connaît pas. Il est ouvert en lecture seule pour ne rien perdre.",
-  "This file was written by a newer version of bento/spaces. It is open read-only so nothing is lost.": "Ce fichier a été écrit par une version plus récente de bento/spaces. Il est ouvert en lecture seule pour ne rien perdre.",
+  "This file was written by a newer version of webdeck-spaces. It is open read-only so nothing is lost.": "Ce fichier a été écrit par une version plus récente de webdeck-spaces. Il est ouvert en lecture seule pour ne rien perdre.",
   "This image is {size} and travels inside the file, making it that much bigger for everyone you send it to. Embed it anyway?": "Cette image fait {size} et voyage dans le fichier, ce qui l’alourdit d’autant pour toutes les personnes à qui vous l’envoyez. L’intégrer quand même ?",
   "This image was resized to keep the file small. Click to replace it with the original.": "Cette image a été redimensionnée pour garder le fichier léger. Cliquez pour la remplacer par l’originale.",
-  "This is not a bento/spaces document — {detail}.": "Ce n’est pas un document bento/spaces — {detail}.",
+  "This is not a webdeck-spaces document — {detail}.": "Ce n’est pas un document webdeck-spaces — {detail}.",
   "This page only": "Cette page seulement",
   "This space has no pages.": "Cet espace n’a aucune page.",
   "This space is encrypted. Saves stay encrypted.": "Cet espace est chiffré. Les enregistrements restent chiffrés.",
@@ -147,7 +147,7 @@ export const fr: Catalog = {
   "Wrong password — try again": "Mot de passe incorrect — réessayez",
   "You have the newest version ({v}).": "Vous avez la dernière version ({v}).",
   "archived": "archivée",
-  "bento/spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "bento/spaces {version} · {pages} page(s), {blocks} bloc(s). Le document, l’éditeur et la recherche tiennent tous dans ce seul fichier.",
+  "webdeck-spaces {version} · {pages} page(s), {blocks} block(s). The document, the editor and the search are all in this one file.": "webdeck-spaces {version} · {pages} page(s), {blocks} bloc(s). Le document, l’éditeur et la recherche tiennent tous dans ce seul fichier.",
   "none": "aucun",
   "{i} of {n}": "{i} sur {n}",
   "{n} duplicate or missing id(s) were repaired so links and pages resolve.": "{n} id(s) en double ou manquant(s) ont été réparés pour que les liens et les pages se résolvent.",

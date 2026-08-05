@@ -1,0 +1,19 @@
+{
+  "name": "webdeck",
+  "description": "Author WebDeck presentations — self-contained .webdeck.html decks with morph transitions, live charts and speaker notes. Starts from nothing: downloads the latest WebDeck app automatically.",
+  "version": "1.0.6",
+  "author": {
+    "name": "The WebDeck authors",
+    "url": "https://webdeck.page"
+  },
+  "homepage": "https://webdeck.page",
+  "repository": "https://github.com/xuzhenpeng263/webdeck",
+  "license": "MIT",
+  "keywords": [
+    "slides",
+    "presentation",
+    "deck",
+    "webdeck",
+    "powerpoint"
+  ]
+}

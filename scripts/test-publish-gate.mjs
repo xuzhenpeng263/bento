@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Publish deletion-gate rig.
 //
 //   node scripts/test-publish-gate.mjs
 //
 // WHAT THIS PROVES. `site/` is assembled for ONE app and mirrored
 // authoritatively with `rsync --delete`, so every artifact that build did not
-// write is removed from bento.page. Measured against a copy of the real
+// write is removed from webdeck.page. Measured against a copy of the real
 // published tree, a spaces-shaped `site/` deleted 47 live files — the signed
 // shell, `releases/slides/manifest.json`, all 22 language packs, the gallery,
 // the guestbook landing page — with every pre-existing gate green.
@@ -39,16 +39,16 @@ function ok(cond, msg) {
 // A published tree shaped like the real one: the artifacts shipped files depend on.
 const PUBLISHED = [
   'index.html', 'CNAME', '.nojekyll', 'agents.md', 'LICENSE',
-  'releases/slides/Bento_Slides.bento.html',
+  'releases/slides/WebDeck.webdeck.html',
   'releases/slides/manifest.json',
   'releases/slides/packs.json',
-  'releases/slides/packs/bento-slides-1.0.13-ko.pack.json',
-  'releases/slides/packs/bento-slides-1.0.13-ru.pack.json',
+  'releases/slides/packs/webdeck-1.0.13-ko.pack.json',
+  'releases/slides/packs/webdeck-1.0.13-ru.pack.json',
   'slides/index.html',
-  'gallery/orbital-dark-immersive.bento.html',
+  'gallery/orbital-dark-immersive.webdeck.html',
   'guestbook/index.html',
-  'guestbook.bento.html',
-  'skills/bento-slides/SKILL.md',
+  'guestbook.webdeck.html',
+  'skills/webdeck/SKILL.md',
 ]
 
 // ---- the failure this exists to stop -------------------------------------
@@ -56,7 +56,7 @@ const PUBLISHED = [
 // every slides artifact is simply absent from the staging tree.
 const SPACES_STAGED = [
   'index.html', 'CNAME', '.nojekyll',
-  'releases/spaces/Bento_Spaces.bento.html',
+  'releases/spaces/WebDeck_Spaces.webdeck.html',
   'releases/spaces/manifest.json',
   'spaces/index.html',
 ]
@@ -66,8 +66,8 @@ ok(spacesDeletions.length === 12,
 for (const critical of [
   'releases/slides/manifest.json',
   'releases/slides/packs.json',
-  'releases/slides/Bento_Slides.bento.html',
-  'releases/slides/packs/bento-slides-1.0.13-ko.pack.json',
+  'releases/slides/WebDeck.webdeck.html',
+  'releases/slides/packs/webdeck-1.0.13-ko.pack.json',
 ]) {
   ok(spacesDeletions.includes(critical),
     `the update/pack channel artifact ${critical} is caught`)
@@ -85,17 +85,17 @@ ok(plannedDeletions(PUBLISHED, PUBLISHED, ['.git']).length === 0,
 // The mirror does not touch an excluded path, so it cannot delete it. Without
 // this, every release built from a clean tag checkout — which never has the
 // gitignored guestbook epoch — would be blocked outright.
-const noGuestbookDeck = PUBLISHED.filter((p) => p !== 'guestbook.bento.html')
-ok(plannedDeletions(PUBLISHED, noGuestbookDeck, ['.git', 'guestbook.bento.html']).length === 0,
+const noGuestbookDeck = PUBLISHED.filter((p) => p !== 'guestbook.webdeck.html')
+ok(plannedDeletions(PUBLISHED, noGuestbookDeck, ['.git', 'guestbook.webdeck.html']).length === 0,
   'a path excluded from the mirror is not counted as a deletion')
-ok(plannedDeletions(PUBLISHED, noGuestbookDeck, ['.git']).includes('guestbook.bento.html'),
+ok(plannedDeletions(PUBLISHED, noGuestbookDeck, ['.git']).includes('guestbook.webdeck.html'),
   'the same path IS a deletion when it is not excluded — the exclusion is doing the work')
 
 // Directory-prefix exclusions must cover their contents, and nothing else.
 ok(plannedDeletions(PUBLISHED, [], ['.git', 'releases']).every((p) => !p.startsWith('releases/')),
   'excluding a directory covers everything under it')
-ok(plannedDeletions(PUBLISHED, [], ['.git', 'guestbook']).includes('guestbook.bento.html'),
-  'excluding "guestbook" does NOT swallow the sibling file "guestbook.bento.html"')
+ok(plannedDeletions(PUBLISHED, [], ['.git', 'guestbook']).includes('guestbook.webdeck.html'),
+  'excluding "guestbook" does NOT swallow the sibling file "guestbook.webdeck.html"')
 
 // ---- grouping --------------------------------------------------------------
 const groups = new Map(groupDeletions(spacesDeletions))
@@ -123,16 +123,16 @@ try {
 // real deletions gets waved through.
 const SLIDES_1014 = [
   'index.html', 'CNAME', '.nojekyll', 'agents.md', 'LICENSE',
-  'releases/slides/Bento_Slides.bento.html',
+  'releases/slides/WebDeck.webdeck.html',
   'releases/slides/manifest.json',
   'releases/slides/packs.json',
-  'releases/slides/packs/bento-slides-1.0.14-ko.pack.json',
-  'releases/slides/packs/bento-slides-1.0.14-ru.pack.json',
+  'releases/slides/packs/webdeck-1.0.14-ko.pack.json',
+  'releases/slides/packs/webdeck-1.0.14-ru.pack.json',
   'slides/index.html',
-  'gallery/orbital-dark-immersive.bento.html',
+  'gallery/orbital-dark-immersive.webdeck.html',
   'guestbook/index.html',
-  'guestbook.bento.html',
-  'skills/bento-slides/SKILL.md',
+  'guestbook.webdeck.html',
+  'skills/webdeck/SKILL.md',
 ]
 const superseded = supersededPacks(PUBLISHED, SLIDES_1014)
 ok(superseded.length === 2, `both older packs are recognised as superseded (got ${superseded.length})`)
@@ -147,7 +147,7 @@ ok(supersededPacks(PUBLISHED, SPACES_STAGED).length === 0,
   'a spaces release excuses no slides packs — it stages none of them')
 ok(supersededPacks(PUBLISHED, PUBLISHED).length === 0,
   'a republish of the same versions excuses nothing (same version is not superseded)')
-ok(supersededPacks(PUBLISHED, ['releases/spaces/packs/bento-spaces-1.0.0-ko.pack.json']).length === 0,
+ok(supersededPacks(PUBLISHED, ['releases/spaces/packs/webdeck-spaces-1.0.0-ko.pack.json']).length === 0,
   "another app's pack for the same language does not excuse this app's")
 
 console.log(`\n${checks - failures}/${checks} checks passed`)

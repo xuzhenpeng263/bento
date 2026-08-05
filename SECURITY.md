@@ -18,7 +18,7 @@ with no details, and we'll follow up.)
 When you report, please include:
 
 - A description of the issue and the impact you believe it has.
-- Steps to reproduce, ideally with a minimal `.bento.html` file or a short
+- Steps to reproduce, ideally with a minimal `.webdeck.html` file or a short
   script.
 - The affected version (the app version is shown in the About dialog and baked
   into every shell as `APP_VERSION`), plus your browser and OS.
@@ -44,8 +44,8 @@ In scope:
 - The signed self-update mechanism (`slides/src/update.ts`).
 
 Out of scope: vulnerabilities in third-party browsers or operating systems,
-and issues that require a user to run a `.bento.html` file they already know to
-be malicious from an untrusted source (a Bento document is code-adjacent — treat
+and issues that require a user to run a `.webdeck.html` file they already know to
+be malicious from an untrusted source (a WebDeck document is code-adjacent — treat
 files from strangers like any other HTML you'd open).
 
 ## Security posture (for context)

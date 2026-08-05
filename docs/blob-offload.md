@@ -31,7 +31,7 @@ Two further consequences, both fixed by this design:
 
 ## The constraint that shapes everything
 
-**The file must stay self-contained.** A `.bento.html` carries its assets as
+**The file must stay self-contained.** A `.webdeck.html` carries its assets as
 data URIs in `doc.assets` — that is the product. So this is a **transport
 change, not a format change**. `doc.assets` keeps holding data URIs; only the
 way an asset *travels between peers* changes. A receiving peer fetches the

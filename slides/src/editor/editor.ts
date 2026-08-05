@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Editor shell: topbar, slide sidebar, canvas, properties panel, keyboard
 // shortcuts, save & present wiring.
 
@@ -35,7 +35,7 @@ const i18nT = t
 
 /** Per-BROWSER, not per-deck: whether the "this browser can't rewrite files"
  *  notice has been acknowledged. It is a property of the browser. */
-const SAVE_NOTICE_KEY = 'bento-save-notice'
+const SAVE_NOTICE_KEY = 'webdeck-save-notice'
 
 /** sessionStorage: set just before the post-update reload, read once by the
  *  version that boots next. Deliberately NOT localStorage — see
@@ -217,13 +217,8 @@ export class Editor {
     const bar = div('ed-topbar')
     const logo = div('ed-logo')
     logo.innerHTML =
-      `<svg class="ed-logo-mark" viewBox="0 0 32 32" width="20" height="20" aria-hidden="true">` +
-      `<rect width="32" height="32" rx="7" fill="#16273E"/>` +
-      `<rect x="5" y="5" width="7" height="22" rx="2.5" fill="#5E7699"/>` +
-      `<rect x="14" y="5" width="13" height="10" rx="2.5" fill="#FF9E8A"/>` +
-      `<rect x="14" y="17" width="13" height="10" rx="2.5" fill="#F0EBE0"/>` +
-      `</svg> <b>bento<span style="color:#FF9E8A">/</span>slides</b>`
-    logo.title = t('About bento/slides — version, updates, licenses')
+      `<img class="ed-logo-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAQCAMAAAAhxq8pAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAGVUExUReXl5dDPz8zLy83MzM7NzdDOztjW1uDf3+Hg4OHh4N/e3trZ2dfW1s/OzsjHx8bExNva2vv7+93c3NLR0eTj4/Dw8O/v7+vr6uTk49jX19nY2NrZ2NXU09DPzsrJyMnHx9PS0fr6+uTk5NXT0+fn5+jo6Ojo5+Xl5OLi4d7e3uDg3/n5+dfX1+Lh4ezs7O7u7e7u7u3t7erq6ujn5+bl5eno6N7d3dXU1Pj5+Ovq6vHx8fT09Orq6enp6fX19Pn5+Pj4+OHh4fLy8dTT09HPz9TU1NHQz9LR0NbV1ff399/f38fGxtHQ0NjY19PS0uPi4vn6+enp6Nzb2/j49+fm5uXk5N/f3sLBwd7e3ezs6+rp6d3d3Nzc28vKyvPz8/f49+Pj49PT0tDQ0N3d3dXV1Obm5eHg38fFxc3Ly/f39tva2c/Nzbu5uezr69fW1cnIyPHw8Pb29ePj4vf29vPz8sC+vsXDw8vKyczLysTCwvX19fTz8/b29vb19e/v7uXk49/e3dTS0tHP0NnZ2ODg4PHx8P///+b2oiQAAAABYktHRIaM3jtdAAAAB3RJTUUH6ggFBTkMfVwqzQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyNi0wOC0wNVQwNTozNjowNCswMDowMHAJfacAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjYtMDgtMDVUMDU6MzQ6MzErMDA6MDDZFj1iAAAAKHRFWHRkYXRlOnRpbWVzdGFtcAAyMDI2LTA4LTA1VDA1OjU3OjEyKzAwOjAw/kxwHQAAAUdJREFUGNMVyOlfwXAcAODvGJtt9GuISelgajWkWRImVKSIrOTovnTTpfv+v6vP8+4BwDRaHNfpCYI0UDRjNHWhbmDNFmuPza6nOQfdyzn7+l0DgzBkMlKEYxi5Pbx3hBgVWIwZAws2LnrcHp8/MBHkJyVLSJ4Kg4imIzMeiAZjfMxniytKjEvALJEU2VQ6NYdh8wu6jFXh6QSIkF30x7nckmOZc+S1hZViaRXEclhdQ+uVjWC1VmdNjU2+vgWCpGyTssaws+sWqEJOmwyhLOypiiCF8jV8vyodHB4dR4JsE1AhwZ+cnolC+Zy5YC7xq2i9Bah93bphbu/u+xudzkPHHIihOCC1+diypV1Y3pnK47gzWuCe/vP5pfVqaL9JdkGuvPP0RxK4jGr/A6oKXouBrGc0n0kocl8lVhbIb4KiCFmWSzT58wumIECr62Sq6gAAAABJRU5ErkJggg==" width="20" height="20" alt=""> <b>WebDeck</b>`
+    logo.title = t('About webdeck — version, updates, licenses')
     logo.style.cursor = 'pointer'
     logo.addEventListener('click', () => this.openAbout())
     const title = document.createElement('input')
@@ -299,7 +294,7 @@ export class Editor {
     const undoB = btn(ICONS.undo, '', () => this.store.undo(), t('Undo (⌘Z)'))
     const redoB = btn(ICONS.redo, '', () => this.store.redo(), t('Redo (⇧⌘Z)'))
     const saveB = btn(ICONS.save, t('Save'), () => this.save(false),
-      t('Save only the document data as .bento.json — lightweight, git-friendly, ideal for AI tools.'))
+      t('Save only the document data as .webdeck.json — lightweight, git-friendly, ideal for AI tools.'))
     saveB.appendChild(this.dirtyDot) // the amber unsaved-changes dot lives ON Save
     const pdfB = btn(ICONS.pdf, '', () => this.exportPdf(), t('Export PDF (print)'))
     const pptxB = btn(ICONS.download, 'PPTX', () => void this.exportPowerPoint(), t('Export PowerPoint (.pptx)'))
@@ -369,7 +364,7 @@ export class Editor {
     // hint merely plays — so it keeps nudging until it's used). Hover replays it
     // any time (CSS :hover). When the laps finish fading, just drop the class so
     // hover takes over cleanly (a lingering class would replay on mouse-out).
-    try { if (!localStorage.getItem('bento-slideshow-started')) pill.classList.add('ed-hint-pulse') } catch { /* storage off */ }
+    try { if (!localStorage.getItem('webdeckhow-started')) pill.classList.add('ed-hint-pulse') } catch { /* storage off */ }
     pill.addEventListener('animationend', (e) => {
       if ((e as AnimationEvent).animationName !== 'ed-runner-fade') return
       pill.classList.remove('ed-hint-pulse')
@@ -692,16 +687,16 @@ export class Editor {
       // FILE operations only — everything that goes to OTHER PEOPLE lives in
       // the Share panel (one mental model: Save = for me, Share = for others).
       item(ICONS.code, t('Open File…'),
-        t('Open a .bento.html or .bento.json file — replaces the current deck (⌘Z undoes).'),
+        t('Open a .webdeck.html or .webdeck.json file — replaces the current deck (⌘Z undoes).'),
         () => void this.openFileIntoEditor())
       into.appendChild(tag(div('ed-menu-sep')))
       // Save in either format — the main ⌘S button saves in the current file's
       // format; these always produce the named format regardless.
       item(ICONS.save, t('Save as HTML…'),
-        t('Save the full .bento.html file — self-contained, double-click to open.'),
+        t('Save the full .webdeck.html file — self-contained, double-click to open.'),
         () => void this.saveAsHtml())
       item(ICONS.code, t('Save as JSON…'),
-        t('Save only the document data as .bento.json — lightweight, git-friendly, ideal for AI tools.'),
+        t('Save only the document data as .webdeck.json — lightweight, git-friendly, ideal for AI tools.'),
         () => void this.saveJsonOnly())
       into.appendChild(tag(div('ed-menu-sep')))
       item(ICONS.copy, t('Save a copy…'),
@@ -741,6 +736,10 @@ export class Editor {
       item(ICONS.template, t('Start from scratch…'),
         t('Replace every slide with one blank slide. Keeps the deck’s theme, name and live session — ⌘Z undoes.'),
         () => this.startFromScratch())
+      into.appendChild(tag(div('ed-menu-sep')))
+      item(ICONS.x, t('Close File'),
+        t('Close this file and return to the welcome page — open or create another.'),
+        () => { (window as any).webdeck?.closeFile?.() })
     }
   }
 
@@ -962,7 +961,7 @@ export class Editor {
     })
   }
 
-  /** Open a Bento file and replace the current document (undoable). */
+  /** Open a WebDeck file and replace the current document (undoable). */
   private async openFileIntoEditor() {
     if (this.store.dirty && !confirm(t('Open another file? Unsaved changes will be lost.'))) return
     try {
@@ -970,16 +969,16 @@ export class Editor {
       if (!picked) return
       const { content, name } = picked
       const json = extractDocJson(content, name)
-      if (!json) { this.toast(t('{name} doesn\'t contain a Bento document.', { name })); return }
+      if (!json) { this.toast(t('{name} doesn\'t contain a WebDeck document.', { name })); return }
       const next = parseDoc(json)
-      if (!next) { this.toast(t('{name} isn\'t a valid Bento document.', { name })); return }
+      if (!next) { this.toast(t('{name} isn\'t a valid WebDeck document.', { name })); return }
       this.openedAs = name
       this.store.replaceDoc(next)
       this.canvas.render()
       this.syncWindowTitle()
       this.flashSaved(hasFileHandle() ? t('Opened {name}', { name }) : t('Opened {name} — ⌘S will save a copy', { name }))
     } catch (err) {
-      console.error('bento: open file failed', err)
+      console.error('webdeck: open file failed', err)
       this.toast(t('Couldn\'t open that file — see console'))
     }
   }
@@ -993,8 +992,8 @@ export class Editor {
     void this.save(true)
   }
 
-  /** Save as a self-contained .bento.html file — always full HTML.
-   *  If a .bento.json file is also open, it is kept in sync. */
+  /** Save as a self-contained .webdeck.html file — always full HTML.
+   *  If a .webdeck.json file is also open, it is kept in sync. */
   private async saveAsHtml() {
     this.canvas.commitTextEdit()
     this.session?.stampInto(this.store.doc)
@@ -1010,7 +1009,7 @@ export class Editor {
       } else {
         downloadFile(html, name)
       }
-      // Keep the paired .bento.json in sync
+      // Keep the paired .webdeck.json in sync
       if (jsonHandle) {
         try { await saveDocJson(this.store.doc) } catch { /* best-effort */ }
       }
@@ -1022,14 +1021,14 @@ export class Editor {
   }
 
   /** Save only the document JSON (no HTML shell) — lightweight interchange.
-   *  If a .bento.html file is also open, it is kept in sync. */
+   *  If a .webdeck.html file is also open, it is kept in sync. */
   private async saveJsonOnly() {
     this.canvas.commitTextEdit()
     this.session?.stampInto(this.store.doc)
     try {
       const htmlHandle = hasFileHandle() && !/\.json$/i.test(currentFileName() ?? '')
       const result = await saveDocJson(this.store.doc)
-      // Keep the paired .bento.html in sync
+      // Keep the paired .webdeck.html in sync
       if (htmlHandle) {
         try { await writeUpdatedDoc(this.store.doc) } catch { /* best-effort */ }
       }
@@ -1107,13 +1106,13 @@ export class Editor {
     nameInput.type = 'text'
     nameInput.placeholder = t('Guest')
     try {
-      nameInput.value = localStorage.getItem('bento-author') ?? ''
+      nameInput.value = localStorage.getItem('webdeck-author') ?? ''
     } catch {
       /* storage unavailable */
     }
     nameInput.addEventListener('change', () => {
       try {
-        localStorage.setItem('bento-author', nameInput.value.trim())
+        localStorage.setItem('webdeck-author', nameInput.value.trim())
       } catch {
         /* storage unavailable */
       }
@@ -1143,7 +1142,7 @@ export class Editor {
       else if (cme.v === 2 && cme.ownerPriv) { myRole = 'owner'; myPub = cme.owner }
       else if (cme.v === 2 && cme.invite) {
         myRole = 'editor'
-        try { myPub = JSON.parse(localStorage.getItem(`bento-member-${this.store.doc.docId}`) ?? 'null')?.pub } catch { /* absent */ }
+        try { myPub = JSON.parse(localStorage.getItem(`webdeck-member-${this.store.doc.docId}`) ?? 'null')?.pub } catch { /* absent */ }
       } else if (cme.writerPriv) { myRole = 'editor'; myPub = cme.writerPub }
       if (myRole) {
         const label = div('ed-share-label')
@@ -1153,7 +1152,7 @@ export class Editor {
         const who = document.createElement('span')
         who.className = 'who'
         let myName = t('Guest')
-        try { myName = localStorage.getItem('bento-author') || myName } catch { /* ok */ }
+        try { myName = localStorage.getItem('webdeck-author') || myName } catch { /* ok */ }
         who.textContent = `${myName} (${t('you')})`
         const where = document.createElement('span')
         where.className = 'where'
@@ -1372,7 +1371,7 @@ export class Editor {
         if (cov.missing > 0) {
           const warn = div('ed-lang-warn')
           warn.textContent = t(
-            'Built for v{v} — {n} phrases still show in English. Updating Bento refreshes it.',
+            'Built for v{v} — {n} phrases still show in English. Updating WebDeck refreshes it.',
             { v: p.version ?? '?', n: String(cov.missing) },
           )
           listHost.appendChild(warn)
@@ -1704,7 +1703,7 @@ export class Editor {
 
   private wireThumbDrag(item: HTMLElement, index: number) {
     item.addEventListener('dragstart', (ev) => {
-      ev.dataTransfer!.setData('text/bento-slide', String(index))
+      ev.dataTransfer!.setData('text/webdeck-slide', String(index))
       ev.dataTransfer!.effectAllowed = 'move'
     })
     item.addEventListener('dragover', (ev) => {
@@ -1715,7 +1714,7 @@ export class Editor {
     item.addEventListener('drop', (ev) => {
       ev.preventDefault()
       item.classList.remove('drop')
-      const from = parseInt(ev.dataTransfer!.getData('text/bento-slide'))
+      const from = parseInt(ev.dataTransfer!.getData('text/webdeck-slide'))
       if (Number.isNaN(from) || from === index) return
       this.store.commit(() => {
         const [moved] = this.store.doc.slides.splice(from, 1)
@@ -1746,7 +1745,7 @@ export class Editor {
         const slide = this.store.doc.slides[Number(item.dataset.index)]
         if (!slide) return
         const w = slide.stateOf ? Math.round(base * 0.84) : base
-        item.querySelector('.bento-thumb-surface')?.replaceWith(renderThumbnail(slide, this.store.doc, w))
+        item.querySelector('.webdeck-thumb-surface')?.replaceWith(renderThumbnail(slide, this.store.doc, w))
         // comment badge tracks doc-level changes too (comments emit 'doc')
         const open = slide.comments?.some((c) => !c.resolved)
         const badge = item.querySelector('.ed-thumb-cmt')
@@ -1817,7 +1816,7 @@ export class Editor {
     // page geometry follows the deck's aspect (width normalised to 1600)
     const pageH = Math.round((1600 * this.store.doc.size.height) / this.store.doc.size.width)
     const pageCss = document.createElement('style')
-    pageCss.textContent = `@page { size: 1600px ${pageH}px; margin: 0; } #bento-print .bp-page { height: ${pageH}px; }`
+    pageCss.textContent = `@page { size: 1600px ${pageH}px; margin: 0; } #webdeck-print .bp-page { height: ${pageH}px; }`
     box.appendChild(pageCss)
     for (const slide of this.store.doc.slides) {
       if (slide.stateOf) continue
@@ -1930,7 +1929,7 @@ export class Editor {
       if (file.size > MEDIA_EMBED_BUDGET) {
         const mb = Math.round(file.size / (1024 * 1024))
         const ok = confirm(t(
-          'This {kind} is {mb} MB. Embedding keeps it inside the .bento.html but makes the file large and slow to open and save.\n\nEmbed anyway? (Cancel, then paste a hosted URL in the panel to keep the deck small.)',
+          'This {kind} is {mb} MB. Embedding keeps it inside the .webdeck.html but makes the file large and slow to open and save.\n\nEmbed anyway? (Cancel, then paste a hosted URL in the panel to keep the deck small.)',
           { kind: t(kind), mb }, // localise the noun — see promptMediaUrl
         ))
         if (!ok) { this.insertMedia(kind, ''); return } // empty element → panel URL field
@@ -1992,7 +1991,7 @@ export class Editor {
     if (this.presenting) return
     if (this.store.doc.slides.length === 0) { this.toast(t('No pages yet')); return }
     // They've started a slideshow — retire the first-run nudge for good.
-    try { localStorage.setItem('bento-slideshow-started', '1') } catch { /* storage off */ }
+    try { localStorage.setItem('webdeckhow-started', '1') } catch { /* storage off */ }
     document.querySelector('.ed-hint-pulse')?.classList.remove('ed-hint-pulse')
     this.canvas.commitTextEdit()
     this.presenting = true
@@ -2006,7 +2005,7 @@ export class Editor {
   // --- paste: external objects + cross-deck elements/slides ---------------------
 
   private wirePaste() {
-    // A dropped .bento.html OPENS as a deck (and adopts a writable handle);
+    // A dropped .webdeck.html OPENS as a deck (and adopts a writable handle);
     // anything else falls through to the existing image/media drop behaviour.
     document.addEventListener('dragover', (ev: DragEvent) => {
       if ([...(ev.dataTransfer?.items ?? [])].some((i) => i.kind === 'file')) ev.preventDefault()
@@ -2026,7 +2025,7 @@ export class Editor {
         if (file) { ev.preventDefault(); this.pasteImageFile(file); return }
       }
       const text = dt.getData('text/plain')
-      // 2) Bento elements / slides copied from this or another deck
+      // 2) WebDeck elements / slides copied from this or another deck
       const clip = parseClip(text)
       if (clip?.kind === 'elements') {
         ev.preventDefault()
@@ -2264,12 +2263,12 @@ export class Editor {
    * Keyed on sessionStorage, NOT a stored last-seen version, because those
    * answer different questions. We want "did this reload just follow an
    * upgrade?", not "has this browser seen 1.0.11?". The difference is
-   * recipients: most people who open a .bento.html never upgraded anything, and
+   * recipients: most people who open a .webdeck.html never upgraded anything, and
    * a version comparison would greet them with release notes for a version they
    * never had. They cannot reach this path — they never clicked Reload.
    *
    * localStorage would also be wrong mechanically: it is per ORIGIN, and in
-   * bento/tray every document gets its own origin, so a "seen" flag would be
+   * webdeck/tray every document gets its own origin, so a "seen" flag would be
    * per document — five decks, five notices.
    *
    * Only fires when the reload actually landed on the version it promised, so a
@@ -2289,7 +2288,7 @@ export class Editor {
     msg.textContent = t('Updated to v{v}.', { v: APP_VERSION })
     const what = document.createElement('a')
     what.className = 'ed-btn'
-    what.href = `https://github.com/nyblnet/bento/releases/tag/v${APP_VERSION}`
+    what.href = `https://github.com/xuzhenpeng263/webdeck/releases/tag/v${APP_VERSION}`
     what.target = '_blank'
     what.rel = 'noopener'
     what.textContent = t('What’s new →')
@@ -2305,7 +2304,7 @@ export class Editor {
    * Tab title = deck title, plus the FILE name once one is known.
    *
    * `openedFileName()` answers this from the handle, or from the URL when a
-   * `.bento.html` was opened directly — so it is right for a dropped file, a
+   * `.webdeck.html` was opened directly — so it is right for a dropped file, a
    * saved file, and a double-clicked one alike, and null for the hosted demo.
    */
   private syncWindowTitle() {
@@ -2334,7 +2333,7 @@ export class Editor {
   }
 
   /**
-   * Open a `.bento.html` dropped onto the editor, adopting a WRITABLE handle
+   * Open a `.webdeck.html` dropped onto the editor, adopting a WRITABLE handle
    * where the browser offers one.
    *
    * This is the only route to in-place saving for a deck that arrived from
@@ -2342,7 +2341,7 @@ export class Editor {
    * every ⌘S re-runs the save picker and asks the user to navigate to the file
    * they already have open. `getAsFileSystemHandle()` returns a real handle for
    * a dropped file (Chromium only), so one permission prompt converts that deck
-   * into one Bento can rewrite.
+   * into one WebDeck can rewrite.
    *
    * Guards, in order: images and everything else keep their existing paste/drop
    * behaviour; an encrypted deck is refused rather than half-opened, because the
@@ -2379,7 +2378,7 @@ export class Editor {
     if (!file) return true
 
     const html = await file.text()
-    const el = new DOMParser().parseFromString(html, 'text/html').querySelector('#bento-doc')
+    const el = new DOMParser().parseFromString(html, 'text/html').querySelector('#webdeck-doc')
     const block = el?.textContent?.trim() ?? ''
     // A pristine, never-saved shell ships an EMPTY block — the starter deck is
     // generated at runtime, not stored. That file is a perfectly good Bento
@@ -2387,13 +2386,13 @@ export class Editor {
     // a foreign file.
     if (el && !block) { alert(t('{name} is an empty copy of Bento, not a saved deck. Open it on its own to start one.', { name: named })); return true }
     let parsed: unknown
-    try { parsed = JSON.parse(block) } catch { alert(t('{name} isn’t a Bento document.', { name: named })); return true }
-    if ((parsed as { format?: string })?.format === 'bento/enc') {
+    try { parsed = JSON.parse(block) } catch { alert(t('{name} isn’t a WebDeck document.', { name: named })); return true }
+    if ((parsed as { format?: string })?.format === 'webdeck/enc') {
       alert(t('{name} is password-protected. Open it directly to unlock it.', { name: named }))
       return true
     }
     const next = parseDoc(JSON.stringify(parsed))
-    if (!next) { alert(t('{name} isn’t a Bento document.', { name: named })); return true }
+    if (!next) { alert(t('{name} isn’t a WebDeck document.', { name: named })); return true }
 
     if (writable) adoptFileHandle(handle)
     this.openedAs = named
@@ -2553,17 +2552,17 @@ export class Editor {
     const ul = document.createElement('ul'); ul.className = 'ed-help-tips'
     for (const tip of [
       t('Paste an image or text straight onto the canvas with ⌘V.'),
-      t('Copy a slide (⌘C with nothing selected) and paste it into another Bento deck.'),
+      t('Copy a slide (⌘C with nothing selected) and paste it into another WebDeck deck.'),
       t('Make a chart from a table and it stays linked — edit the table, the chart updates.'),
       t('Your work auto-saves; restore earlier versions from Save → Version history.'),
     ]) { const li = document.createElement('li'); li.textContent = tip; ul.appendChild(li) }
     tips.appendChild(ul); colL.appendChild(tips)
     const more = div('ed-help-more')
     const link = document.createElement('a')
-    link.href = 'https://bento.page/help'
+    link.href = 'https://webdeck.page/help'
     link.target = '_blank'
     link.rel = 'noopener'
-    link.textContent = t('Full guide at bento.page/help →')
+    link.textContent = t('Full guide at webdeck.page/help →')
     more.appendChild(link)
     box.appendChild(more)
     overlay.appendChild(box)
@@ -2592,7 +2591,7 @@ export class Editor {
     try {
       // The primary Save action is the lightweight, editable interchange file.
       // A held JSON handle is rewritten in place; otherwise this downloads a
-      // .bento.json copy. The self-contained HTML remains an explicit Save As.
+      // .webdeck.json copy. The self-contained HTML remains an explicit Save As.
       const result = await saveDocJson(this.store.doc)
       if (result === 'cancelled') return
       this.store.setDirty(false)
@@ -2692,7 +2691,7 @@ export class Editor {
       }
       if (mod && ev.key.toLowerCase() === 'c') {
         // Copy to BOTH the in-app clipboard (fast, same session) and the system
-        // clipboard as a Bento payload (works across decks/tabs). Elements when
+        // clipboard as a WebDeck payload (works across decks/tabs). Elements when
         // any are selected; otherwise the current slide.
         if (this.store.selection.length) {
           void navigator.clipboard?.writeText?.(serializeElements(this.store.selectedElements, this.store.doc)).catch(() => {})
@@ -2783,24 +2782,16 @@ export class Editor {
     const head = div('ed-about-head')
     // The logo/wordmark links home (new tab) — a gentle route back to the site.
     head.innerHTML =
-      `<a class="ed-about-logo" href="https://bento.page" target="_blank" rel="noopener">` +
-      `<svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">` +
-      `<rect width="32" height="32" rx="7" fill="#16273E"/>` +
-      `<rect x="5" y="5" width="7" height="22" rx="2.5" fill="#5E7699"/>` +
-      `<rect x="14" y="5" width="13" height="10" rx="2.5" fill="#FF9E8A"/>` +
-      `<rect x="14" y="17" width="13" height="10" rx="2.5" fill="#F0EBE0"/>` +
-      `</svg><div><b>bento<span style="color:#FF9E8A">/</span>slides</b><span>v${APP_VERSION} · format v${FORMAT_VERSION}</span></div>` +
+      `<a class="ed-about-logo" href="https://webdeck.page" target="_blank" rel="noopener">` +
+      `<img src="data:image/png;base64,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" width="28" height="28" alt="">` +
+      `<div><b>WebDeck</b><span>v${APP_VERSION} · format v${FORMAT_VERSION}</span></div>` +
       `</a>`
-    head.querySelector('a')?.setAttribute('title', t('Visit bento.page (opens in a new tab)'))
-    box.appendChild(head)
-
-    // Engagement nudge back to the site (templates / gallery / agent guide).
     const promo = div('ed-about-promo')
     promo.innerHTML = t(
-      'New to Bento? Find templates, the gallery and the AI editing guide at {home} — or ⭐ it on {gh}.',
+      'New to WebDeck? Find templates, the gallery and the AI editing guide at {home} — or ⭐ it on {gh}.',
       {
-        home: '<a href="https://bento.page" target="_blank" rel="noopener">bento.page</a>',
-        gh: '<a href="https://github.com/nyblnet/bento" target="_blank" rel="noopener">GitHub</a>',
+        home: '<a href="https://webdeck.page" target="_blank" rel="noopener">webdeck.page</a>',
+        gh: '<a href="https://github.com/xuzhenpeng263/webdeck" target="_blank" rel="noopener">GitHub</a>',
       },
     )
     box.appendChild(promo)
@@ -2892,7 +2883,7 @@ export class Editor {
         // row deliberately: reading before deciding is the point.
         const notesLink = document.createElement('a')
         notesLink.className = 'ed-btn'
-        notesLink.href = `https://github.com/nyblnet/bento/releases/tag/v${release.version}`
+        notesLink.href = `https://github.com/xuzhenpeng263/webdeck/releases/tag/v${release.version}`
         notesLink.target = '_blank'
         notesLink.rel = 'noopener'
         notesLink.textContent = t('What’s new →')
@@ -3059,7 +3050,7 @@ function languageInstallError(code: import('../packs').PackError): string {
     case 'bad-pack':
       return t('That language pack couldn’t be read.')
     case 'wrong-app':
-      return t('That language pack was built for a different Bento app.')
+      return t('That language pack was built for a different WebDeck app.')
     // Says what happened and what was done about it, without pretending to
     // know whether it was an attack or a bungled upload — we cannot tell, and
     // the answer is the same either way: it was not installed.

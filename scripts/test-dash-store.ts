@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento/dash store + undo rig.
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-dash store + undo rig.
 //
 //   node scripts/test-dash-store.ts        (Node ≥ 23.6 strips types natively)
 //
@@ -34,7 +34,7 @@ function ok(cond: boolean, msg: string) {
 
 const fresh = (): DashDoc => {
   const r = parseDoc(JSON.stringify({
-    format: 'bento/dash', version: 1, policy: 'bento-dash-1',
+    format: 'webdeck-dash', version: 1, policy: 'webdeck-dash-1',
     docId: 'd', title: 'test',
     sheets: [{
       id: 'sh1', name: 'S', kind: 'table',

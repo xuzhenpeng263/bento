@@ -1,163 +1,122 @@
-<p align="center">
-  <a href="https://bento.page" title="bento.page — try it in your browser">
-    <img src="docs/assets/bento-logo.svg" alt="Bento" width="96" height="96">
-  </a>
-</p>
+# WebDeck — 自包含的演示文稿编辑器
 
-# [Bento — the office suite that fits in a file](https://bento.page/)
+**WebDeck 是一个 PowerPoint 的替代方案，整个编辑器就在一个 HTML 文件里。**
 
-**This PowerPoint alternative is a single HTML file.** A Bento deck carries
-its own viewer, presenter, and editor inside the document — open it in any
-browser, edit it, present it, send it. The person you send it to needs
-nothing: the file *is* the software.
+一个 `.webdeck.html` 文件就是一份完整的演示文稿：幻灯片、演讲者备注、实时图表、嵌入媒体和交互元素全部包含在内。每个文件自带查看器、编辑器和演示器——在浏览器中双击即开，无需安装。
 
-**Try it in 10 seconds:** open [bento.page/slides](https://bento.page/slides)
-— that's the entire app, running on a starter deck that doubles as the
-feature tour. Or grab a designed template from the
-[gallery](https://bento.page/) and make it yours.
+**10 秒体验**：打开 [webdeck.page](https://webdeck.page) 即可看到完整应用。
 
-**Download the app:** grab the single `Bento_Slides.bento.html` from the
-[GitHub Releases](https://github.com/nyblnet/bento/releases) page or straight
-from [bento.page](https://bento.page/releases/slides/Bento_Slides.bento.html)
-(~560 KB, no account, no installer). Open it in any modern browser and it *is*
-the editor. Save, and it rewrites itself with your deck inside.
+---
 
-## Why this exists
+## 功能特性
 
-Office documents used to be things you *had*. Now they're things you rent —
-locked in someone's cloud, behind someone's login, readable only while a
-company keeps its servers on. Bento takes the other path:
+- **自包含**：一个 `.webdeck.html` 文件 = 文档 + 查看器 + 编辑器 + 演示器
+- **变形过渡**：模型驱动的变形动画（位移/缩放/颜色），通过匹配元素 ID 在幻灯片之间实现无缝过渡
+- **实时图表**：柱状图、折线图、饼图、散点图，支持动画过渡和双轴显示
+- **表格**：可编辑表格，支持表头切换、斑马纹和列宽拖拽
+- **演讲者视图**：独立的演讲者窗口，包含计时器、备注和幻灯片预览
+- **密码加密**：AES-256-GCM 静态文档加密
+- **实时协作**：端到端加密的实时编辑（可选功能），基于 CRDT 的字符级文本合并
+- **AI 友好**：文档内容为纯 JSON，AI 代理可直接创作和编辑文稿
+- **响应式界面**：适配桌面和移动端浏览器
+- **PPTX 和 PDF 导出**：按需导出标准格式
+- **8 种界面语言**：中文（简/繁）、英文、日文、西班牙文、法文、德文、意大利文
 
-- **One file, forever.** Deck, fonts, images, charts, animations, and the
-  full editor travel together. A copy from 2026 will open in 2036.
-- **View-source honest.** Your data sits in a plain, readable JSON block at
-  the top of the file. No binary formats, no lock-in, no archaeology.
-- **It saves itself.** The file rewrites its own data block on save (File
-  System Access API, with a download fallback). No app to install, ever.
-- **Local-first, provably.** Flip on Offline mode and nothing leaves your
-  machine — updates and collaboration are hard-blocked, and the app says so.
+---
 
-## What's inside
+## 快速开始
 
-| Feature | Description |
-|---|---|
-| **Morph presenting** | Elements that share an id animate between slides — position, size, color, even gradients. Duplicate a slide, rearrange, and the motion designs itself. |
-| **Live collaboration** | E2EE (AES-GCM) with keys that live in your file, never on a server. The file itself is the invitation: anyone who opens a copy joins. Offline edits merge back precisely — our own CRDT, character-level text merging included. |
-| **A blind relay** | The optional sync relay ([`server/sync-worker/`](server/sync-worker/)) stores ciphertext and learns nothing. Read the source; it's about one file. |
-| **Charts, built in** | Bar / line / pie / scatter drawn by our own dependency-free engine, live during presentations: tooltips, zoom, and data that morphs when a bar chart becomes a pie. |
-| **Designed for AI** | The document is plain JSON in the file, so agents edit `.bento.html` files in place and chatbots round-trip the JSON (`window.bento.loadDoc`). See [docs/agents.md](docs/agents.md). |
-| **Signed self-updates** | Releases are ECDSA-signed and offered in-app. Updating writes a *new* file — the old one stays as your rollback. No server ever touches your documents. |
-| **Everything else** | Speaker view, comments, layouts, hidden interactive states, hover reveals, motion paths, PDF export, page sizes, 8 UI languages — in a ~560 KB shell. |
+### 打开已有文稿
 
-## Use it with AI
+直接双击任意 `.webdeck.html` 文件，即可在浏览器中打开完整编辑器。
 
-Because the document is plain JSON living in one plaintext block near the top
-of the file, any assistant that can read and write a file can edit your deck —
-no plugin, no API. Two ways in:
+### 新建文稿
 
-- **File harnesses** edit the `#bento-doc` JSON in place:
-  [Claude Code](https://claude.com/claude-code), Cursor, Aider, or any agent
-  with filesystem access. Claude Code users get a packaged `bento-slides`
-  skill (installable from this repo's plugin marketplace: `/plugin marketplace
-  add nyblnet/bento`) that even downloads the latest Bento app by itself.
-- **Chat round-trip** for any chatbot: copy the document JSON out (*Save →
-  Copy document JSON*), let the assistant rewrite it, paste it back.
+1. 在浏览器中打开 `WebDeck.webdeck.html`
+2. 点击 **新建文件** 创建空白文稿，或点击 **打开文件** 打开已有文稿
+3. 开始编辑——文本、图形、图片、图表、表格
 
-**It works fully offline with local open-weight models** — point
-[Ollama](https://ollama.com), llama.cpp, or LM Studio at the deck and nothing
-leaves your machine. The agent guide is a single page you can drop into any
-model's context: [bento.page/agents.md](https://bento.page/agents.md) (also in
-this repo at [docs/agents.md](docs/agents.md)).
-
-## Architecture in one paragraph
-
-`slides/src/model.ts` defines the JSON document model; one renderer
-(`render.ts`) draws it for the editor canvas, thumbnails, and present mode
-(Reveal.js drives navigation; morphs are computed from the model, not the
-DOM). Animation is an in-house engine (`anim.ts`), charts are in-house
-(`charts.ts`), collaboration is an in-house CRDT (`sync/crdt.ts` — pure
-data, fuzz-tested by `scripts/test-sync.ts` across hundreds of thousands of
-convergence checks). The shell compresses to ~560 KB with the document block
-left as plaintext so old files and outside tools can always splice it. The
-deep dive: [docs/architecture.md](docs/architecture.md).
-
-## Security model, honestly
-
-- Collab keys are minted client-side at document creation and live only in
-  the file. Possession of the file = membership; "Rotate keys" = revocation.
-- The relay sees: ciphertext, connection timing, and a hash of the room key.
-  It cannot read content, names, or structure.
-- Presence names are claims, not proofs — fine within a shared-key room;
-  enterprise identity would need signed frames (designed, not built).
-- Update checks fetch a static manifest and send nothing about you or your
-  document. Signature + hash + version monotonicity are verified in-app.
-- Known trade-offs: undo during live collab is snapshot-based and can revert
-  a collaborator's concurrent edit to the same property; editing is
-  desktop-first (phones view and present well).
-
-## Build from source
-
-Node 20+ and npm are all you need — the app is a single-page build with no
-backend to stand up.
+### 从源码构建
 
 ```bash
 cd slides
 npm install
-npm run dev            # dev server (http://localhost:5173)
-npm run build:single   # → dist-single/Bento_Slides.bento.html (the product)
+npm run dev           # 开发服务器（localhost:5199）
+npm run build:single  # 构建产物 → dist-single/WebDeck.webdeck.html
 ```
 
-`node scripts/test-sync.ts` runs the CRDT convergence rig. Releases are cut
-locally so the signing key never leaves the maintainer's machine — see
-[docs/RELEASING.md](docs/RELEASING.md).
+要求：Node.js 20+
 
-## Where to read more
+---
 
-- [CLAUDE.md](CLAUDE.md) — the deep architecture + development guide (also what
-  AI agents read to work in this repo).
-- [docs/architecture.md](docs/architecture.md) — how a `.bento.html` file is
-  built, the on-disk format, and the runtime layout.
-- [docs/format.md](docs/format.md) — the normative `bento/slides` document-model
-  spec (every element type, slide/state/layout shape, and collab fields).
-- [docs/collab-design.md](docs/collab-design.md) — the CRDT, E2EE relay, and
-  signed-write RBAC design + threat model.
-- [docs/agents.md](docs/agents.md) — the document format, for AI agents.
-- [CHANGELOG.md](CHANGELOG.md) — the version history.
-- **Layout:** `slides/` is the app (source in `slides/src/`);
-  `server/sync-worker/` is the blind relay; `docs/` and `scripts/` are the
-  guides and build tooling.
+## 架构
 
-Contributions welcome — start with [CONTRIBUTING.md](CONTRIBUTING.md). Found a
-security issue? See [SECURITY.md](SECURITY.md).
+WebDeck 使用纯 TypeScript 构建为**单文件应用**，无需后端——`.webdeck.html` 文件本身就是应用。
 
-## Community
+- **文档模型**：基于 JSON 的格式（`src/model.ts`）——所有幻灯片内容、主题和元数据在一个结构中
+- **自保存机制**：应用在启动时克隆自身，保存时将更新后的文档数据写回 HTML 文件（File System Access API + 下载降级）
+- **动画引擎**：自研补间动画引擎（`src/anim.ts`），支持变形、入场动画、计数动画和运动路径
+- **图表引擎**：自研 SVG 图表渲染器（`src/charts.ts`），兼容 ECharts 选项格式
+- **协作系统**：基于 CRDT 的端到端加密同步（`src/sync/`），使用 Cloudflare Durable Object 盲中继
+- **压缩外壳**：运行时 JS/CSS 经 deflate 压缩嵌入——浏览器在启动时解压
 
-- **Questions and help** — [Discussions →
-  Q&A](https://github.com/nyblnet/bento/discussions/categories/q-a)
-- **Ideas and feature requests** — [Discussions →
-  Ideas](https://github.com/nyblnet/bento/discussions/categories/ideas)
-- **Built something with Bento?** — [Show and
-  tell](https://github.com/nyblnet/bento/discussions/categories/show-and-tell)
-- **Bugs** — [open an issue](https://github.com/nyblnet/bento/issues).
-  Security issues go through [SECURITY.md](SECURITY.md) instead, never a
-  public issue.
+深入阅读：[docs/architecture.md](docs/architecture.md)
 
-Planning a substantial contribution? Check the pinned **What's in flight**
-issue and the open PRs first, and say what you're planning before you build it
-— see [CONTRIBUTING.md](CONTRIBUTING.md).
+---
 
-## Roadmap
+## 安全模型
 
-**bento/slides** is the first app — a PowerPoint alternative, shipping now.
-**bento/spaces** (notes), **bento/dash** (sheets & tables) and **bento/vault**
-follow, each as its own self-contained `.bento.html` distributable. The
-current release lives on [bento.page](https://bento.page) and reaches every
-existing file through the signed update channel.
+- 协作密钥在客户端文档创建时生成，仅存在于文件中。拥有文件 = 拥有访问权限；"轮换密钥" = 撤销权限
+- 中继服务器仅能看到密文、连接时间和房间密钥哈希，无法读取内容、名称或结构
+- 更新检查获取静态清单，不发送任何用户或文档信息。签名 + 哈希 + 版本单调性在应用内验证
+- 已知权衡：实时协作期间的撤销是快照级别的，可能还原协作者对同一属性的并发编辑；编辑以桌面端为主（手机端查看和演示良好）
 
-## License
+---
 
-Bento is open source under the [MIT License](LICENSE) — all software here is
-MIT, © 2026 The Bento authors. Bundled runtime components (reveal.js,
-Moveable, Selecto) are MIT; the embedded typefaces (Fraunces, Instrument Sans)
-are OFL; gallery imagery is public-domain (see
-`scripts/gallery-photos/SOURCES.md`). Each component keeps its own license.
+## 技术栈
+
+纯 TypeScript，无框架依赖。使用以下核心库（均 MIT 许可，已内嵌）：
+
+| 库 | 用途 |
+|------|------|
+| [Reveal.js](https://revealjs.com) | 演示引擎 |
+| [Moveable](https://github.com/daybrush/moveable) | 元素拖拽操作 |
+| [Selecto](https://github.com/daybrush/selecto) | 框选工具 |
+| [PPTXGenJS](https://github.com/gitbrent/PptxGenJS) | PPTX 导出 |
+| [Temml](https://github.com/derilkillms/temml) | 数学公式渲染 |
+
+---
+
+## 与 AI 协作
+
+文档是文件顶部的一个纯文本 JSON 块，任何能读写文件的 AI 助手都可以编辑你的文稿：
+
+- **文件直接编辑**：Claude Code、Cursor、Aider 等可直接编辑 `#webdeck-doc` JSON 块
+- **对话往返**：复制文档 JSON（保存 → 复制文档 JSON），让 AI 助手修改后粘贴回来
+- **离线可用**：配合 Ollama、llama.cpp 或 LM Studio 使用本地开源模型，数据不离开本机
+
+---
+
+## 阅读更多
+
+- [CLAUDE.md](CLAUDE.md) — 深度架构与开发指南
+- [docs/architecture.md](docs/architecture.md) — 文件格式和运行时架构
+- [docs/format.md](docs/format.md) — 文档模型规范
+- [docs/collab-design.md](docs/collab-design.md) — CRDT 协作设计
+- [docs/agents.md](docs/agents.md) — AI 代理指南
+- [CHANGELOG.md](CHANGELOG.md) — 版本历史
+- [CONTRIBUTING.md](CONTRIBUTING.md) — 贡献指南
+
+---
+
+## 开源许可
+
+WebDeck 基于 [MIT License](LICENSE) 开源。© 2026 The WebDeck authors。
+
+内嵌运行时组件（reveal.js、Moveable、Selecto）均为 MIT 许可；内嵌字体（Fraunces、Instrument Sans）为 SIL Open Font License；图库图片为公共领域。
+
+---
+
+## 致谢
+
+本项目基于 **[Bento](https://github.com/nyblnet/bento)** 深度定制而来。Bento 是一个出色的自包含办公文档平台，由 The Bento authors 创建并维护。感谢原项目的所有贡献者，他们的开创性工作为 WebDeck 奠定了坚实的基础。

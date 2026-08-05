@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento-sync M0 convergence rig.
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-sync M0 convergence rig.
 //
 //   node scripts/test-sync.ts        (Node ≥ 23.6 strips types natively)
 //
@@ -114,7 +114,7 @@ type Doc = any
 
 function baseDoc(): Doc {
   return {
-    format: 'bento/slides',
+    format: 'webdeck',
     version: 1,
     docId: 'doc-1',
     title: 'Rig deck',

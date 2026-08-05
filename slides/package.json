@@ -1,5 +1,5 @@
 {
-  "name": "bento-slides",
+  "name": "webdeck",
   "private": true,
   "version": "1.0.16",
   "license": "MIT",
@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:single": "tsc -b && SINGLEFILE=1 vite build --outDir dist-single && mv dist-single/index.html dist-single/Bento_Slides.bento.html && node ../scripts/postbuild-compress.mjs dist-single/Bento_Slides.bento.html",
+    "build:single": "tsc -b && SINGLEFILE=1 vite build --outDir dist-single && mv dist-single/index.html dist-single/WebDeck.webdeck.html && node ../scripts/postbuild-compress.mjs dist-single/WebDeck.webdeck.html",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
-# bento/slides — architecture
+# webdeck — architecture
 
-*Engineering reference, current as of July 2026. Covers how a `.bento.html`
+*Engineering reference, current as of July 2026. Covers how a `.webdeck.html`
 file is constructed, what the on-disk format looks like, and how the runtime
 is organized. User-facing documentation comes later, once the format
 stabilizes for release.*
@@ -15,21 +15,21 @@ trick, modernized with the File System Access API).
 
 > **v0.7.0 update**: the runtime now ships DEFLATE-compressed (shell ≈373KB,
 > was 1.33MB) — byte order: chrome → NOTICE → tooling comment → **plaintext
-> `#bento-doc`** → splash → compressed payloads + 1KB loader last. The
+> `#webdeck-doc`** → splash → compressed payloads + 1KB loader last. The
 > document block stays plaintext forever (AI/tooling + old-updater splice
 > contract; release.mjs gates every release on it). Charts are now in-house
 > (`charts-lite`, MIT) — ECharts/zrender removed. Diagrams below describe the
 > uncompressed layout; sizes predate compression.
 
 > **v0.8.0 update**: live collaboration shipped — an in-house op-based CRDT
-> (**bento-sync**, §8) with automatic same-machine sync (BroadcastChannel)
+> (**webdeck-sync**, §8) with automatic same-machine sync (BroadcastChannel)
 > and an optional end-to-end-encrypted blind relay (Cloudflare Durable
-> Objects, `sync.bento.page`). The saved file stays a complete standalone
+> Objects, `sync.webdeck.page`). The saved file stays a complete standalone
 > document; `doc.collab {room, key}` is the only (additive) format change.
 
 ## 1. On-disk anatomy
 
-A `.bento.html` file is ordinary, valid HTML. Its compartments, drawn
+A `.webdeck.html` file is ordinary, valid HTML. Its compartments, drawn
 roughly to scale (widths √-compressed so the small parts stay visible —
 exact numbers in the table below):
 
@@ -38,7 +38,7 @@ block-beta
   columns 56
   chrome["hdr"]:3
   notice["NOTICE"]:4
-  doc["#bento-doc — THE DOCUMENT (0 → n MB)"]:14
+  doc["#webdeck-doc — THE DOCUMENT (0 → n MB)"]:14
   js["runtime JS — app + Reveal + Moveable/Selecto + charts-lite (~560 KB)"]:26
   css["CSS (62 KB)"]:6
   splash["splash"]:3
@@ -53,22 +53,22 @@ block-beta
 
 The amber block is the only part that changes between saves — everything
 else is the fixed *shell*. Skeleton of the actual markup
-(`dist-single/Bento_Slides.bento.html`):
+(`dist-single/WebDeck.webdeck.html`):
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"> <meta name="viewport" …> <meta name="generator" content="bento-slides">
+  <meta charset="UTF-8"> <meta name="viewport" …> <meta name="generator" content="webdeck">
   <link rel="icon" href="data:image/svg+xml,…">
-  <title>Deck title — bento/slides</title>
+  <title>Deck title — webdeck</title>
 
   <!-- NOTICE — bundled open-source components …
        (license notices; part of the shell, so they travel with every copy) -->
 
   <!-- ═══ THE DOCUMENT ═══ (empty in a fresh shell → boots the starter deck) -->
-  <script type="application/bento+json" id="bento-doc">
-    {"format":"bento/slides","title":"…","size":{…},"slides":[…]}
+  <script type="application/webdeck+json" id="webdeck-doc">
+    {"format":"webdeck","title":"…","size":{…},"slides":[…]}
   </script>
 
   <!-- ═══ THE RUNTIME ═══ viewer + presenter + editor, one inlined bundle -->
@@ -77,7 +77,7 @@ else is the fixed *shell*. Skeleton of the actual markup
   <style>/* splash CSS — paints before the bundle parses */</style>
 </head>
 <body>
-  <div id="bento-splash">…</div>   <!-- pure-CSS boot splash -->
+  <div id="webdeck-splash">…</div>   <!-- pure-CSS boot splash -->
   <div id="app"></div>             <!-- the runtime mounts the editor here -->
 </body>
 </html>
@@ -91,7 +91,7 @@ runtime (the shipped shell is DEFLATE-compressed, see the v0.7.0 note above; the
 |---|---|---|---|
 | 1 | Head chrome | 0.7 KB | doctype, metas, favicon, title |
 | 2 | NOTICE comment | 2 KB | bundled-library license notices |
-| 3 | **`#bento-doc` data block** | **0 → *n* MB** | **the document** — JSON, `<` escaped; assets are data URIs, so image-heavy decks dominate the file |
+| 3 | **`#webdeck-doc` data block** | **0 → *n* MB** | **the document** — JSON, `<` escaped; assets are data URIs, so image-heavy decks dominate the file |
 | 4 | Runtime JS | ~560 KB | app (~120 KB) + Reveal.js + Moveable/Selecto family + charts-lite (in-house SVG charts, replaced ECharts in v0.7.0) |
 | 5 | Runtime CSS | 62 KB | editor + present + print styles |
 | 6 | Splash CSS + body mounts | 2 KB | splash `<style>`/`<div>`, `#app` mount |
@@ -110,7 +110,7 @@ Two hard rules keep the file well-formed:
 
 ## 2. How a file is constructed
 
-Two producers make Bento files: the Vite build (makes the empty *shell*) and
+Two producers make WebDeck files: the Vite build (makes the empty *shell*) and
 the runtime's own save path (makes every subsequent copy). Generators (like
 the testing deck transpiler) are a third, minor path: they take the shell and
 splice a JSON document into its data block.
@@ -122,10 +122,10 @@ flowchart LR
         TSC --> VITE["vite build<br/>(rollup + esbuild minify)"]
         DEPS["reveal.js · moveable · selecto<br/>echarts (tree-shaken, svg renderer)"] --> VITE
         VITE --> SF["vite-plugin-singlefile<br/>inline all JS + CSS"]
-        SF --> SHELL["Bento_Slides.bento.html<br/>(data block EMPTY → boots starter deck)"]
+        SF --> SHELL["WebDeck.webdeck.html<br/>(data block EMPTY → boots starter deck)"]
     end
-    SHELL -->|"user edits + saves"| DOC1[".bento.html<br/>(data block filled)"]
-    SHELL -->|"generator splices JSON<br/>into #bento-doc"| DOC2["generated deck<br/>.bento.html"]
+    SHELL -->|"user edits + saves"| DOC1[".webdeck.html<br/>(data block filled)"]
+    SHELL -->|"generator splices JSON<br/>into #webdeck-doc"| DOC2["generated deck<br/>.webdeck.html"]
     DOC1 -->|"opened anywhere,<br/>edited, saved again"| DOC1
 ```
 
@@ -142,16 +142,16 @@ sequenceDiagram
     participant Store
     participant Save as save.ts
 
-    Disk->>Browser: open .bento.html
+    Disk->>Browser: open .webdeck.html
     Browser->>Boot: parse + run inline bundle
     Boot->>Save: capturePristine()  — deep-clone document BEFORE any DOM mutation
-    Boot->>Save: readEmbeddedDoc()  — #bento-doc textContent
+    Boot->>Save: readEmbeddedDoc()  — #webdeck-doc textContent
     Save-->>Boot: JSON string (or null → starterDoc)
     Boot->>Store: new Store(parseDoc(json))
     Note over Browser: editor mounts, DOM mutates freely —<br/>the pristine clone still holds the original bytes
 
     Browser->>Save: ⌘S / Save button
-    Save->>Save: clone pristine → swap #bento-doc content<br/>with JSON.stringify(doc), "<" → "\u003c"
+    Save->>Save: clone pristine → swap #webdeck-doc content<br/>with JSON.stringify(doc), "<" → "\u003c"
     Save->>Save: sync <title> · sanity-check script-close count
     alt File System Access API (Chromium)
         Save->>Disk: rewrite the SAME file in place (persistent handle)
@@ -171,14 +171,14 @@ Consequences of the pristine-clone design:
 - Editor state (selection, zoom, panel widths) never leaks into the file;
   only the model JSON changes between saves. UI prefs live in `localStorage`.
 
-## 4. The document model (`format: "bento/slides"`)
+## 4. The document model (`format: "webdeck"`)
 
 The data block holds one JSON object. Sketch of the current shape — see
 `src/model.ts` for the authoritative types:
 
 ```
 BentoDoc
-├─ format: "bento/slides"
+├─ format: "webdeck"
 ├─ title
 ├─ size: { width: 1280, height: 720 }   ← canonical 16:9; per-doc, presets in the slide panel
 ├─ theme: { fontFamily, … }
@@ -192,7 +192,7 @@ BentoDoc
    ├─ name? · notes
    ├─ stateOf?                     ← marks a hidden interactive state of another slide
    ├─ hover?                       ← { type:'focus-group', dim } | { type:'reveal', default }
-   ├─ comments?                       ← review threads, anchored to element/point/slide (editor-only; window.bento.comments() for tooling)
+   ├─ comments?                       ← review threads, anchored to element/point/slide (editor-only; window.webdeck.comments() for tooling)
    └─ elements: SlideElement[]     ← array order = paint order (z)
       ├─ common: id · x y w h · rotation · opacity
       │          fx? · link? · group? · groupId? · showOnHover? · role?
@@ -267,7 +267,7 @@ everywhere, which is what keeps WYSIWYG honest:
 | Editor canvas | `.ed-stage-scale` (CSS-scaled) | static SVG snapshot | Moveable control box mounts *inside* the scale wrapper (see CLAUDE.md gotcha #1) |
 | Sidebar thumbnails | per-slide mini surface | snapshot | `svg` elements collapse to `<img>` for cheapness |
 | Present | Reveal.js sections | **live instance** (tooltips, dataZoom) | fx/morph/states run here only |
-| PDF export | `#bento-print`, `@page` 1600×900 | snapshot | state slides excluded |
+| PDF export | `#webdeck-print`, `@page` 1600×900 | snapshot | state slides excluded |
 
 Animation is fully in-house (`anim.ts`, no GSAP): tween channels for
 opacity/transform/colors/SVG attributes/motion paths, a per-element transform
@@ -280,7 +280,7 @@ measures the DOM.
 
 Things generators and future format revisions must not break:
 
-1. `format: "bento/slides"` plus additive, optional fields — old files must
+1. `format: "webdeck"` plus additive, optional fields — old files must
    open in newer shells (unknown fields are preserved by parse → serialize).
 2. Element **ids are identity**: morphs match on them across slides, states
    sync from parents by id lineage, links point at slide ids. Generators must
@@ -301,7 +301,7 @@ Things generators and future format revisions must not break:
 
 A shipped file pins its runtime forever — it never needs the network. On
 **user request only** (About dialog via the topbar logo, or
-`window.bento.updates`), it can ask the release origin for a newer shell and
+`window.webdeck.updates`), it can ask the release origin for a newer shell and
 rebuild itself as *same document, newer app*:
 
 ```
@@ -316,7 +316,7 @@ deliver  downloaded as a NEW file — the on-disk original is its own rollback
 
 - `APP_VERSION` is baked at build from `slides/package.json` (vite `define`).
 - The private key lives offline (`scripts/keygen.mjs` →
-  `~/.bento/release-key.json`, never in repo or CI); `scripts/sign-release.mjs`
+  `~/.webdeck/release-key.json`, never in repo or CI); `scripts/sign-release.mjs`
   hashes the built shell and writes the signed manifest. A compromised release
   host cannot forge an update without that key. Rotating the key orphans every
   shipped file — guard the key instead.
@@ -325,7 +325,7 @@ deliver  downloaded as a NEW file — the on-disk original is its own rollback
 - Update channel = signed **code**; future sync channel = inert **data**
   (invariant 3). Never mix the two.
 
-## 8. Live collaboration (bento-sync)
+## 8. Live collaboration (webdeck-sync)
 
 The in-house CRDT designed in `collab-design.md`, shipped in v0.8.0.
 
@@ -349,7 +349,7 @@ slides/src/sync/online.ts   E2EE relay transport: AES-GCM under the room
                             encrypted client-produced snapshots cap replay
 server/sync-worker/         Cloudflare Worker + one Durable Object per
                             docId: blind fan-out, encrypted op log, ~30-day
-                            idle TTL. The only Bento server code.
+                            idle TTL. The only WebDeck server code.
 scripts/test-sync.ts        property-based convergence rig (SEEDS/STEPS/
                             ACTORS env knobs) — random op interleavings
                             across simulated actors must converge to

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Charts, bound to columns.
 //
 // A TILE NAMES A SHEET AND COLUMNS. The series arrays are DERIVED at render and

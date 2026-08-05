@@ -1,4 +1,4 @@
-# Bento security, plainly
+# WebDeck security, plainly
 
 *How live collaboration is encrypted, exactly what the relay can and cannot
 see, how keys live and die, and how to prove no bytes ever leave your machine.
@@ -80,7 +80,7 @@ and the *public* half of the writer key.
 ### Password encryption is a separate layer
 
 Independently of collaboration, a document can be **password-encrypted at
-rest**: the on-disk `#bento-doc` block holds a `bento/enc` envelope —
+rest**: the on-disk `#webdeck-doc` block holds a `webdeck/enc` envelope —
 AES-GCM-256 over the document JSON, with the key derived from your password via
 **PBKDF2-SHA-256, 300,000 iterations**
 ([`slides/src/save.ts`](../slides/src/save.ts)). The password is held only in
@@ -91,7 +91,7 @@ file itself; it is orthogonal to the room key that protects live frames.
 
 A subtle problem: if read-only were just a flag, it would be a lie. Anyone who
 can *decrypt* frames holds the key, and holding the key means being able to
-*encrypt and send* too. So Bento splits the single capability in two.
+*encrypt and send* too. So WebDeck splits the single capability in two.
 
 - The **content key** is the read capability (everyone in the room has it).
 - The **ECDSA writer keypair** is the write capability. A **read-only copy is

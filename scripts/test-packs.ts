@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Language-pack verification rig.
 //
 //   node scripts/test-packs.ts        (Node ≥ 23.6 strips types natively)
@@ -91,8 +91,8 @@ Object.defineProperty(globalThis, 'crypto', {
 })
 
 // --- the channel ------------------------------------------------------------
-const CHANNEL = 'https://bento.page/releases/slides'
-const PACK_URL = 'packs/bento-slides-1.0.0-xx.pack.json'
+const CHANNEL = 'https://webdeck.page/releases/slides'
+const PACK_URL = 'packs/webdeck-1.0.0-xx.pack.json'
 
 const pack = {
   app: 'slides',
@@ -136,14 +136,14 @@ Object.defineProperty(globalThis, 'fetch', {
 // Imported AFTER the globals exist — module scope must find them in place.
 const { configureApp } = await import('../kernel/src/app.ts')
 configureApp({
-  appId: 'bento-slides',
-  appName: 'bento/slides',
+  appId: 'webdeck',
+  appName: 'webdeck',
   manifestUrl: `${CHANNEL}/manifest.json`,
 })
 const packs = await import('../slides/src/packs.ts')
 
 /** The index payload shape scripts/sign-packs.mjs publishes. */
-const index = async (listings: unknown[], app = 'bento-slides') =>
+const index = async (listings: unknown[], app = 'webdeck') =>
   envelope({ app, version: '1.0.0', at: new Date().toISOString(), packs: listings })
 
 const listing = (sha256 = packHash, version = '1.0.0') => ({
@@ -186,17 +186,17 @@ ok((await packs.availablePacks()).length === 0, 'an index whose signature fails 
 
 // --- 4. unsigned index ------------------------------------------------------
 console.log('\nunsigned index')
-servedIndex = JSON.stringify({ app: 'bento-slides', version: '1.0.0', packs: [listing()] })
+servedIndex = JSON.stringify({ app: 'webdeck', version: '1.0.0', packs: [listing()] })
 ok((await packs.availablePacks()).length === 0, 'a bare (unsigned) payload is refused — fail closed')
 servedIndex = await index([{ lang: 'xx', label: 'Testish', url: PACK_URL }])
 ok((await packs.availablePacks()).length === 0, 'a signed listing with NO pinned hash is not offered')
 
 // --- 4b. an index signed for another app ------------------------------------
-// The release key is platform-wide, so a validly signed bento/spaces index is
+// The release key is platform-wide, so a validly signed webdeck-spaces index is
 // a real thing an attacker could replay onto this channel. The app id is what
 // stops it — same check verifyManifest makes on the release manifest.
 console.log('\nindex signed for a different app')
-servedIndex = await index([listing()], 'bento-spaces')
+servedIndex = await index([listing()], 'webdeck-spaces')
 ok((await packs.availablePacks()).length === 0, 'a validly signed index for ANOTHER app offers nothing')
 servedIndex = await envelope([listing()])
 ok((await packs.availablePacks()).length === 0, 'a bare array payload (no app id) offers nothing')

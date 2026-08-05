@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // The grid.
 //
 // WINDOWED, not because 100k rows is slow to compute — a full scan is 5.9 ms —

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // tray/webext background rig.
 //
 //   node scripts/test-webext-background.ts
@@ -67,12 +67,12 @@ function dirHandle(tree: Record<string, any>, perm = 'granted') {
 const senderFor = (path: string) => ({ url: 'file://' + path })
 
 // ---- 1. the path comes from the browser, not the page -----------------------
-ok(pathFromSender({ url: 'file:///Users/x/Decks/Q3.bento.html' }) === '/Users/x/Decks/Q3.bento.html',
+ok(pathFromSender({ url: 'file:///Users/x/Decks/Q3.webdeck.html' }) === '/Users/x/Decks/Q3.webdeck.html',
   'a file:// sender yields its path')
-ok(pathFromSender({ url: 'https://evil.example/x.bento.html' }) === null,
+ok(pathFromSender({ url: 'https://evil.example/x.webdeck.html' }) === null,
   'an http sender is refused — the bridge is for local documents')
 ok(pathFromSender({}) === null, 'a sender with no url is refused')
-ok(pathFromSender({ url: 'file:///Users/x/My%20Decks/Q3.bento.html' }) === '/Users/x/My Decks/Q3.bento.html',
+ok(pathFromSender({ url: 'file:///Users/x/My%20Decks/Q3.webdeck.html' }) === '/Users/x/My Decks/Q3.webdeck.html',
   'a percent-encoded path is decoded')
 
 // ---- 2. resolution inside the grant ----------------------------------------
@@ -82,35 +82,35 @@ const deps = (tree: Record<string, any>, perm = 'granted') => ({
 })
 
 {
-  const tree = { 'Q3.bento.html': fileHandle('Q3.bento.html'), 'notes.txt': fileHandle('notes.txt') }
-  const r = await resolve(senderFor('/Users/x/Decks/Q3.bento.html'), deps(tree))
-  ok(r.ok === true && r.name === 'Q3.bento.html', 'a unique file in the granted folder resolves')
+  const tree = { 'Q3.webdeck.html': fileHandle('Q3.webdeck.html'), 'notes.txt': fileHandle('notes.txt') }
+  const r = await resolve(senderFor('/Users/x/Decks/Q3.webdeck.html'), deps(tree))
+  ok(r.ok === true && r.name === 'Q3.webdeck.html', 'a unique file in the granted folder resolves')
 }
 {
-  const tree = { 'Q3.bento.html': fileHandle('Q3.bento.html') }
-  const r = await resolve(senderFor('/Users/x/Decks/Other.bento.html'), deps(tree))
+  const tree = { 'Q3.webdeck.html': fileHandle('Q3.webdeck.html') }
+  const r = await resolve(senderFor('/Users/x/Decks/Other.webdeck.html'), deps(tree))
   ok(r.ok === false && /not in the granted folder/.test(r.reason!),
     'a file outside the grant is declined, not guessed at')
 }
 {
   // the same name in two subfolders — the case a real Decks folder hits
   const tree = {
-    ClientA: { 'Q3.bento.html': fileHandle('a/Q3.bento.html') },
-    ClientB: { 'Q3.bento.html': fileHandle('b/Q3.bento.html') },
+    ClientA: { 'Q3.webdeck.html': fileHandle('a/Q3.webdeck.html') },
+    ClientB: { 'Q3.webdeck.html': fileHandle('b/Q3.webdeck.html') },
   }
-  const r = await resolve(senderFor('/Users/x/Decks/ClientA/Q3.bento.html'), deps(tree))
+  const r = await resolve(senderFor('/Users/x/Decks/ClientA/Q3.webdeck.html'), deps(tree))
   ok(r.ok === false && /ambiguous/.test(r.reason!),
     'a duplicate file name is declined rather than written to the wrong one')
 }
 {
-  const tree = { 'Q3.bento.html': fileHandle('Q3.bento.html') }
-  const r = await resolve(senderFor('/Users/x/Decks/Q3.bento.html'), deps(tree, 'prompt'))
+  const tree = { 'Q3.webdeck.html': fileHandle('Q3.webdeck.html') }
+  const r = await resolve(senderFor('/Users/x/Decks/Q3.webdeck.html'), deps(tree, 'prompt'))
   ok(r.ok === false && /renewing/.test(r.reason!),
     'a lapsed folder grant is reported, never silently prompted for')
 }
 {
-  const r = await resolve({ url: 'https://evil.example/Q3.bento.html' },
-    deps({ 'Q3.bento.html': fileHandle('Q3.bento.html') }))
+  const r = await resolve({ url: 'https://evil.example/Q3.webdeck.html' },
+    deps({ 'Q3.webdeck.html': fileHandle('Q3.webdeck.html') }))
   ok(r.ok === false && /not a local file/.test(r.reason!),
     'an http page cannot resolve a file in the granted folder')
 }
@@ -118,28 +118,28 @@ const deps = (tree: Record<string, any>, perm = 'granted') => ({
 // ---- 3. a write needs no prior claim (service-worker eviction) --------------
 {
   written.clear()
-  const tree = { 'Q3.bento.html': fileHandle('Q3.bento.html') }
+  const tree = { 'Q3.webdeck.html': fileHandle('Q3.webdeck.html') }
   // NO claim() first — this is precisely what a restarted service worker sees.
-  const r = await write(senderFor('/Users/x/Decks/Q3.bento.html'), '<html>deck</html>', deps(tree))
+  const r = await write(senderFor('/Users/x/Decks/Q3.webdeck.html'), '<html>deck</html>', deps(tree))
   ok(r.ok === true && r.bytes === 17, 'a write with no preceding claim succeeds — no state is carried')
-  ok(written.get('Q3.bento.html') === '<html>deck</html>', 'and the bytes land in the right file')
+  ok(written.get('Q3.webdeck.html') === '<html>deck</html>', 'and the bytes land in the right file')
 }
 
 // ---- 4. claim reports without writing --------------------------------------
 {
   written.clear()
-  const tree = { 'Q3.bento.html': fileHandle('Q3.bento.html') }
-  const r = await claim(senderFor('/Users/x/Decks/Q3.bento.html'), deps(tree))
-  ok(r.ok === true && r.name === 'Q3.bento.html', 'claim reports the file it would write')
+  const tree = { 'Q3.webdeck.html': fileHandle('Q3.webdeck.html') }
+  const r = await claim(senderFor('/Users/x/Decks/Q3.webdeck.html'), deps(tree))
+  ok(r.ok === true && r.name === 'Q3.webdeck.html', 'claim reports the file it would write')
   ok(written.size === 0, 'and writes nothing while doing so')
 }
 
 // ---- 5. the depth limit ----------------------------------------------------
 {
   // 6 levels deep — past the limit, so it must NOT be found rather than hang
-  let deep: any = { 'Q3.bento.html': fileHandle('deep/Q3.bento.html') }
+  let deep: any = { 'Q3.webdeck.html': fileHandle('deep/Q3.webdeck.html') }
   for (let i = 0; i < 6; i++) deep = { sub: deep }
-  const r = await resolve(senderFor('/Users/x/Decks/Q3.bento.html'), deps(deep))
+  const r = await resolve(senderFor('/Users/x/Decks/Q3.webdeck.html'), deps(deep))
   ok(r.ok === false, 'a file buried past the depth limit is declined, not searched forever')
 }
 

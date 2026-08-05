@@ -1,9 +1,9 @@
-# bento/tray — iOS
+# webdeck/tray — iOS
 
 A thin native host that runs **any self-contained HTML document** and lets it
 **save itself in place** on iOS.
 
-Bento decks are the reason it exists, but nothing in the Swift is Bento-specific
+WebDeck decks are the reason it exists, but nothing in the Swift is Bento-specific
 — it never parses the document, it is a courier. Any single-file HTML app that
 saves itself through the File System Access API works the same way, which on iOS
 is otherwise impossible: every browser there is WebKit and none of them ship
@@ -13,14 +13,14 @@ that API.
 
 Every browser on iOS is WebKit, so the File System Access API does not exist
 there — not in Safari, not in Chrome or Firefox, which are WKWebView underneath.
-Without it Bento can only hand back downloaded copies: no in-place save, no
+Without it WebDeck can only hand back downloaded copies: no in-place save, no
 silent autosave write-back, no in-place self-update. `UIDocument` is the only
 way to write back to the user's actual file, and only a native app can use it.
 
 ## What it is, and what it deliberately is not
 
 The app supplies **file access and nothing else**. It bundles no runtime for
-rendering and has no opinion about which version of Bento a deck carries.
+rendering and has no opinion about which version of WebDeck a deck carries.
 
 That is the decision everything else follows from. The deck runs **its own
 embedded runtime**, exactly as it would in Safari, so it self-updates through
@@ -50,9 +50,9 @@ destroy a file:
 
 | `id` | meaning | a host may |
 |---|---|---|
-| `bento-doc` | ⌘S — overwrite the document being edited | write in place, silently |
-| `bento-copy` | "Save a copy…" — a second file the author chooses | **must** let the author choose |
-| `bento-share` | a suffixed export: view-only, presentation package, invite, template | **must** let the author choose |
+| `webdeck-doc` | ⌘S — overwrite the document being edited | write in place, silently |
+| `webdeck-copy` | "Save a copy…" — a second file the author chooses | **must** let the author choose |
+| `webdeck-share` | a suffixed export: view-only, presentation package, invite, template | **must** let the author choose |
 
 Before this existed, ⌘S and "Save a copy…" reached the picker with
 byte-identical arguments, so a host could not distinguish them. One that guessed
@@ -76,12 +76,12 @@ methods. Two consequences:
 ### Saving from apps that are not Bento
 
 Two idioms, both supported, because "any self-contained HTML document" has to
-mean more than "any document that saves the way Bento does":
+mean more than "any document that saves the way WebDeck does":
 
 - **File System Access.** The handle implements `kind`, `name`, `isSameEntry`,
   `queryPermission`, `requestPermission`, `getFile` and `createWritable`; the
   writable implements `write` (raw data AND the `{type:'write'|'seek'|'truncate'}`
-  params form), `seek`, `truncate`, `abort` and `close`. Bento only ever calls
+  params form), `seek`, `truncate`, `abort` and `close`. WebDeck only ever calls
   `createWritable`/`write`/`close`, but a third-party page may reasonably call
   `queryPermission()` before saving or `truncate()` to overwrite in place — a
   live probe page reported those as `undefined` before this existed.
@@ -93,7 +93,7 @@ mean more than "any document that saves the way Bento does":
   "export this page" tools. WKWebView DROPS these silently without a download
   delegate, so the button appears to do nothing, which is the worst possible
   failure for a save. Downloads land in the app's Documents folder (visible in
-  Files under Bento Tray) with a collision-safe name and a confirmation. A
+  Files under WebDeck Tray) with a collision-safe name and a confirmation. A
   picker per save would punish an app that saves often, and a download cannot
   overwrite the user's original anyway — that is what the FSA path is for.
 
@@ -112,7 +112,7 @@ of this bridge did exactly that and prompted on every single save.
 
 ## Two implementation details that carry weight
 
-- **The document is served through a custom scheme** (`bento-tray://`), never
+- **The document is served through a custom scheme** (`webdeck-tray://`), never
   `loadFileURL`. A `file://` page in WKWebView gets an opaque, unstable origin,
   which makes `localStorage` and IndexedDB unreliable — silently breaking the
   autosave backstop, the per-device collab member key, and language/motion
@@ -155,14 +155,14 @@ of this bridge did exactly that and prompted on every single save.
   letterboxes on black with a native ✕, and swiping advances slides. This is a
   case where the wrapper is not merely restoring parity with desktop but doing
   something the browser cannot. Credit to #87 for finding the flag.
-- **`bridge.js` is injected `.atDocumentStart`.** Bento decides whether it can
+- **`bridge.js` is injected `.atDocumentStart`.** WebDeck decides whether it can
   save during boot; injected later, the editor has already concluded it cannot.
 
 ## Getting documents in
 
 Four routes, all landing on the same in-place editing:
 
-1. **Files** — the app's folder appears under *On My iPhone → Bento Tray*, and
+1. **Files** — the app's folder appears under *On My iPhone → WebDeck Tray*, and
    the Browse tab navigates the whole Files hierarchy: iCloud Drive, Dropbox,
    Google Drive, anything with a File Provider. Tap a document to open it where
    it lives; edits go back to that file.
@@ -187,14 +187,14 @@ Needs **full Xcode** (Command Line Tools alone is not enough) and XcodeGen:
 
 ```sh
 brew install xcodegen
-cd tray/ios && xcodegen && open BentoTray.xcodeproj
+cd tray/ios && xcodegen && open WebDeckTray.xcodeproj
 ```
 
 Source lives under `tray/<platform>/` — `tray/ios/` and `tray/webext/` today. The design below
 (the polyfill and its protocol) is platform-neutral; only the transport lookup
 and the native file layer are not.
 
-`BentoTray.xcodeproj` is generated, never committed — a `.pbxproj` in git is a
+`WebDeckTray.xcodeproj` is generated, never committed — a `.pbxproj` in git is a
 merge-conflict magnet.
 
 ### Signing
@@ -218,11 +218,11 @@ be re-signed; TestFlight and the App Store need the paid programme.
 
 ## State: runs, unsigned, untested on hardware
 
-Verified — the save contract, exercised against the **real** Bento build in a
+Verified — the save contract, exercised against the **real** WebDeck build in a
 browser with the native side emulated (`begin`/`write` over the same protocol):
 
 - ⌘S writes the open document, no export prompt, 899KB of valid HTML with the
-  `#bento-doc` block intact and no stray script-close
+  `#webdeck-doc` block intact and no stray script-close
 - autosave write-back reuses the handle and writes again silently
 - "Save a copy…" prompts for a destination and leaves the open document
   untouched
@@ -308,10 +308,10 @@ does not arrive — so an app that opens the editor from that callback silently
 creates files and appears to do nothing. `tray/ios` therefore places new
 documents itself and hands the browser `.none` ("already in its final
 location"), which also puts collision naming under our control: the system
-renames `Untitled.bento.html` to `Untitled.bento 2.html`, reading `.bento.html`
+renames `Untitled.webdeck.html` to `Untitled.bento 2.html`, reading `.webdeck.html`
 as a name plus one extension.
 
 Still to do:
 
 - App icon, launch screen, signing, an Apple Developer account ($99/yr).
-- Decide whether a `.bento.html` UTI is worth declaring over plain `public.html`.
+- Decide whether a `.webdeck.html` UTI is worth declaring over plain `public.html`.

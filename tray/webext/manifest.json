@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Bento Tray",
+  "name": "WebDeck Tray",
   "version": "0.0.1",
-  "description": "Save a Bento document back to the file you opened, without a destination prompt.",
+  "description": "Save a WebDeck document back to the file you opened, without a destination prompt.",
   "minimum_chrome_version": "116",
   "permissions": [
     "storage"
@@ -15,7 +15,7 @@
   "content_scripts": [
     {
       "matches": [
-        "file:///*.bento.html"
+        "file:///*.webdeck.html"
       ],
       "js": [
         "src/page-bridge.js"
@@ -25,7 +25,7 @@
     },
     {
       "matches": [
-        "file:///*.bento.html"
+        "file:///*.webdeck.html"
       ],
       "js": [
         "src/relay.js"

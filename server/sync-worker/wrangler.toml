@@ -1,14 +1,14 @@
-# bento-sync relay — Cloudflare Worker + one Durable Object room per docId.
+# webdeck-sync relay — Cloudflare Worker + one Durable Object room per docId.
 # Deploy:  npx wrangler deploy          (needs `npx wrangler login` once)
 # Dev:     npx wrangler dev --port 8787 (fully local, no account needed)
-# Then point sync.bento.page at the worker (Custom Domain below, or a route).
-name = "bento-sync"
+# Then point sync.webdeck.page at the worker (Custom Domain below, or a route).
+name = "webdeck-sync"
 main = "src/worker.js"
 compatibility_date = "2026-07-01"
 
 # workers.dev URL is fine to start; add the custom domain when ready:
 routes = [
-  { pattern = "sync.bento.page", custom_domain = true }
+  { pattern = "sync.webdeck.page", custom_domain = true }
 ]
 
 # Encrypted asset blobs (docs/blob-offload.md). The relay pipes ciphertext
@@ -17,7 +17,7 @@ routes = [
 # inlining small assets, so a self-hoster without R2 still works.
 [[r2_buckets]]
 binding = "BLOBS"
-bucket_name = "bento-blobs"
+bucket_name = "webdeck-blobs"
 
 [[durable_objects.bindings]]
 name = "ROOM"

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Clipboard transport is plain JSON, so this regression rig runs without a DOM.
 
 import { insertElements, insertSlides, parseClip, serializeElements, serializeSlides } from '../slides/src/editor/clipboard.ts'

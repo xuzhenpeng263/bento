@@ -1,10 +1,10 @@
 # Changelog
 
-All notable changes to **bento/dash**. The app version is baked into every
+All notable changes to **webdeck-dash**. The app version is baked into every
 shell as `APP_VERSION` (from `dash/package.json`) and checked against the
 signed release manifest; a shipped file updates itself through that channel.
 
-The format (`bento/dash`, version `1`) is additive and stable — every version
+The format (`webdeck-dash`, version `1`) is additive and stable — every version
 below opens files from every earlier version, and unknown fields are preserved.
 There is no server, so a break here would be permanent.
 
@@ -54,6 +54,6 @@ the formulas and the charts, opening from `file://` with no backend.
   header leaves the document untouched and the file unmodified.
 
 - **A file that cannot be read is never overwritten.** If the document block is
-  damaged, or belongs to another Bento app, the workbook refuses to open,
+  damaged, or belongs to another WebDeck app, the workbook refuses to open,
   explains what it found, and offers the original bytes back — rather than
   showing an empty grid over your data and saving it.

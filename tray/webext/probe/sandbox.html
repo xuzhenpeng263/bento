@@ -24,7 +24,7 @@
   #log { background: #f5f7fa; border-radius: 8px; padding: .8rem; white-space: pre-wrap; font: 12px/1.45 ui-monospace, monospace; margin-top: 1rem; max-height: 260px; overflow: auto; }
 </style>
 
-<h1>Does a Bento document survive an <em>opaque origin</em>?</h1>
+<h1>Does a WebDeck document survive an <em>opaque origin</em>?</h1>
 <p class="sub">
   The only isolation left to <b>bento/home</b> is running a document in
   <code>&lt;iframe sandbox="allow-scripts"&gt;</code> — no <code>allow-same-origin</code>, so it
@@ -104,7 +104,7 @@ function harness(tag) {
   };
   send({ type: 'ctx', origin: String(location.origin), secure: !!self.isSecureContext });
 
-  // The APIs a Bento document actually reaches for. Each is a real feature:
+  // The APIs a WebDeck document actually reaches for. Each is a real feature:
   // localStorage carries language/reduce-motion and the collab member key,
   // IndexedDB carries autosave + version history, crypto mints docIds and
   // signs collab writes.
@@ -128,14 +128,14 @@ function harness(tag) {
   // Did the app actually come up? Reported twice: once early, once late enough
   // for a deflate-and-import boot to have finished.
   var report = function (when) {
-    var b = window.bento;
+    var b = window.webdeck;
     send({
       type: 'boot', when: when,
       hasBento: !!b,
       slides: (b && b.doc && b.doc.slides && b.doc.slides.length) || 0,
       title: (b && b.doc && b.doc.title) || null,
       appNodes: (document.getElementById('app') && document.getElementById('app').childElementCount) || 0,
-      surfaces: document.querySelectorAll('.bento-slide, .ed-stage-scale').length,
+      surfaces: document.querySelectorAll('.webdeck-slide, .ed-stage-scale').length,
       bodyText: (document.body ? document.body.innerText.slice(0, 90) : '')
     });
   };
@@ -206,7 +206,7 @@ function render() {
   out += `<tr><td class="k">secure context</td><td class="same">${c.secure ?? '—'}</td><td class="same">${s.secure ?? '—'}</td></tr>`
   for (const k of ROWS) out += `<tr><td class="k">${k}</td>${cell(c.api?.[k])}${cell(s.api?.[k])}</tr>`
   const bootRow = (r) => r.boot
-    ? `<td class="${r.boot.hasBento ? 'ok' : 'bad'}">${r.boot.hasBento ? '✓ booted' : '✗ no window.bento'} · ${r.boot.slides} slides · ${r.boot.surfaces} surfaces</td>`
+    ? `<td class="${r.boot.hasBento ? 'ok' : 'bad'}">${r.boot.hasBento ? '✓ booted' : '✗ no window.webdeck'} · ${r.boot.slides} slides · ${r.boot.surfaces} surfaces</td>`
     : '<td class="same">waiting…</td>'
   out += `<tr><td class="k">app boot</td>${bootRow(c)}${bootRow(s)}</tr>`
   const errRow = (r) => `<td class="${r.errors?.length ? 'bad' : 'ok'}">${r.errors?.length ? escapeHtml(r.errors.slice(0, 3).join(' · ')).slice(0, 120) : 'none'}</td>`

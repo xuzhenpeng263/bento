@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// The workbook a fresh bento/dash file opens with.
+// Copyright (c) 2026 The WebDeck authors
+// The workbook a fresh webdeck-dash file opens with.
 //
 // It has to teach the app in one screen, so it is deliberately not empty and
 // deliberately not a lorem-ipsum grid: it is a small, real-shaped table with
@@ -65,7 +65,7 @@ export function starterDoc(): DashDoc {
   return {
     format: FORMAT,
     version: FORMAT_VERSION,
-    policy: 'bento-dash-1',
+    policy: 'webdeck-dash-1',
     docId: uid('doc'),
     title: 'Untitled workbook',
     sheets: [starterSheet()],

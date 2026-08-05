@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// Boot sequence for bento/dash.
+// Copyright (c) 2026 The WebDeck authors
+// Boot sequence for webdeck-dash.
 //
 // Order matters: configure the app, then capture the pristine document BEFORE
 // any DOM mutation — the captured copy is what gets re-serialized on save.
@@ -14,7 +14,7 @@
 // ⌘S makes permanent.
 //
 // And one case the kernel cannot express: `readEmbeddedDoc` returns
-// `text || null`, so "no #bento-doc element" and "element present, text node
+// `text || null`, so "no #webdeck-doc element" and "element present, text node
 // empty" arrive identically. Measured, past the parser's limit the block IS
 // present with a zero-length text node and no throw — so that must be told
 // apart HERE, where the DOM is still visible, or an oversized workbook opens
@@ -43,16 +43,16 @@ import { defaultBinding, renderChart, type ChartBinding } from './chart.ts'
 import { FUNCTIONS } from './formula.ts'
 
 configureApp({
-  appId: 'bento-dash',
-  appName: 'bento/dash',
-  manifestUrl: 'https://bento.page/releases/dash/manifest.json',
+  appId: 'webdeck-dash',
+  appName: 'webdeck-dash',
+  manifestUrl: 'https://webdeck.page/releases/dash/manifest.json',
 })
 
 capturePristine()
 
 // --- boot -------------------------------------------------------------------
 
-const blockEl = document.getElementById('bento-doc')
+const blockEl = document.getElementById('webdeck-doc')
 const embedded = readEmbeddedDoc()
 const envelope = embedded ? parseEnvelope(embedded) : null
 
@@ -70,7 +70,7 @@ if (envelope) {
 
 /** An encrypted workbook: ask, then take the same boot path. */
 async function passwordGate(raw: string): Promise<void> {
-  document.getElementById('bento-splash')?.remove()
+  document.getElementById('webdeck-splash')?.remove()
   document.body.innerHTML =
     `<div class="dx-gate"><h1>${t('This file is encrypted.')}</h1>` +
     `<p>${t('Enter the password to open this workbook.')}</p>` +
@@ -100,12 +100,12 @@ async function passwordGate(raw: string): Promise<void> {
  * subscription are constructed, and none of them exist on this path.
  */
 function refuse(res: Extract<ParseResult, { ok: false }>): void {
-  document.getElementById('bento-splash')?.remove()
+  document.getElementById('webdeck-splash')?.remove()
   const why = res.err === 'empty' ? '' : 'detail' in res ? res.detail : ''
   const found = 'found' in res && res.found ? ` (${res.found})` : ''
   document.body.innerHTML =
     `<div class="dx-gate">` +
-    `<h1>${t('This file could not be opened as a bento/dash workbook.')}</h1>` +
+    `<h1>${t('This file could not be opened as a webdeck-dash workbook.')}</h1>` +
     `<p>${esc(why)}${esc(found)}</p>` +
     `<p>${t('Your data has not been changed, and this build will not write to this file. You can take the contents out below.')}</p>` +
     `<code id="dx-raw"></code>` +
@@ -119,7 +119,7 @@ function refuse(res: Extract<ParseResult, { ok: false }>): void {
   })
   document.getElementById('dx-download')!.addEventListener('click', () => {
     // the file exactly as it arrived — no parse, no re-serialize
-    downloadFile(document.documentElement.outerHTML, openedFileName() ?? 'recovered.bento.html')
+    downloadFile(document.documentElement.outerHTML, openedFileName() ?? 'recovered.webdeck.html')
   })
 }
 
@@ -127,7 +127,7 @@ function refuse(res: Extract<ParseResult, { ok: false }>): void {
 
 function boot(doc: DashDoc, repaired: number, frozen?: 'policy' | 'version'): void {
   document.title = `${doc.title} — ${appConfig().appName}`
-  document.getElementById('bento-splash')?.remove()
+  document.getElementById('webdeck-splash')?.remove()
 
   const store = new Store(doc)
   if (frozen) store.readOnly = true
@@ -135,7 +135,7 @@ function boot(doc: DashDoc, repaired: number, frozen?: 'policy' | 'version'): vo
   const app = document.getElementById('app')!
   app.innerHTML =
     `<header class="dx-bar">` +
-    `<span class="dx-mark">bento<span>/</span>dash</span>` +
+    `<span class="dx-mark">webdeck<span>/</span>dash</span>` +
     `<input class="dx-title" value="">` +
     `<span class="dx-dirty" hidden>•</span>` +
     `<button class="dx-btn" data-act="formula">${t('＋ Formula column')}</button>` +

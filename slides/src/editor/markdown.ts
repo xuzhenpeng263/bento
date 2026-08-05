@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Lightweight markdown affordances for text editing. Two entry points:
 // - autoformatAtCaret: called on every input; when the text just before the
 //   caret completes an inline pattern (**bold**, *italic*, `code`, ~~strike~~)

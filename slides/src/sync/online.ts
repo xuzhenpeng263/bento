@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento-sync online transport — E2EE WebSocket to the blind relay
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-sync online transport — E2EE WebSocket to the blind relay
 // (server/sync-worker). Every session frame is AES-GCM encrypted with the
 // room key from doc.collab.key; the relay sees ciphertext, fan-out routing,
 // and nothing else. Auth is possession-proof: ?tok= is a hash of the key.
@@ -17,7 +17,7 @@ import type { Frame, RefusalCode, SyncSession, Transport } from './session'
 import { offlineEnabled } from '../update'
 import { lsGet, lsSet } from '../../../kernel/src/storage.ts'
 
-export const DEFAULT_SYNC_HOST = 'wss://sync.bento.page'
+export const DEFAULT_SYNC_HOST = 'wss://sync.webdeck.page'
 const SNAP_EVERY = 200 // ops between encrypted snapshot uploads
 
 const b64u = {
@@ -85,7 +85,7 @@ export async function mintInvite(ownerPrivB64: string, role: 'writer' | 'comment
 /** This device's member identity for a doc — minted once, kept in localStorage,
  *  NEVER in the file (the file travels; a device key must not). */
 export async function deviceIdentity(docId: string): Promise<{ pub: string; priv: string }> {
-  const k = `bento-member-${docId}`
+  const k = `webdeck-member-${docId}`
   try {
     const saved = lsGet(k)
     if (saved) return JSON.parse(saved)
@@ -143,7 +143,7 @@ export async function mintCollab(): Promise<CollabCreds> {
 /** dev override for the relay host (e.g. ws://localhost:8787) */
 export function syncHost(): string {
   try {
-    return lsGet('bento-sync-url') || DEFAULT_SYNC_HOST
+    return lsGet('webdeck-sync-url') || DEFAULT_SYNC_HOST
   } catch {
     return DEFAULT_SYNC_HOST
   }
@@ -397,12 +397,12 @@ export class OnlineTransport implements Transport {
     if (env.code !== 'too-large' && env.code !== 'storage-failed' && env.code !== 'room-full') {
       // a code from a newer relay: no recovery we can invent is better than
       // leaving the op in the log, where `need` will retry it honestly
-      console.warn('[bento-sync] relay refused a frame:', env.code)
+      console.warn('[webdeck-sync] relay refused a frame:', env.code)
       return
     }
     const culprit = this.matchRefused(env)
     if (culprit) this.awaitingAck = this.awaitingAck.filter((o) => o !== culprit)
-    console.warn(`[bento-sync] relay refused a frame (${env.code})`, env)
+    console.warn(`[webdeck-sync] relay refused a frame (${env.code})`, env)
     this.hooks.onRefused?.(env.code, culprit?.ops ?? null)
   }
 
@@ -489,7 +489,7 @@ export class OnlineTransport implements Transport {
     // refuses our reconnects anyway — don't retry into a wall of 403s)
     if (env.ctl === 'revoked') {
       if (env.p && env.p === this.myPub) {
-        console.info('[bento-sync] this copy’s access was revoked by the owner')
+        console.info('[webdeck-sync] this copy’s access was revoked by the owner')
         this.close()
       }
       return

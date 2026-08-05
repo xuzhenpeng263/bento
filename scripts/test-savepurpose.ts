@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Save-intent rig.
 //
 //   node scripts/test-savepurpose.ts
@@ -33,7 +33,7 @@ const ids = purposes.map(pickerIdFor)
 
 ok(new Set(ids).size === purposes.length,
   `every purpose has its own picker id (${ids.join(', ')})`)
-ok(pickerIdFor('in-place') === 'bento-doc',
+ok(pickerIdFor('in-place') === 'webdeck-doc',
   'in-place keeps the original id, so no existing deck changes where its picker opens')
 ok(pickerIdFor('copy') !== pickerIdFor('in-place'),
   'a copy is distinguishable from an in-place save — the case that overwrote a file')

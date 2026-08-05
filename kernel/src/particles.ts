@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // GPU particle engine — tens of thousands of particles at 60fps.
 //
 // WebGL instanced-points renderer: one draw call for all particles,

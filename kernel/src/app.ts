@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// Per-app identity for the kernel. Every Bento app calls configureApp() once,
+// Copyright (c) 2026 The WebDeck authors
+// Per-app identity for the kernel. Every WebDeck app calls configureApp() once,
 // first thing at boot, before any kernel module is used.
 //
 // Only three values are app-specific across the whole kernel: the id the
@@ -16,13 +16,13 @@
 // would make importing it before configureApp() throw.
 
 export interface AppConfig {
-  /** Manifest `app` field this shell will accept — e.g. 'bento-slides'.
+  /** Manifest `app` field this shell will accept — e.g. 'webdeck'.
    *  A manifest signed for another app is rejected even though the signing
    *  key is shared platform-wide. */
   appId: string
   /** Human-facing product name: window title suffix, save-picker label. */
   appName: string
-  /** Release manifest URL. Dev override: localStorage 'bento-update-url'. */
+  /** Release manifest URL. Dev override: localStorage 'webdeck-update-url'. */
   manifestUrl: string
 }
 
@@ -37,6 +37,6 @@ export function configureApp(cfg: AppConfig): void {
  *  a loud failure at boot beats silently checking updates against the
  *  wrong manifest. */
 export function appConfig(): AppConfig {
-  if (!config) throw new Error('bento kernel: configureApp() was never called')
+  if (!config) throw new Error('webdeck kernel: configureApp() was never called')
   return config
 }

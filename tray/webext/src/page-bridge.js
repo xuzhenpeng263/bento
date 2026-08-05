@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
 // The page-world half of the bridge. Runs in the DOCUMENT's world (MAIN), at
 // document_start, so it is in place before the deck's own runtime boots.
@@ -24,7 +24,7 @@
 
 ;(() => {
   const native = window.showSaveFilePicker?.bind(window)
-  const CH = '__bento_tray__'
+  const CH = '__webdeck_tray__'
   let seq = 0
   const pending = new Map()
 
@@ -65,15 +65,15 @@
    * copy…" reached the picker with byte-identical arguments, this code guessed
    * in-place, and it overwrote the open deck — no dialog, no new file.
    *
-   *   bento-doc    ⌘S, or a first save of an unsaved document → write in place
-   *   bento-copy   "Save a copy…"                             → the author chooses
-   *   bento-share  view-only, package, invite, template       → the author chooses
+   *   webdeck-doc    ⌘S, or a first save of an unsaved document → write in place
+   *   webdeck-copy   "Save a copy…"                             → the author chooses
+   *   webdeck-share  view-only, package, invite, template       → the author chooses
    *
    * Default to declining. An unknown or absent id means a caller we have not
    * seen; the native picker is the correct answer.
    *
    * And the id alone is not enough: a deck whose runtime PREDATES #213 sends
-   * `bento-doc` for every save, "Save a copy…" included, so acting on it there
+   * `webdeck-doc` for every save, "Save a copy…" included, so acting on it there
    * reproduces exactly the bug this replaced. Hence the runtime-version gate —
    * old decks keep the behaviour they have today, which is correct and safe.
    * The failure directions are not symmetric: declining costs a prompt, taking
@@ -81,7 +81,7 @@
    */
   /**
    * The release that first sent a distinct picker `id` per purpose (#213).
-   * A deck whose embedded runtime predates it sends `bento-doc` for EVERY save
+   * A deck whose embedded runtime predates it sends `webdeck-doc` for EVERY save
    * — including "Save a copy…" — so the id carries no information there and
    * this bridge must not act on it. If #213 ships under a different number,
    * this constant is the one thing to change.
@@ -89,7 +89,7 @@
   const ID_SINCE = [1, 0, 15]
 
   const runtimeAtLeast = (min) => {
-    const v = window.bento?.updates?.version
+    const v = window.webdeck?.updates?.version
     if (typeof v !== 'string') return false // no runtime yet, or too old to say
     const parts = v.split('.').map((n) => parseInt(n, 10))
     if (parts.some(Number.isNaN)) return false
@@ -100,7 +100,7 @@
     return true
   }
 
-  const wantsOpenFile = (opts) => opts?.id === 'bento-doc' && runtimeAtLeast(ID_SINCE)
+  const wantsOpenFile = (opts) => opts?.id === 'webdeck-doc' && runtimeAtLeast(ID_SINCE)
 
   /**
    * Options safe to hand to the NATIVE picker.
@@ -140,7 +140,7 @@
       // installed — which cost a full diagnostic round trip. The common cause
       // is the folder grant lapsing after an extension reload, which the
       // options page can renew in one click.
-      console.info('[bento-tray] not saving in place:', claim?.reason ?? 'no answer from the extension',
+      console.info('[webdeck-tray] not saving in place:', claim?.reason ?? 'no answer from the extension',
         '— falling back to the browser picker. Open the extension options to check the folder grant.')
       // The extension cannot reach this file — no folder granted, or the deck
       // lives outside it. The native picker is not a worse outcome, it is
@@ -162,7 +162,7 @@
             const text = await blob.text()
             const res = await ask('write', { text })
             if (!res?.ok) throw new DOMException(res?.reason || 'write failed', 'NotAllowedError')
-            console.info('[bento-tray] wrote', claim.name, `(${res.bytes} bytes) in place`)
+            console.info('[webdeck-tray] wrote', claim.name, `(${res.bytes} bytes) in place`)
           },
         }
       },

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Facade: the i18n ENGINE lives in the shared kernel (kernel/src/i18n.ts);
 // the CATALOGS are this app's string data and stay here in ./i18n/*.ts.
 //
@@ -87,7 +87,7 @@ export { t, locale, setLocale, i18nApi, localeChoices } from '../../kernel/src/i
 // --- writing direction -------------------------------------------------------
 //
 // Direction is a property of the VIEWER's language, exactly like the language
-// itself: it follows navigator.language / the 'bento-lang' override and NEVER
+// itself: it follows navigator.language / the 'webdeck-lang' override and NEVER
 // enters the document format. A deck authored in Cairo must open in Chicago
 // looking byte-identical — only the chrome around it turns around.
 //

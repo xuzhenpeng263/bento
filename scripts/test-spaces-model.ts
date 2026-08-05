@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento/spaces model rig.
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-spaces model rig.
 //
 //   node scripts/test-spaces-model.ts
 //
@@ -54,8 +54,8 @@ ok(parseDoc('   \n ').ok === false && (parseDoc('  ') as any).err === 'empty',
   'whitespace counts as empty')
 
 for (const [label, input, err] of [
-  ['a slides document', JSON.stringify({ format: 'bento/slides', slides: [] }), 'format'],
-  ['a hand-edited typo', '{"format":"bento/spaces", pages:[]}', 'json'],
+  ['a slides document', JSON.stringify({ format: 'webdeck', slides: [] }), 'format'],
+  ['a hand-edited typo', '{"format":"webdeck-spaces", pages:[]}', 'json'],
   ['a JSON array', '[]', 'shape'],
   ['pages missing', JSON.stringify({ format: FORMAT }), 'shape'],
 ] as const) {
@@ -63,8 +63,8 @@ for (const [label, input, err] of [
   ok(r.ok === false && r.err === err, `${label} REFUSES with err="${err}" (never the starter)`)
 }
 {
-  const r = parseDoc(JSON.stringify({ format: 'bento/slides', slides: [] }))
-  ok(r.ok === false && 'found' in r && r.found === 'bento/slides',
+  const r = parseDoc(JSON.stringify({ format: 'webdeck', slides: [] }))
+  ok(r.ok === false && 'found' in r && r.found === 'webdeck',
     'refusing names the format it actually found, so the message can say so')
 }
 
@@ -95,7 +95,7 @@ for (const [label, input, err] of [
 {
   const r = parseDoc(doc({ version: 99 }))
   ok(r.ok && r.frozen === 'version', 'a newer format version opens FROZEN rather than being reinterpreted')
-  const p = parseDoc(doc({ policy: 'bento-spaces-2' }))
+  const p = parseDoc(doc({ policy: 'webdeck-spaces-2' }))
   ok(p.ok && p.frozen === 'policy', 'an unrecognised policy opens FROZEN')
   // frozen means ids are NOT rewritten, even duplicates: we cannot know the
   // rules this file was written under, so we must not touch it

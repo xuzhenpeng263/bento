@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
 // The ENTIRE web-side surface of the iOS host: a polyfill of the one File
-// System Access call Bento tests for. Injected at .atDocumentStart, because
+// System Access call WebDeck tests for. Injected at .atDocumentStart, because
 // capability is read during boot — inject it later and the editor has already
 // decided it cannot save.
 //
-// Bento needs exactly this much of the API (kernel/src/save.ts):
+// WebDeck needs exactly this much of the API (kernel/src/save.ts):
 //   showSaveFilePicker({suggestedName}) -> { name, createWritable() }
 //   createWritable() -> { write(Blob|string), close() }
 // ...and hasFsAccess() is just `typeof window.showSaveFilePicker === 'function'`.
 //
-// That is why the app needs NO changes to Bento and works with decks saved by
+// That is why the app needs NO changes to WebDeck and works with decks saved by
 // any past version: every in-place path (⌘S, autosave write-back, self-update)
 // already routes through this one function. A bespoke `window.__bentoHost`
 // bridge would only have helped decks re-saved after it shipped.
@@ -24,7 +24,7 @@
   const pending = new Map()
 
   // native calls back into this
-  window.__bentoNativeReply = (id, ok, value) => {
+  window.__webdeckNativeReply = (id, ok, value) => {
     const p = pending.get(id)
     if (!p) return
     pending.delete(id)
@@ -40,21 +40,21 @@
   window.showSaveFilePicker = async (opts) => {
     const want = (opts && opts.suggestedName) || ''
     // Native decides what this call targets; the rule is DETERMINISTIC and lives
-    // there, not here. Bento only reaches a picker when it holds no handle —
+    // there, not here. WebDeck only reaches a picker when it holds no handle —
     // once it has one, ⌘S, autosave write-back and in-place update all reuse it
     // (kernel/src/save.ts). So the FIRST call is "the document already open in
     // the app" and resolves with no UI, and any LATER call is a genuine Save-As
     // or export (read-only copy, invite, template) that must not overwrite it.
     //
     // Do NOT try to infer this by comparing suggestedName to the open file:
-    // Bento derives that name from the DECK TITLE, so it rarely matches and
+    // WebDeck derives that name from the DECK TITLE, so it rarely matches and
     // every save would wrongly prompt.
     const name = await call('begin', { suggestedName: want })
     return makeHandle(name)
   }
 
   // A FileSystemFileHandle faithful enough for apps that are not Bento.
-  // Bento itself only ever touches createWritable/write/close, but this host
+  // WebDeck itself only ever touches createWritable/write/close, but this host
   // opens ANY self-contained HTML document, and a real app may well call
   // queryPermission() before saving or truncate() to overwrite in place. Those
   // returned `undefined` and threw — measured against a live third-party page,

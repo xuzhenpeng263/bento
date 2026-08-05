@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Compose the social share card (og:image) as a self-contained SVG, using the
 // SAME embedded typefaces as the deck/landing so it's on-brand. Writes an SVG;
 // it's rasterised to site-src/og.png in the browser (no CLI rasteriser is
@@ -70,7 +70,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" v
   <text x="80" y="524" font-family="Instrument Sans, sans-serif" font-weight="500" font-size="27" fill="rgba(182,193,210,0.92)">One HTML file — the document, the editor and the player at once.</text>
 
   <!-- domain -->
-  <text x="1120" y="566" text-anchor="end" font-family="Instrument Sans, sans-serif" font-weight="600" font-size="24" fill="rgba(182,193,210,0.75)">bento.page</text>
+  <text x="1120" y="566" text-anchor="end" font-family="Instrument Sans, sans-serif" font-weight="600" font-size="24" fill="rgba(182,193,210,0.75)">webdeck.page</text>
 </svg>`
 
 mkdirSync(dirname(out), { recursive: true })

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // "This QR code is a presentation" — builds site/q/index.html from
 // site-src/q.html: composes a tiny deck, deflates it into a base64url
 // payload (the QR encodes URL#payload — the deck literally lives in the
@@ -24,7 +24,7 @@ const out = process.argv[2] ?? join(root, 'site/q/index.html')
 // page renders exactly this subset)
 const INK = '#0D1B2E', PEACH = '#FF9E8A', PAPER = '#F0EBE0', STEEL = '#5E7699'
 const doc = {
-  format: 'bento/slides', version: 1, title: 'The QR deck',
+  format: 'webdeck', version: 1, title: 'The QR deck',
   size: { width: 1280, height: 720 },
   slides: [
     { id: 'q1', background: INK, elements: [
@@ -37,15 +37,15 @@ const doc = {
     ] },
     { id: 'q2', background: PAPER, elements: [
       { id: 't4', type: 'text', x: 96, y: 150, w: 1080, h: 220, html: 'A deck in 3 KB.<br>An office suite in one file.', fontSize: 66, fontWeight: 800, color: INK, lineHeight: 1.1, fontFamily: 'Georgia, serif' },
-      { id: 't5', type: 'text', x: 96, y: 420, w: 900, h: 120, html: 'Real Bento decks carry their own editor, presenter, charts and end-to-end-encrypted collaboration. Still just a file.', fontSize: 22, color: 'rgba(13,27,46,0.75)', lineHeight: 1.55 },
-      { id: 't6', type: 'text', x: 96, y: 590, w: 900, h: 60, html: 'bento.page', fontSize: 40, fontWeight: 800, color: '#C25A43' },
+      { id: 't5', type: 'text', x: 96, y: 420, w: 900, h: 120, html: 'Real WebDeck decks carry their own editor, presenter, charts and end-to-end-encrypted collaboration. Still just a file.', fontSize: 22, color: 'rgba(13,27,46,0.75)', lineHeight: 1.55 },
+      { id: 't6', type: 'text', x: 96, y: 590, w: 900, h: 60, html: 'webdeck.page', fontSize: 40, fontWeight: 800, color: '#C25A43' },
     ] },
   ],
 }
 
 const payload = deflateRawSync(JSON.stringify(doc), { level: 9 })
   .toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-const url = `https://bento.page/q#${payload}`
+const url = `https://webdeck.page/q#${payload}`
 console.log(`qr payload: ${payload.length} chars (${url.length} total in QR)`)
 
 // QR SVG generated IN-PROCESS via the qrcode module (a devDependency). The

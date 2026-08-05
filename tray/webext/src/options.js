@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 //
 // Granting happens here and nowhere else: `showDirectoryPicker` needs a user
 // gesture, and a save is the wrong moment to discover there isn't one. The
 // service worker only ever reads the grant it finds.
 
-const DB = 'bento-tray'
+const DB = 'webdeck-tray'
 const STORE = 'grant'
 const open = () => new Promise((res, rej) => {
   const r = indexedDB.open(DB, 1)

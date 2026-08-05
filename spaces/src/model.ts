@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// The bento/spaces document model. This JSON is what lives inside the
-// #bento-doc block — the format IS the product (docs/PLATFORM.md §3).
+// Copyright (c) 2026 The WebDeck authors
+// The webdeck-spaces document model. This JSON is what lives inside the
+// #webdeck-doc block — the format IS the product (docs/PLATFORM.md §3).
 //
 // ONE FILE = ONE SPACE: a tree of pages, each holding a flat pre-order list of
 // blocks. Links are same-document fragments (`#p/<pageId>`) resolved against a
@@ -13,7 +13,7 @@
 // meeting a future 'kanban' block keeps it and renders its html fallback.
 // There is no server; a break here is permanent.
 
-export const FORMAT = 'bento/spaces'
+export const FORMAT = 'webdeck-spaces'
 export const FORMAT_VERSION = 1
 
 /**
@@ -23,7 +23,7 @@ export const FORMAT_VERSION = 1
  * policy must PARSE, so the file opens and round-trips byte-exact with
  * canonicalization and id repair disabled.
  */
-export type Policy = 'bento-spaces-1' | (string & {})
+export type Policy = 'webdeck-spaces-1' | (string & {})
 
 /**
  * Block types this build knows. `Block.type` is `string`, NOT this union —
@@ -114,7 +114,7 @@ export interface Theme {
 export interface SpacesDoc {
   format: typeof FORMAT
   version: number
-  /** absent ⇒ bento-spaces-1 */
+  /** absent ⇒ webdeck-spaces-1 */
   policy?: Policy
   /** minted once at creation/load, NEVER regenerated (PLATFORM §3) */
   docId: string
@@ -201,13 +201,13 @@ export function parseDoc(json: string): ParseResult {
     }
   }
   if (!Array.isArray(raw.pages)) {
-    return { ok: false, err: 'shape', detail: 'a bento/spaces document needs a "pages" array' }
+    return { ok: false, err: 'shape', detail: 'a webdeck-spaces document needs a "pages" array' }
   }
 
   const version = typeof raw.version === 'number' ? raw.version : FORMAT_VERSION
-  const policy = typeof raw.policy === 'string' ? raw.policy : 'bento-spaces-1'
+  const policy = typeof raw.policy === 'string' ? raw.policy : 'webdeck-spaces-1'
   const frozen: 'policy' | 'version' | undefined =
-    version > FORMAT_VERSION ? 'version' : policy !== 'bento-spaces-1' ? 'policy' : undefined
+    version > FORMAT_VERSION ? 'version' : policy !== 'webdeck-spaces-1' ? 'policy' : undefined
 
   const repaired: string[] = []
   const seen = new Set<string>()
@@ -291,7 +291,7 @@ export function docContentKey(doc: SpacesDoc): string {
 
 // ---- derived, NEVER stored -------------------------------------------------
 // Stale the moment anything else writes the document (an agent editing
-// #bento-doc, a version restore, a future CRDT apply). Derived at load.
+// #webdeck-doc, a version restore, a future CRDT apply). Derived at load.
 
 export interface SpaceIndex {
   page: Map<string, Page>

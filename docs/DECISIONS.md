@@ -21,7 +21,7 @@ Decision. Why. Pointers.
 guards it sat on top of are unchanged and are not optional.
 
 **What stands, because the failure past the budget is SILENT.** Measured at a
-539 MB file: the `#bento-doc` element still holds exactly one child text node,
+539 MB file: the `#webdeck-doc` element still holds exactly one child text node,
 of length **zero**. `textContent` returns `''` — a string, no throw — so the
 workbook opens EMPTY, and self-save then re-splices whatever is in memory over
 the user's file. Unrecoverable loss caused by a successful parse of nothing. So,
@@ -61,9 +61,9 @@ Compute is not the constraint and is not close: hand-written columnar JS over
 typed arrays, zero dependencies, single-threaded, measured on **10,000,000
 rows** — scan-sum 5.9 ms, filter+sum 10.6 ms, two-dimension group-by 11.5 ms.
 
-## 2026-08-02 — `bento/dash` is settled, and it stands for DAta SHeets
+## 2026-08-02 — `webdeck-dash` is settled, and it stands for DAta SHeets
 
-**Keep `bento/dash`.** The name contracts **DA**ta **SH**eets — the two halves
+**Keep `webdeck-dash`.** The name contracts **DA**ta **SH**eets — the two halves
 of the app, the typed data model and the grid. It is not short for "dashboard";
 a dashboard is something the app can produce, not what it is.
 
@@ -95,9 +95,9 @@ anything — and it is now unblocked.
 
 **Namespace was deliberately down-weighted.** PyPI `dash` is Plotly's dataviz
 framework and npm `dash` is the cryptocurrency, but the app never ships as a
-bare word — it is `bento/dash`, at `bento.page/dash`, in
-`Bento_Dash.bento.html`. That is the mitigation the 2026-07-24 entry already
-prescribes for the crowded Bento namespace: always carry the `bento/<app>`
+bare word — it is `webdeck-dash`, at `webdeck.page/dash`, in
+`WebDeck_Dash.webdeck.html`. That is the mitigation the 2026-07-24 entry already
+prescribes for the crowded WebDeck namespace: always carry the `bento/<app>`
 form and the descriptor.
 
 ## 2026-07-28 — Vault is a capability broker; identity is multi-user from commit one
@@ -119,7 +119,7 @@ Settled:
   freshly fetched shell and discards everything else, so shell config survives an
   update only if the update comes from the vault. Needs a visible "return to
   upstream" escape so a defunct vault cannot freeze former employees' files.
-- **Dual signatures.** Canonical runtime = the file minus `#bento-doc` and
+- **Dual signatures.** Canonical runtime = the file minus `#webdeck-doc` and
   `#bento-vault`; its sha256 must match upstream's signed manifest, and the vault
   signs its config BOUND to that hash. A compromised vault can then redirect
   endpoints but cannot ship modified editor code. Build in v1 — unaddable later.
@@ -133,7 +133,7 @@ Settled:
   identically on every replica today; a fetch does not (two replicas fetching at
   different moments get different rows). Extend `scripts/test-sync.ts` first.
 - **Archival is reinstated; backup stays cut.** Different products. Copying bytes
-  is solved; being able to OPEN them in ten years is not, and a Bento archive
+  is solved; being able to OPEN them in ten years is not, and a WebDeck archive
   renders itself and stays machine-readable as plaintext JSON with no vendor in
   the loop. Vault produces the archive shape; restic moves it.
 
@@ -161,11 +161,11 @@ neither half of that. Probed with a page that is red by default, turns green
 from an inline script, and carries a blue `<noscript>`, the iOS thumbnailer
 renders **RED** — it runs no script AND does not render `<noscript>`. So the
 feature worked in Finder and macOS QuickLook and did nothing on the platform it
-was built for; every deck in Bento Tray stayed a dark box.
+was built for; every deck in WebDeck Tray stayed a dark box.
 
 That same gap is the fix. A renderer that runs no script still renders ordinary
 markup, and every real reader does run script — so the preview ships as a plain
-`[data-bento-preview]` element with a **parser-blocking inline remover**
+`[data-webdeck-preview]` element with a **parser-blocking inline remover**
 immediately after it. The thumbnailer keeps the preview (it never runs the
 remover); the reader never sees it (the script executes before the browser
 paints). Measured: at removal `document.readyState` is `"loading"` and
@@ -193,19 +193,19 @@ them is markup a browser could paint first.
 
 ---
 
-## 2026-07-27 — bento/vault is the ORG service point, and the AI broker is what forces it
+## 2026-07-27 — webdeck-vault is the ORG service point, and the AI broker is what forces it
 
 **Supersedes the 2026-07-25 "personal server" entry.** Vault is not a personal
 document library. It is the **service point for a group of people and their
 documents**, self-hosted on hardware that group owns.
 
 The reframe came from subtraction. Of the five promises in the old entry, four
-were met or taken while it sat unbuilt: mobile reach went to `bento/tray` plus
+were met or taken while it sat unbuilt: mobile reach went to `webdeck/tray` plus
 any existing File Provider (iCloud Drive, Dropbox), sharing went to the collab
 relay (the file IS the capability), per-device version history went to
 `kernel/src/autosave.ts`, and plain file sync was never ours. What survived
 personally was **search alone**, and it has since been narrowed by measurement:
-Spotlight indexes rendered HTML text, so the `#bento-doc` script block is
+Spotlight indexes rendered HTML text, so the `#webdeck-doc` script block is
 invisible to it — but the save-time preview is ORDINARY MARKUP now (the
 thumbnails entry above), and markup indexes. Measured 2026-07-28 with
 `mdimport -d2 -t` on a deck saved from the current shell: the whole title slide
@@ -217,7 +217,7 @@ real problem — now a smaller one — does not need a personal server.
 self-contained document travels, so it can never carry a model credential — that
 is emailing your API key to everyone you share the deck with. `localStorage` is
 per-device, and under tray it is per-DOCUMENT (the origin is
-`bento-tray://<sha256 of path>`, `EditorViewController.swift`), so it degenerates
+`webdeck-tray://<sha256 of path>`, `EditorViewController.swift`), so it degenerates
 into configuring a key per deck. The only place a credential can live once and
 serve a whole library is a server the group runs. **In-app AI is architecturally
 impossible without something vault-shaped**, and the same index serves both
@@ -228,7 +228,7 @@ made real.
 **SSO gates distribution, never the file.** Once someone holds the bytes they
 open them forever, offline, with no server — that is the product, not a bug. SSO
 can gate access to the vault and the distribution of decryption keys (the
-`bento/enc` envelope and the owner→invite→member chain already exist for this).
+`webdeck/enc` envelope and the owner→invite→member chain already exist for this).
 Revocation is therefore FORWARD-ONLY: a revoked member keeps what they already
 downloaded, exactly as `collab-design.md` already documents for devices. Say this
 before an enterprise security review discovers it.
@@ -265,7 +265,7 @@ relicense slides.
 Bento app; the drawing is per-app (`slides/src/preview.ts`).
 
 **The problem.** Thumbnailers render a document's HTML but do not run its
-JavaScript, so every Bento file thumbnailed as the same dark box — correctly,
+JavaScript, so every WebDeck file thumbnailed as the same dark box — correctly,
 because before the runtime boots every deck *is* the same bytes plus the boot
 splash. Confirmed on iOS, and confirmed that the iOS-side escape hatch does not
 exist: an image attached via `UIDocument.fileAttributesToWrite` under
@@ -300,14 +300,14 @@ the only honest test. Chrome's `--blink-settings=scriptEnabled=false` suppresses
 over CDP instead.
 
 **Encrypted decks get NO preview — the load-bearing rule.** A plaintext
-rendering of page one beside a `bento/enc` envelope hands over the title slide,
+rendering of page one beside a `webdeck/enc` envelope hands over the title slide,
 usually the most disclosive page, and does it invisibly. `previewAllowed()`
 checks the in-memory password flag AND re-parses the body as an envelope,
 because those fail independently. Removal of any existing preview is
 UNCONDITIONAL and happens before that decision, so a deck that gains a password
 loses its preview on the next save.
 
-**Shell furniture, not format.** Nothing enters `#bento-doc`; no format field
+**Shell furniture, not format.** Nothing enters `#webdeck-doc`; no format field
 is added; old files open unchanged; an app that registers no provider (spaces)
 saves as before. The preview is replaced, never appended — `capturePristine()`
 snapshots the file as loaded, so the clone already carries the previous save's
@@ -319,7 +319,7 @@ a table 16 KB; a page with a 2.5 MB photograph degrades to 1.7 KB. Over budget,
 page one re-renders with raster payloads replaced by tinted boxes; over it
 again, a title card. Downscaling a hero photo instead would be
 better and was NOT done: image decode is async and `serializeWith`/
-`serializeFile` are synchronous (update.ts, `window.bento.serialize()`), so an
+`serializeFile` are synchronous (update.ts, `window.webdeck.serialize()`), so an
 async provider is a kernel API change of its own.
 
 Guards: `scripts/test-preview.ts` (encryption veto + the refusal to emit markup
@@ -331,8 +331,8 @@ asserts both rules are still wired into the save path.
 
 No browser-local install. A "keep it on this computer" option (localStorage)
 was **built and then removed**, because `localStorage` is scoped per ORIGIN
-and that is fatally misaligned with how Bento is used: the download comes from
-`bento.page` (an https origin) and the file is then opened from disk (a
+and that is fatally misaligned with how WebDeck is used: the download comes from
+`webdeck.page` (an https origin) and the file is then opened from disk (a
 `file://` origin). A language added on the website was therefore GONE the
 moment the user saved the deck and reopened it locally — the exact journey the
 product encourages, and "I added Korean and it vanished" is not a bug a user
@@ -486,7 +486,7 @@ regardless, because a bad merge is either silent or catastrophic:
   once, and there is no per-user rollback.
 - **`scripts/release.mjs` / `sign-release.mjs` / `keygen.mjs`** — the signing
   and release path.
-- **Anything touching the `#bento-doc` splice contract or the update-manifest
+- **Anything touching the `#webdeck-doc` splice contract or the update-manifest
   shape** (`PLATFORM.md` §2, §6) — these brick files already on users' disks.
 
 Do not enable auto-merge without that exclusion list encoded somewhere
@@ -496,7 +496,7 @@ enforceable, not just written down here.
 Settled after working through the whole namespace. **Do not reopen these** —
 each rejected candidate was rejected for a specific reason, recorded below.
 
-- **Platform: `bento`** (lowercase). Not "Bento Box", not "Bento Suite" — the
+- **Platform: `bento`** (lowercase). Not "WebDeck Box", not "WebDeck Suite" — the
   bare word is the family, and `bento/<app>` reads as members of it.
 - **Wordmark: `bento/.`** — the trailing dot stands for the platform (the apps
   complete the slash). This is a MARK, not a name: `/` is a path separator and
@@ -506,10 +506,10 @@ each rejected candidate was rejected for a specific reason, recorded below.
 - **Casing: lowercase everywhere**, brand and machine alike. This deliberately
   collapses the usual split (`Docker` the brand / `docker` the command)
   because the lowercase form is already the file's own identity — `doc.type`
-  is `bento/slides`, the MIME type is `application/bento+json`.
-- **Apps:** `bento/slides` (shipped), `bento/spaces` (Notion/notes-like),
-  `bento/dash` (spreadsheet + tables + dashboards — absorbs what would have
-  been a separate database app), `bento/vault` (document library / personal
+  is `webdeck`, the MIME type is `application/webdeck+json`.
+- **Apps:** `webdeck` (shipped), `webdeck-spaces` (Notion/notes-like),
+  `webdeck-dash` (spreadsheet + tables + dashboards — absorbs what would have
+  been a separate database app), `webdeck-vault` (document library / personal
   storage). A word-processor app is planned; **`bento/folio` is the proposed
   name, NOT yet confirmed** (alternatives considered: draft, prose, write —
   `pages` and `docs` are unusable, being Apple's and Google's).
@@ -527,11 +527,11 @@ reads as "code library" to this audience.
 Bento (email automation, link-in-bio, analytics, a dead FileMaker database).
 The field is crowded, which weakens everyone's claim — including ours. The
 practical cost is discoverability, not legal exposure. Mitigation is the
-`bento/<app>` form, the `bento.page` domain, and always carrying the
+`bento/<app>` form, the `webdeck.page` domain, and always carrying the
 descriptor. Get real clearance before commercialising; a bare wordmark would
 be hard to register, a composite (mark + logo) much less so.
 
-## 2026-07-25 — bento/vault is a personal server; the relay is a separate product
+## 2026-07-25 — webdeck-vault is a personal server; the relay is a separate product
 **Supersedes the "map, not the keys" entry below.** Vault is not an index and
 not a sync service — it is "cloud services without a cloud": your documents
 live on hardware you own (desktop / NAS / homelab) and it provides
@@ -553,12 +553,12 @@ capability handshake (we can no longer control deploy order); background
 execution is unreliable on every platform so the protocol must be correct
 after unbounded offline periods; mobile uses iOS File Provider /
 Android DocumentsProvider rather than a background daemon; and the agent syncs
-a FOLDER, so no Bento app needs any changes. Retained from the superseded
+a FOLDER, so no WebDeck app needs any changes. Retained from the superseded
 entry: the relay only ever sees ciphertext, and **export-to-standalone-file
 always works** — that invariant is what keeps "your data is a file you own"
 true while vault holds it.
 
-## 2026-07-24 — [SUPERSEDED] bento/vault holds the map, not the keys
+## 2026-07-24 — [SUPERSEDED] webdeck-vault holds the map, not the keys
 The document library must not become a custody service. It stores an encrypted
 index of what documents exist and how they reference each other; each document
 keeps its own encryption password and collab credentials. Compromising the
@@ -568,8 +568,8 @@ defensible — files stay authoritative, server loss is survivable — and keeps
 the name an honest promise. Any sync tier is E2EE and optional (DO for
 coordination + R2 for encrypted blobs; never D1/plaintext), and self-hostable.
 
-## 2026-07-24 — Suite expansion: bento/spaces and bento/dash
-Two new apps begin: **bento/spaces** (Notion/notes-like) and **bento/dash**
+## 2026-07-24 — Suite expansion: webdeck-spaces and webdeck-dash
+Two new apps begin: **webdeck-spaces** (Notion/notes-like) and **webdeck-dash**
 (spreadsheet + tables). Development fans out across parallel
 agents and multiple tools (Claude Code, Codex, Antigravity) — coordination
 rules in `docs/PARALLEL-WORK.md`, platform contract in `docs/PLATFORM.md`.
@@ -579,7 +579,7 @@ build:single + splice conformance + test-sync). Releases stay local/signed
 regardless of CI.
 
 ## 2026-07-24 — Hold marketing-surface i18n
-Don't localize the bento.page landing page or README yet: the landing page
+Don't localize the webdeck.page landing page or README yet: the landing page
 will be rebuilt around the multi-app suite, so translations now would only
 drift. App UI i18n (7 locales) is the localization that matters and already
 ships. Revisit once the new landing page is stable.
@@ -624,7 +624,7 @@ publishes, or deploys. Runbook: docs/RELEASING.md.
 
 ## v0.x — Single-file architecture is the product
 One HTML file = document + viewer + editor, working offline from file://.
-The splice contract on `#bento-doc` is frozen forever (shipped updaters
+The splice contract on `#webdeck-doc` is frozen forever (shipped updaters
 depend on it). Everything else is negotiable; this isn't. See
 docs/PLATFORM.md §1–2.
 
@@ -697,7 +697,7 @@ is still English is worse than not mirroring — and because the point of
 shipping a pack first is to learn whether RTL users actually turn up.
 
 The invariant that falls out of the split — **the document never mirrors** —
-is recorded in `PLATFORM.md` §8 and binds every Bento app. A document that
+is recorded in `PLATFORM.md` §8 and binds every WebDeck app. A document that
 looks different depending on the viewer's locale is a format-level bug.
 
 Cost, measured rather than guessed: ~430 bytes in the shipped shell for the
@@ -721,7 +721,7 @@ Revisit only if a language arrives where the workaround genuinely fails.
 ## One English word, two meanings = two keys
 
 **Decided:** 2026-07-26. Consequence of English-string-as-key; binds every
-Bento app that uses `kernel/src/i18n.ts`.
+WebDeck app that uses `kernel/src/i18n.ts`.
 
 Gettext-style catalogs key on the English source string, which quietly assumes
 that one English word means one thing. It often doesn't. `Loop` was the
@@ -758,15 +758,15 @@ agrees grammatically, since a substituted noun carries gender in half the
 languages we ship (French needed "Ce fichier {kind}" once `vidéo` could land
 in it).
 
-## 2026-07-26 — bento/tray: the iOS host is a suite member, and it is generic
+## 2026-07-26 — webdeck/tray: the iOS host is a suite member, and it is generic
 
-The native iOS app is named **bento/tray** — "Bento Tray" on the App Store,
+The native iOS app is named **webdeck/tray** — "WebDeck Tray" on the App Store,
 bundle id `page.bento.tray`, source in `tray/` beside `slides/` and `spaces/`.
 
 **It runs ANY self-contained HTML document, not only Bento's.** That is not
 scope creep bolted on; the Swift never parses the document and never did — it
 is a courier that serves bytes into a WKWebView and polyfills the one File
-System Access call the page needs to save itself. Bento decks are simply the
+System Access call the page needs to save itself. WebDeck decks are simply the
 first documents it carries. Any single-file HTML app that saves itself works
 identically, which on iOS is otherwise impossible: every browser there is
 WebKit and none ship that API.
@@ -778,7 +778,7 @@ Naming notes, so this is not relitigated:
   says what it does — a tray carries any bento, whoever made it.
 - **Plain "Bento" is unavailable** on the App Store: an unrelated Food & Drink
   app holds the exact name, and App Store names are globally unique. "Bento
-  Tray" and "BentoTray" were both free at time of checking. That check reads
+  Tray" and "WebDeckTray" were both free at time of checking. That check reads
   published listings only — reservations in App Store Connect are invisible to
   it, so confirm there before submitting.
 - The App Store name carries no slash. Per the 2026-07-24 naming entry, `/` is
@@ -791,7 +791,7 @@ Developer Program is $99/yr per ACCOUNT, so a second app costs nothing in fees;
 the cost is entirely in maintenance.
 
 Consequence already implemented: each document gets its OWN origin
-(`bento-tray://<sha256 of path>`), because a shared origin would let one
+(`webdeck-tray://<sha256 of path>`), because a shared origin would let one
 document read another's localStorage and IndexedDB — tolerable when every file
 is yours, a real leak between unrelated third-party apps.
 
@@ -815,7 +815,7 @@ fix. Any future auto-height must be an ADDITIVE flag (`autoHeight: true`) with
 container resolved to concrete pixels would work — the file would stay
 absolute-pixel, so morph, the drag handles and old shells are untouched. It is
 declined because the hole it was proposed to fill is now filled: with
-`window.bento.measure()` an agent can compute a row or grid directly, and
+`window.webdeck.measure()` an agent can compute a row or grid directly, and
 `agents.md` carries the column arithmetic pre-computed. Containers would make
 correct layout DECLARATIVE, not POSSIBLE — convenience, not capability.
 
@@ -852,9 +852,9 @@ count-ups silently dead and `slide-left` silently mean "rise 14px".
 
 `site/` is assembled for ONE app and mirrored into `bento-site` with
 `rsync -a --delete`, so anything that build did not write is removed from
-bento.page. Measured, not theorised: a cloned `release.mjs --app spaces`
+webdeck.page. Measured, not theorised: a cloned `release.mjs --app spaces`
 staged a spaces site, and a publish against a copy of the real published tree
-removed **47 live files** — `releases/slides/Bento_Slides.bento.html`,
+removed **47 live files** — `releases/slides/WebDeck.webdeck.html`,
 `releases/slides/manifest.json`, `packs.json`, all 22 signed language packs,
 `slides/index.html`, all four gallery decks, `guestbook/index.html` — with
 every existing gate reporting green.
@@ -870,7 +870,7 @@ back.
 shell-consistency gate and the pack-index gate are both
 `if (existsSync(<path in site/>))` — an artifact that is *missing* skips the
 check instead of tripping it, and missing is exactly the dangerous case.
-PR #192's `--exclude guestbook.bento.html` is one hardcoded filename, not a
+PR #192's `--exclude guestbook.webdeck.html` is one hardcoded filename, not a
 mechanism; it must not be read as evidence that protection exists.
 
 **The gate is a deletion inventory of the DESTINATION, and it is fail-closed.**
@@ -910,13 +910,13 @@ handles to every other deck. A file someone emailed you could rewrite all of
 them. That is a real escalation over double-clicking it, where the file gets an
 opaque origin and reaches nothing.
 
-**A shared runner origin (`run.bento.page`) was considered and REJECTED.** It
+**A shared runner origin (`run.webdeck.page`) was considered and REJECTED.** It
 fixes the wrong half. Documents could no longer read home's handles, but they
-would all share one origin with each other, and a Bento document persists:
+would all share one origin with each other, and a WebDeck document persists:
 
-- `bento-autosave` IndexedDB — `recovery` (PLAINTEXT doc JSON, keyed by docId)
+- `webdeck-autosave` IndexedDB — `recovery` (PLAINTEXT doc JSON, keyed by docId)
   and `versions` (a timeline of the same)
-- `localStorage` `bento-member-<docId>` — the device's collab member PRIVATE KEY
+- `localStorage` `webdeck-member-<docId>` — the device's collab member PRIVATE KEY
 
 So one runner origin creates a pooled store, which does not exist today, holding
 the full plaintext content and version history of every document opened through
@@ -944,8 +944,8 @@ breaking recovery, version history and collab identity, and stays safe only for
 as long as every future feature remembers not to persist anything. Per-document
 origins get the same property structurally. Not adopted.
 
-**Hosting consequence, measured 2026-08-02.** `bento.page` is GitHub Pages
-behind Cloudflare (`x-github-request-id` on the apex); `sync.bento.page` is
+**Hosting consequence, measured 2026-08-02.** `webdeck.page` is GitHub Pages
+behind Cloudflare (`x-github-request-id` on the apex); `sync.webdeck.page` is
 Cloudflare-only. GitHub Pages serves one custom domain per repo and no
 wildcards, so per-document origins cannot be hosted the way the rest of the site
 is — the runner belongs on Cloudflare beside the relay, with its own deploy
@@ -959,8 +959,8 @@ conclusions):
 1. Does a `FileSystemFileHandle` survive a cross-origin `postMessage` and stay
    usable? Permissions are per-origin, so the receiving origin re-prompting once
    is expected and acceptable; being unusable is not, and would sink this shape.
-2. Cloudflare Universal SSL covers one label (`x.bento.page`), not two
-   (`x.run.bento.page`). If so, a single hyphenated label — `<hash>-run.bento.page`
+2. Cloudflare Universal SSL covers one label (`x.webdeck.page`), not two
+   (`x.run.webdeck.page`). If so, a single hyphenated label — `<hash>-run.webdeck.page`
    — avoids paying for Advanced Certificate Manager. Worth checking before
    committing to a naming scheme, because it is baked into every stored origin.
 
@@ -968,7 +968,7 @@ conclusions):
 it executes a self-contained file that may be slides, spaces or sheets. An
 app-named origin would isolate nothing extra (every deck would still share an
 origin with every other deck) and app names should stay free for the apps' own
-pages. The precedent is `sync.bento.page`: a subdomain marks a TRUST BOUNDARY,
+pages. The precedent is `sync.webdeck.page`: a subdomain marks a TRUST BOUNDARY,
 not a product. An origin that executes files strangers sent your users is the
 last one that should share a name with anything you want trusted.
 
@@ -1008,8 +1008,8 @@ origin that acquires a handle is the only origin that can ever use it. So:
 **What that leaves**, none free:
 
 1. **Home and documents share one origin.** Rejected in the entry above and the
-   reasons are unchanged: `bento-autosave` (plaintext doc JSON, version
-   history) and `bento-member-<docId>` (collab private keys) pool into one
+   reasons are unchanged: `webdeck-autosave` (plaintext doc JSON, version
+   history) and `webdeck-member-<docId>` (collab private keys) pool into one
    store any document can read.
 2. **Home never opens documents** — a drop target and a list, with opening left
    to the OS. Safe, and much less useful.
@@ -1027,7 +1027,7 @@ rather than inventing a second one is the point of the 2026-08-01 entry on
 
 **To measure before committing to option 3** (again: not testable in an
 automated browser): an opaque-origin document has NO localStorage and NO
-IndexedDB, so `bento-autosave`, version history, `bento-member-<docId>`,
+IndexedDB, so `webdeck-autosave`, version history, `webdeck-member-<docId>`,
 language choice and reduce-motion all fail or degrade. Whether the runtime
 survives that gracefully, and whether the degradation is acceptable, decides
 whether home can open documents at all.
@@ -1058,7 +1058,7 @@ shell's own loader had caught it and printed to the page:
 
 So the runtime does not fail because it NEEDS storage. It fails on the first
 unguarded `localStorage` touch during boot — `kernel/src/i18n.ts` `resolve()`
-reading `bento-lang`, which runs at module scope and therefore before anything
+reading `webdeck-lang`, which runs at module scope and therefore before anything
 else. There are 39 `localStorage` call sites across `kernel/src` and
 `slides/src` and no safe accessor.
 
@@ -1080,7 +1080,7 @@ with default preferences.
 **What it does NOT fix**, and this is the actual product decision: an opaque
 origin has no persistent storage at all, so a document hosted this way loses
 auto-save and crash recovery, local version history, and its collab member
-identity (`bento-member-<docId>` is re-minted per session). Whether a launcher
+identity (`webdeck-member-<docId>` is re-minted per session). Whether a launcher
 may open documents that quietly cannot autosave is a question about what Bento
 promises, not about what the browser permits.
 
@@ -1102,8 +1102,8 @@ the successor.
 use it — home cannot be a broker. Per-document origins are unreachable from the
 other side too, because the origin name depends on which document it is, which
 is unknowable before reading the file, and the handle cannot move after. What
-remained was: run every document on one shared origin, where `bento-autosave`
-(plaintext doc JSON, version history) and `bento-member-<docId>` (collab private
+remained was: run every document on one shared origin, where `webdeck-autosave`
+(plaintext doc JSON, version history) and `webdeck-member-<docId>` (collab private
 keys) pool into a store any document can read. Rejected.
 
 A launcher that can list decks but not open them is not worth building.
@@ -1115,7 +1115,7 @@ A launcher that can list decks but not open them is not worth building.
 GRANTED  <folder>                       queryPermission: granted
   ── reload ──
 RESTORED <folder>  kind=directory       queryPermission, no gesture: granted
-[file 1] getFileHandle('bento-probe.txt', {create:true})
+[file 1] getFileHandle('webdeck-probe.txt', {create:true})
 [file 1] the FILE's permission, unprompted: granted   ← never picked
 [file 2] the FILE's permission, unprompted: granted
 ```
@@ -1162,12 +1162,12 @@ extension needs exactly that to label what it is about to save. The launcher UI
 and the recents store are superseded by the directory grant.
 ## 2026-08-02 — One autosave database per app, migrated once
 
-`kernel/src/autosave.ts` used a single `DB_NAME = 'bento-autosave'` and a single
+`kernel/src/autosave.ts` used a single `DB_NAME = 'webdeck-autosave'` and a single
 `DB_VERSION` for every app. Two problems, and the second is the dangerous one.
 
 Snapshots from different apps piled into one store wherever they share an
-origin — `bento.page`, or any local server. bento/spaces has been writing into
-bento/slides' database since its scaffold landed (`spaces/src/main.ts` calls
+origin — `webdeck.page`, or any local server. webdeck-spaces has been writing into
+webdeck' database since its scaffold landed (`spaces/src/main.ts` calls
 `putRecovery` on a 2.5s debounce).
 
 `DB_VERSION` was shared too, and that breaks in one direction only: a new app
@@ -1176,10 +1176,10 @@ bumping it to 2 makes every ALREADY-SHIPPED shell of every other app throw
 code — 1.0.11 files are in the world and will go on opening version 1 forever.
 There is no way to reach them.
 
-**The name is `${appId}-autosave`.** `appId` is already `bento-slides` /
-`bento-spaces`, so this reads `bento-slides-autosave` with no doubled prefix
+**The name is `${appId}-autosave`.** `appId` is already `webdeck` /
+`webdeck-spaces`, so this reads `webdeck-autosave` with no doubled prefix
 and — deliberately — **no special case for the app that happened to be
-first**. An earlier draft grandfathered `bento-autosave` for slides to avoid
+first**. An earlier draft grandfathered `webdeck-autosave` for slides to avoid
 orphaning data; carrying the data over is a better answer than a permanent
 exception, and each app now owns its own version line.
 
@@ -1241,7 +1241,7 @@ slides-hardcoded (§6.5) and spaces has no catalog, so a spaces release stages
 NO packs rather than unsigned ones — `publish-site.mjs` refuses unsigned packs,
 correctly.
 
-`sign-release.mjs` gains `--app`; it hardcoded `bento-slides`. This is the
+`sign-release.mjs` gains `--app`; it hardcoded `webdeck`. This is the
 silent failure of the set: a shipped shell verifies the manifest's `app`
 against its own `configureApp()` id (`kernel/src/update.ts`), so a wrong value
 signs and publishes a channel every file quietly declines — nothing errors,
@@ -1255,7 +1255,7 @@ path the release publishes to.
 
 ## 2026-08-03 — An encrypted space is never written to disk in the clear
 
-**Decision.** bento/spaces skips the autosave recovery snapshot while a space
+**Decision.** webdeck-spaces skips the autosave recovery snapshot while a space
 is encrypted, and setting a password clears both the version timeline and the
 recovery snapshot already written.
 
@@ -1276,7 +1276,7 @@ contract in its own autosave layer.
 text in the `recovery` store within three seconds (correct — it is the only
 backstop on iOS, where no browser can write back to a file). Setting a password
 removed that row; every later edit wrote nothing; and the saved file was still
-a `bento/enc` envelope with no plaintext anywhere in it.
+a `webdeck/enc` envelope with no plaintext anywhere in it.
 
 **Guarded** by two source assertions in `scripts/test-spaces-model.ts`, both
 negative-controlled. Same reasoning as the inert-parse guard above: the
@@ -1285,7 +1285,7 @@ site.
 
 ## 2026-08-03 — A space does not phone home when it is opened
 
-**Decision.** bento/spaces renders a remote image `src` as a placeholder naming
+**Decision.** webdeck-spaces renders a remote image `src` as a placeholder naming
 the host, with a "Load this image" button. Only `asset:` and `data:` load
 without asking. Consent is per-url, per-session, in memory, and never enters
 the document.
@@ -1321,7 +1321,7 @@ tells agents to always write one, and to embed bytes rather than link them.
 
 ## 2026-08-03 — Untrusted html is parsed INERT; a detached div is not safe
 
-**Decision.** All untrusted html in bento/spaces goes through
+**Decision.** All untrusted html in webdeck-spaces goes through
 `sanitize.ts inertBody()`, which parses with `DOMParser` into an inert
 document. `document.createElement('div').innerHTML = untrusted` is banned, and
 `scripts/test-spaces-model.ts` refuses it in the source.
@@ -1374,11 +1374,11 @@ exactly why it is written explicitly and pinned by the rig.
 **Decision.** `scripts/apps.mjs` gained `changelog` and `agents` per app. A
 release reads its own app's changelog (`CHANGELOG.md` for slides,
 `spaces/CHANGELOG.md` for spaces) and publishes its own agent guide at
-`bento.page/<app>/agents.md`. Tags are prefixed for every app but slides.
+`webdeck.page/<app>/agents.md`. Tags are prefixed for every app but slides.
 
 **The bug this fixes.** `release.mjs` read `join(root, 'CHANGELOG.md')`
 unconditionally, and that file's first line is "All notable changes to
-**bento/slides**". The first spaces release would therefore have SIGNED slides'
+**webdeck**". The first spaces release would therefore have SIGNED slides'
 release notes into the spaces manifest — and every shipped spaces file fetches
 that manifest at launch and renders `notes` inline in the About dialog. So the
 failure is not a build error; it is a correct-looking release that tells all of
@@ -1406,7 +1406,7 @@ ahead of the `site/` wipe, which is why `cmpVer` is a function declaration and
 not a const arrow — the const is in the TDZ at that point in the file.
 
 **Agent guides.** `docs/agents.md` already advertised
-`bento.page/<app>/agents.md` as the convention, but only the site-root
+`webdeck.page/<app>/agents.md` as the convention, but only the site-root
 `/agents.md` was ever written. Each app now publishes its own guide at the
 advertised URL, and slides copies its own to `/agents.md` for compatibility —
 the README and the harness `SKILL.md` point there, and that SKILL.md ships
@@ -1418,7 +1418,7 @@ spaces starts at 0.1.0. An unprefixed spaces tag would sort into the middle of
 slides' history and permanently claim a version slides cannot reuse. Slides
 keeps bare; everything else is `<app>-vX.Y.Z`.
 
-**Reconciled with #234.** bento/dash hit the same bug independently and landed
+**Reconciled with #234.** webdeck-dash hit the same bug independently and landed
 a convention-based resolver (`<dir>/CHANGELOG.md`, else the root) while this was
 in flight. Both now go through ONE `changelogPath()` in release.mjs — registry
 field first, convention second, root last — used by the signing path and by
@@ -1429,11 +1429,11 @@ fallback unreachable. That matters because the fallback is only harmless while
 version numbers do not overlap: the day a second app reaches 1.0.x, an empty
 manifest would quietly become a wrong one.
 
-## 2026-08-03 — One bento/spaces file is one SPACE, and the reason is a save primitive
+## 2026-08-03 — One webdeck-spaces file is one SPACE, and the reason is a save primitive
 
-Spaces is a tree of pages in ONE `.bento.html`, with links as same-document
+Spaces is a tree of pages in ONE `.webdeck.html`, with links as same-document
 fragments (`#p/<pageId>`) resolved against a map built from the file's own
-`#bento-doc` block. Not one file per page with a folder as the workspace —
+`#webdeck-doc` block. Not one file per page with a folder as the workspace —
 the Obsidian shape — and not cross-file links.
 
 Five shapes were developed and each adversarially attacked. This records why
@@ -1448,14 +1448,14 @@ from its own workspace. No design gets around this; it is not a link problem.
 
 **On iOS a relative link returns the wrong answer, not an error.**
 `tray/ios/EditorViewController.swift` answers every request on a document's
-origin with that document's own bytes, so `href="./other.bento.html"` does not
+origin with that document's own bytes, so `href="./other.webdeck.html"` does not
 404 — it re-serves the space you are already in at a different URL. Silently
 wrong is worse than broken. Filed as a tray-zone request: 404 anything but
 `/index.html`.
 
 **Fragment routing is legal exactly where path routing is illegal.** Measured
 from an origin-null document: `history.pushState(s,'','#p/<id>')` succeeds,
-while `history.pushState(s,'','other.bento.html')` throws `SecurityError`. The
+while `history.pushState(s,'','other.webdeck.html')` throws `SecurityError`. The
 grammar the one-file shape needs is the one the platform permits.
 
 **The folder shape buys no free OS search here.** `mdimport` on a shipped shell
@@ -1478,7 +1478,7 @@ CRDT is generic. The pressure valves are first-class — export a page as its ow
 space, export a space as a markdown folder, import either.
 
 The library tier — many spaces, searched together — attaches at a named seam
-and is `bento/vault`'s job, which is optional by its own invariants 2 and 3.
+and is `webdeck-vault`'s job, which is optional by its own invariants 2 and 3.
 One space needs nothing installed, ever; a library is software you run, on a
 laptop or a 24/7 box or a cluster, the same artifact either way.
 
@@ -1513,7 +1513,7 @@ behaviour is unverified — measure before building on it.
 
 Consequences already implemented: `permissions` trimmed to `storage` (an unused
 `offscreen` would draw review questions it cannot answer), and content scripts
-narrowed from every `file:///*.html` to `file:///*.bento.html`, which is both
+narrowed from every `file:///*.html` to `file:///*.webdeck.html`, which is both
 correct and far easier to justify to a reviewer.
 ## 2026-08-02 — No extension system: compact per-app runtimes instead
 
@@ -1521,9 +1521,9 @@ The recurring proposal is an extension mechanism — sealed, separately signed
 units that bake into a file like language packs do, so a heavy optional feature
 ships on its own clock instead of riding the shell release. The immediate case
 was a PowerPoint exporter carrying a large vendored dependency. The wider case
-was that a mechanism built once would serve `bento/spaces` and `bento/dash` too.
+was that a mechanism built once would serve `webdeck-spaces` and `webdeck-dash` too.
 
-**Declined, for every app.** Bento ships small, self-contained runtimes per app.
+**Declined, for every app.** WebDeck ships small, self-contained runtimes per app.
 A feature is either core or it is a separate artifact — not a plug-in tier in
 between.
 
@@ -1535,7 +1535,7 @@ that way is engineering hygiene, not a plugin system waiting to be finished.
 **The multi-app argument is the strongest evidence against, not for.** Bytes do
 not amortize across apps, they multiply: every app pays the host, the container
 and the per-app i18n for the machinery. Measured against real builds, the
-cheapest extension host costs more than the entire `bento/spaces` shell as it
+cheapest extension host costs more than the entire `webdeck-spaces` shell as it
 stands (10,052 B). Only review effort and one browser matrix amortize, and that
 was never the expensive half. Worse, neither unbuilt app wants it: their designs
 contain no extension-shaped feature, one of them independently ruled out
@@ -1556,7 +1556,7 @@ the same format came in roughly 35x smaller than the vendored library it would
 replace, using the same `CompressionStream` technique.
 
 **Three extension mechanisms already exist, and they are better.** The Claude
-Code plugin/skill channel extends Bento by RECIPE (`plugins/bento-slides/`) at
+Code plugin/skill channel extends WebDeck by RECIPE (`plugins/webdeck/`) at
 zero shell bytes and on its own clock. The native host bridge
 (`tray/ios/Resources/bridge.js`) extends capability at the host, and reaches
 every file ever saved — including ones that predate it. The kernel facade

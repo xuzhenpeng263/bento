@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// The bento/slides document model. This JSON is what lives inside the
-// <script type="application/bento+json"> block of a .bento.html file.
+// Copyright (c) 2026 The WebDeck authors
+// The webdeck document model. This JSON is what lives inside the
+// <script type="application/webdeck+json"> block of a .webdeck.html file.
 
-export const FORMAT = 'bento/slides'
+export const FORMAT = 'webdeck'
 export const FORMAT_VERSION = 1
 
 export type TransitionKind = 'none' | 'fade' | 'slide' | 'zoom' | 'morph' | 'particle'
@@ -278,7 +278,7 @@ export interface TableElement extends ElementBase {
 
 /**
  * Audio or video. Hybrid storage: `src` is a data: URI (embedded — travels
- * inside the .bento.html), an external URL / relative path (referenced — keeps
+ * inside the .webdeck.html), an external URL / relative path (referenced — keeps
  * the file small but needs the network / a sibling file), or "asset:<key>".
  * The editor embeds small clips and warns above MEDIA_EMBED_BUDGET, offering a
  * URL instead. Autoplay only fires in PRESENT mode (never on the canvas or in
@@ -420,7 +420,7 @@ export interface BentoDoc {
    */
   layouts?: Slide[]
   /**
-   * Live-collaboration credentials (bento-sync), minted AT CREATION so any
+   * Live-collaboration credentials (webdeck-sync), minted AT CREATION so any
    * copy of the file can join once sharing is turned on ("send the file
    * first, share later" just works). `room` is the relay WebSocket URL
    * (random id — never derived from docId), `key` the base64url AES-GCM
@@ -753,7 +753,7 @@ export function internAsset(doc: BentoDoc, src: string): string {
 }
 
 /** Soft ceiling for embedding media as a data URI (bytes). Above this the
- *  editor warns — a big embed makes the .bento.html slow to open and save. */
+ *  editor warns — a big embed makes the .webdeck.html slow to open and save. */
 export const MEDIA_EMBED_BUDGET = 8 * 1024 * 1024 // 8 MB
 
 /**

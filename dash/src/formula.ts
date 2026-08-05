@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // The formula engine.
 //
 // ONE EXPRESSION PER COLUMN, and that is the largest structural improvement

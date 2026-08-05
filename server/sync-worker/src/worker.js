@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
-// bento-sync relay — the first (and only) Bento server code. One Durable
+// Copyright (c) 2026 The WebDeck authors
+// webdeck-sync relay — the first (and only) WebDeck server code. One Durable
 // Object per docId room. The relay is BLIND by design:
 //
 //   - every frame body is AES-GCM ciphertext produced by the clients; the
@@ -133,7 +133,7 @@ export default {
     // different keys and nothing correlates.
     const b = url.pathname.match(/^\/b\/([A-Za-z0-9._-]{1,80})\/([A-Za-z0-9_-]{16,64})$/)
     if (b) {
-      // A .bento.html runs from file:// or from ANY origin someone serves it
+      // A .webdeck.html runs from file:// or from ANY origin someone serves it
       // on, so blob fetches are always cross-origin and need CORS — without it
       // the browser rejects them before the request is even sent, and the
       // offload silently never happens. (WebSockets aren't subject to CORS,
@@ -150,7 +150,7 @@ export default {
 
     const m = url.pathname.match(/^\/d\/([A-Za-z0-9._-]{1,80})$/)
     if (!m) {
-      return new Response('bento-sync relay — see https://bento.page', {
+      return new Response('webdeck-sync relay — see https://webdeck.page', {
         status: 200,
         headers: { 'content-type': 'text/plain' },
       })

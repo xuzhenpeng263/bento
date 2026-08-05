@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Something in the app or a .bento.html file isn't working
+about: Something in the app or a .webdeck.html file isn't working
 title: ''
 labels: bug
 ---
@@ -13,7 +13,7 @@ A clear description of the bug and what you expected instead.
 2. …
 
 **A minimal repro**
-If you can, attach a small `.bento.html` that reproduces it (drag it onto the
+If you can, attach a small `.webdeck.html` that reproduces it (drag it onto the
 issue). Please strip anything private first — the document carries your content.
 
 **Environment**

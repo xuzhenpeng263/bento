@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Facade: the IndexedDB auto-save/version store lives in the shared kernel now
 // (kernel/src/autosave.ts). This path stays alive so slides code keeps
 // importing './autosave' unchanged — see docs/PLATFORM.md §9.

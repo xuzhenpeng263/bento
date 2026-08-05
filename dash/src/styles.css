@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
-   Copyright (c) 2026 The Bento authors
-   bento/dash — the whole interface. One stylesheet; it ships deflated. */
+   Copyright (c) 2026 The WebDeck authors
+   webdeck-dash — the whole interface. One stylesheet; it ships deflated. */
 
 :root {
   --ink: #1e2a3a;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // The ONE signing primitive for Bento's release channel.
 //
 // Two artifacts are signed, both with the same offline key:

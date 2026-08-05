@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // Headless guestbook archivist: joins the room READ-ONLY (sends nothing),
 // replays the encrypted op log through the real CRDT engine, and writes an
 // archive file containing what people actually signed — not the pristine
@@ -8,8 +8,8 @@
 //
 //   node scripts/guestbook-archivist.ts [--in <file>] [--out <file>]
 //
-// Defaults: in  = working/guestbook-live/guestbook.bento.html
-//           out = working/guestbook-epochs/epoch-<n>-content-<stamp>.bento.html
+// Defaults: in  = working/guestbook-live/guestbook.webdeck.html
+//           out = working/guestbook-epochs/epoch-<n>-content-<stamp>.webdeck.html
 
 import { webcrypto as crypto } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -24,7 +24,7 @@ const opt = (name: string, fallback: string) => {
   const i = args.indexOf(`--${name}`)
   return i >= 0 && args[i + 1] ? args[i + 1] : fallback
 }
-const inFile = opt('in', join(root, 'working/guestbook-live/guestbook.bento.html'))
+const inFile = opt('in', join(root, 'working/guestbook-live/guestbook.webdeck.html'))
 
 const b64u = {
   enc: (b: Uint8Array) => Buffer.from(b).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
@@ -32,9 +32,9 @@ const b64u = {
 }
 
 const shellText = readFileSync(inFile, 'utf8')
-const blockRe = /<script type="application\/bento\+json" id="bento-doc">\s*([\s\S]*?)\s*<\/script>/
+const blockRe = /<script type="application\/bento\+json" id="webdeck-doc">\s*([\s\S]*?)\s*<\/script>/
 const m = shellText.match(blockRe)
-if (!m) throw new Error('no #bento-doc block in ' + inFile)
+if (!m) throw new Error('no #webdeck-doc block in ' + inFile)
 const doc = JSON.parse(m[1])
 const { room, key: keyB64 } = doc.collab ?? {}
 if (!room || !keyB64) throw new Error('file has no collab credentials')
@@ -61,12 +61,12 @@ const finish = (reason: string) => {
   try { ws.close() } catch { /* already closed */ }
   const total = countEls(doc)
   const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')
-  const out = opt('out', join(root, `working/guestbook-epochs/epoch-${epoch}-content-${stamp}.bento.html`))
+  const out = opt('out', join(root, `working/guestbook-epochs/epoch-${epoch}-content-${stamp}.webdeck.html`))
   const frozen = JSON.parse(JSON.stringify(doc))
   if (frozen.collab) frozen.collab.on = false // archives are frozen artifacts
   frozen.title = `The Guestbook — epoch ${epoch} (archived)`
   const json = JSON.stringify(frozen).replace(/</g, '\\u003c')
-  const spliced = shellText.replace(blockRe, `<script type="application/bento+json" id="bento-doc">\n${json}\n</scr` + 'ipt>')
+  const spliced = shellText.replace(blockRe, `<script type="application/webdeck+json" id="webdeck-doc">\n${json}\n</scr` + 'ipt>')
   mkdirSync(dirname(out), { recursive: true })
   writeFileSync(out, spliced)
   console.log(`archived epoch ${epoch} → ${out}`)

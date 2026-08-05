@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 The Bento authors
+// Copyright (c) 2026 The WebDeck authors
 // U2: the public guestbook deck — one live-collab file anyone can open and
 // sign. Minting fresh credentials IS the reset mechanism ("epochs, not
 // moderation" — see working/guestbook-design.md). The deck definition lives
@@ -8,7 +8,7 @@
 // (server/guestbook-daemon/) which is the SUSTAINABLE home of rolls and
 // snapshots — this local builder remains for seeding and as a fallback.
 //
-//   node scripts/build-guestbook.mjs [--host wss://sync.bento.page] [--out <file>]
+//   node scripts/build-guestbook.mjs [--host wss://sync.webdeck.page] [--out <file>]
 //
 // If the out file exists it is archived to working/guestbook-epochs/ and the
 // new build gets epoch N+1 with FRESH room + key.
@@ -25,10 +25,10 @@ const opt = (name, fallback) => {
   const i = args.indexOf(`--${name}`)
   return i >= 0 && args[i + 1] ? args[i + 1] : fallback
 }
-const host = opt('host', 'wss://sync.bento.page')
-const out = opt('out', join(root, 'working/guestbook-live/guestbook.bento.html'))
+const host = opt('host', 'wss://sync.webdeck.page')
+const out = opt('out', join(root, 'working/guestbook-live/guestbook.webdeck.html'))
 
-const shell = readFileSync(join(root, 'slides/dist-single/Bento_Slides.bento.html'), 'utf8')
+const shell = readFileSync(join(root, 'slides/dist-single/WebDeck.webdeck.html'), 'utf8')
 const fontSrc = readFileSync(join(root, 'slides/src/fontdata.ts'), 'utf8')
 const font = (n) => fontSrc.match(new RegExp(`export const ${n}\\s*=\\s*'(data:[^']+)'`))[1]
 
@@ -71,7 +71,7 @@ if (existsSync(out)) {
   const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')
   const archiveDir = join(root, 'working/guestbook-epochs')
   mkdirSync(archiveDir, { recursive: true })
-  copyFileSync(out, join(archiveDir, `epoch-${epoch - 1}-${stamp}.bento.html`))
+  copyFileSync(out, join(archiveDir, `epoch-${epoch - 1}-${stamp}.webdeck.html`))
   console.log(`archived epoch ${epoch - 1} → working/guestbook-epochs/`)
 }
 
@@ -86,7 +86,7 @@ writeFileSync(out, spliced)
 
 // the OWNER deck: same document, owner credentials — open THIS file to
 // moderate (People panel → Remove). Keep it with the admin token; never public.
-const ownerOut = join(dirname(out), 'guestbook-owner.bento.html')
+const ownerOut = join(dirname(out), 'guestbook-owner.webdeck.html')
 writeFileSync(ownerOut, spliceDoc(shell, { ...doc, collab: ownerCollab }))
 writeFileSync(join(dirname(out), 'guestbook-owner-keys.json'),
   JSON.stringify({ epoch, room: collab.room, key: readKey, owner: ownerKp.pub, ownerPriv: ownerKp.priv, invitePub: inviteKp.pub }, null, 2))
