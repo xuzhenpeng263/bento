@@ -41,7 +41,7 @@ function load(opts: { version?: string; pathname?: string } = {}) {
     addEventListener() {},
     postMessage(msg: any) { posted.push(msg) },
     showSaveFilePicker(o: any) { nativeCalls.push(o); return Promise.resolve({ __native: true }) },
-    bento: opts.version ? { updates: { version: opts.version } } : undefined,
+    webdeck: opts.version ? { updates: { version: opts.version } } : undefined,
   }
   const ctx: any = createContext({
     window: win, setTimeout, clearTimeout, Date, Math, JSON, Promise, Blob: class {},
