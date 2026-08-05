@@ -346,7 +346,10 @@ export class Editor {
       demote: [redoB, commentB, pdfB, pptxB, shareD, langD, helpB],
     }
 
-    bar.append(logo, this.updatesB, title, this.fileChip, slidesB, insertD, history, insert, actions, moreD)
+    const closeB = btn(ICONS.x, '', () => { (window as any).webdeck?.closeFile?.() }, t('Close File'))
+    closeB.classList.add('ed-btn-close')
+
+    bar.append(logo, this.updatesB, title, this.fileChip, slidesB, insertD, history, insert, actions, moreD, closeB)
 
     // main area
     const main = div('ed-main')
@@ -736,10 +739,6 @@ export class Editor {
       item(ICONS.template, t('Start from scratch…'),
         t('Replace every slide with one blank slide. Keeps the deck’s theme, name and live session — ⌘Z undoes.'),
         () => this.startFromScratch())
-      into.appendChild(tag(div('ed-menu-sep')))
-      item(ICONS.x, t('Close File'),
-        t('Close this file and return to the welcome page — open or create another.'),
-        () => { (window as any).webdeck?.closeFile?.() })
     }
   }
 

@@ -847,6 +847,8 @@ a.ed-btn { text-decoration: none; }  /* the update block's "What's new" link is 
 
 /* --- help overlay + help button ------------------------------------------- */
 .ed-btn-help .ed-help-q { font-size: 15px; font-weight: 800; line-height: 1; }
+.ed-btn-close { margin-left: auto; opacity: .45; }
+.ed-btn-close:hover { opacity: .75; }
 .ed-help-box { width: 700px; max-width: 92vw; }
 /* two hand-placed columns so the (now longer) list stays short vertically */
 .ed-help-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 30px; align-items: start; }
