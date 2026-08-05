@@ -134,7 +134,7 @@ function showWelcome() {
   const onDrop = async (ev: DragEvent) => {
     const item = [...(ev.dataTransfer?.items ?? [])].find((i) => i.kind === 'file')
     const named = ev.dataTransfer?.files?.[0]?.name ?? ''
-    if (!item || !/\.(webdeck\.html|json)$/i.test(named)) return
+    if (!item || !/\.(webdeck\.html|bento\.html|json)$/i.test(named)) return
     ev.preventDefault()
     const file = ev.dataTransfer?.files?.[0]
     if (!file) return

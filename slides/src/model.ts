@@ -1020,7 +1020,10 @@ export function newDoc(): BentoDoc {
 export function parseDoc(json: string): BentoDoc | null {
   try {
     const doc = JSON.parse(json)
-    if (doc && doc.format === FORMAT && Array.isArray(doc.slides)) {
+    // Accept legacy bento/slides format and normalize to webdeck
+    const fmt = doc?.format
+    if (doc && (fmt === FORMAT || fmt === 'bento/slides') && Array.isArray(doc.slides)) {
+      if (fmt !== FORMAT) doc.format = FORMAT
       // Documents from before docId existed get one minted here; it persists
       // on the next save and stays stable from then on.
       if (typeof doc.docId !== 'string' || !doc.docId) doc.docId = newDocId()

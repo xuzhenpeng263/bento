@@ -11,6 +11,8 @@ import type { KernelDoc } from './doc.ts'
 import { appConfig } from './app.ts'
 
 const DATA_BLOCK_ID = 'webdeck-doc'
+/** Old-format block ID — accepted when opening files for backward compat. */
+const LEGACY_BLOCK_ID = 'bento-doc'
 // Split so the literal never appears in the bundle (it would terminate the
 // inline <script> that carries this very code inside a built WebDeck file).
 const SCRIPT_CLOSE = '</scr' + 'ipt>'
@@ -54,7 +56,9 @@ export function pickerIdFor(p: SavePurpose): string {
 }
 
 export function readEmbeddedDoc(): string | null {
-  const block = document.getElementById(DATA_BLOCK_ID)
+  let block = document.getElementById(DATA_BLOCK_ID)
+  // Fall back to legacy block id for old .bento.html files
+  if (!block) block = document.getElementById(LEGACY_BLOCK_ID)
   const text = block?.textContent?.trim()
   return text || null
 }
@@ -131,6 +135,11 @@ function serializeBody(shell: Document, body: string, doc: KernelDoc): string {
   }
 
   let block = clone.getElementById(DATA_BLOCK_ID)
+  // Normalize legacy block id on save
+  if (!block) {
+    const legacy = clone.getElementById(LEGACY_BLOCK_ID)
+    if (legacy) { legacy.id = DATA_BLOCK_ID; legacy.setAttribute('type', 'application/webdeck+json'); block = legacy }
+  }
   if (!block) {
     block = clone.createElement('script')
     block.setAttribute('type', 'application/webdeck+json')
@@ -595,14 +604,14 @@ export function openedFileName(): string | null {
   if (fileHandle?.name) return fileHandle.name
   try {
     const base = decodeURIComponent(new URL(location.href).pathname.split('/').pop() ?? '')
-    return /\.bento\.html$/i.test(base) ? base : null
+    return /\.(webdeck|bento)\.html$/i.test(base) ? base : null
   } catch {
     return null
   }
 }
 
 /** Strip the document extension: "Q3-board.webdeck.html" -> "Q3-board". */
-export const fileBase = (name: string) => name.replace(/\.bento\.html$/i, '').replace(/\.html$/i, '')
+export const fileBase = (name: string) => name.replace(/\.(webdeck|bento)\.html$/i, '').replace(/\.html$/i, '')
 
 // --- self-update writing ----------------------------------------------------
 
@@ -679,7 +688,7 @@ export async function openFilePicker(): Promise<{
       const [handle] = await (window as any).showOpenFilePicker({
         types: [
           {
-            description: 'Bento files',
+            description: 'WebDeck files',
             accept: { 'text/html': ['.html'], 'application/json': ['.json'] },
           },
         ],
@@ -709,7 +718,7 @@ export async function openFilePicker(): Promise<{
   return new Promise((resolve) => {
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = '.webdeck.html,.webdeck.json,application/json,text/html'
+    input.accept = '.webdeck.html,.bento.html,.webdeck.json,.bento.json,application/json,text/html'
     const cleanup = () => input.remove()
     input.addEventListener('change', async () => {
       const file = input.files?.[0]
@@ -742,8 +751,10 @@ export function extractDocJson(content: string, name: string): string | null {
   if (/\.json$/i.test(name)) {
     try { JSON.parse(content); return content } catch { return null }
   }
-  // .webdeck.html: extract from the data block
-  const el = new DOMParser().parseFromString(content, 'text/html').querySelector(`#${DATA_BLOCK_ID}`)
+  // .webdeck.html or legacy .bento.html: extract from the data block
+  const doc = new DOMParser().parseFromString(content, 'text/html')
+  let el = doc.querySelector(`#${DATA_BLOCK_ID}`)
+  if (!el) el = doc.querySelector(`#${LEGACY_BLOCK_ID}`)
   return el?.textContent?.trim() || null
 }
 
