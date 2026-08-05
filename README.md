@@ -4,7 +4,9 @@
 
 一个 `.webdeck.html` 文件就是一份完整的演示文稿：幻灯片、演讲者备注、实时图表、嵌入媒体和交互元素全部包含在内。每个文件自带查看器、编辑器和演示器——在浏览器中双击即开，无需安装。
 
-**10 秒体验**：打开 [webdeck.page](https://webdeck.page) 即可看到完整应用。
+**10 秒体验**：打开 [xuzhenpeng263.github.io/webdeck](https://xuzhenpeng263.github.io/webdeck) 即可看到完整应用。
+
+**GitHub 仓库**：[xuzhenpeng263/webdeck](https://github.com/xuzhenpeng263/webdeck)
 
 ---
 

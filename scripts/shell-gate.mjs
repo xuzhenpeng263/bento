@@ -48,7 +48,7 @@ const repoRoot = dirname(here)
 // data, not as tokens the reader's tooling might act on.
 const SCRIPT_CLOSE = '</scr' + 'ipt>'
 const DOC_BLOCK_OPEN = '<script type="application/webdeck+json" id="webdeck-doc">'
-const DOC_BLOCK_RE = /<script type="application\/bento\+json" id="webdeck-doc">[\s\S]*?<\/script>/
+const DOC_BLOCK_RE = /<script type="application\/webdeck\+json" id="webdeck-doc">[\s\S]*?<\/script>/
 
 /** The escape every plaintext WebDeck block is written with. `<` can then never
  *  start a close tag, a comment, or a nested `<script` — and stays valid JSON. */
@@ -126,7 +126,7 @@ function checkSpliceContract(html, label) {
  * comment, or forge another block's opening tag.
  */
 function checkDataBlocks(html, label) {
-  const blocks = scanScripts(html).filter((s) => /^application\/bento\+/.test(s.type))
+  const blocks = scanScripts(html).filter((s) => /^application\/webdeck\+/.test(s.type))
   const docs = blocks.filter((b) => b.id === 'webdeck-doc')
   if (docs.length !== 1) fail(`expected exactly one #webdeck-doc, found ${docs.length} (${label})`)
 
@@ -297,7 +297,7 @@ function checkRuntimeStaysCompressed(html, label) {
  */
 function checkTransientMarking(shell) {
   const scripts = scanScripts(shell)
-  const loader = scripts.find((s) => !s.type && s.text.includes('bento-rt-css'))
+  const loader = scripts.find((s) => !s.type && s.text.includes('webdeck-rt-css'))
   if (!loader) fail('boot loader not found in the shell')
   // Specifically: it SETS the attribute. Merely mentioning the name is what
   // the loader's stale-copy sweep does, and that must not satisfy this check.
@@ -306,7 +306,7 @@ function checkTransientMarking(shell) {
       `the boot loader injects the stylesheet without marking it ${TRANSIENT_ATTR} — ` +
         'every save would write it back as plaintext (scripts/postbuild-compress.mjs)',
     )
-  const runtime = inflatePayloads(shell).get('bento-rt') ?? ''
+  const runtime = inflatePayloads(shell).get('webdeck-rt') ?? ''
   if (!runtime.includes(`[${TRANSIENT_ATTR}]`))
     fail(
       `the runtime no longer strips [${TRANSIENT_ATTR}] when serializing — ` +
@@ -315,7 +315,7 @@ function checkTransientMarking(shell) {
 
   // NEGATIVE CONTROL — a shell carrying the inflated stylesheet as plaintext
   // (exactly what a save produced before the marker existed) must be caught.
-  const css = inflatePayloads(shell).get('bento-rt-css')
+  const css = inflatePayloads(shell).get('webdeck-rt-css')
   if (css) {
     const bloated = shell.replace('</head>', () => `<style>${css}</style>\n</head>`)
     let caught = false

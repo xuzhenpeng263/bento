@@ -4,6 +4,10 @@
 
 A WebDeck file is a complete document: slides, speaker notes, live charts, embedded media, and interactive elements all in one `.webdeck.html` file.
 
+**Try it online**: [xuzhenpeng263.github.io/webdeck](https://xuzhenpeng263.github.io/webdeck)
+
+**GitHub**: [xuzhenpeng263/webdeck](https://github.com/xuzhenpeng263/webdeck)
+
 ---
 
 ## Features

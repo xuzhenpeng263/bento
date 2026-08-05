@@ -1,7 +1,7 @@
 # Deploy the WebDeck Slides editor to GitHub Pages.
 #
 # Triggered by version tags (v*) — push a tag like v1.0.16 and the editor
-# at https://xuzhenpeng263.github.io/bento/ updates automatically.
+# at https://xuzhenpeng263.github.io/webdeck/ updates automatically.
 # Also runnable manually from the Actions tab.
 
 name: Deploy to Pages
@@ -49,7 +49,7 @@ jobs:
           # A small landing hint for first-time visitors. The editor is the
           # index — opening the page lands straight in the app.
           cat > pages-root/README.txt << 'EOF'
-          WebDeck Slides — https://xuzhenpeng263.github.io/bento/
+          WebDeck Slides — https://xuzhenpeng263.github.io/webdeck/
 
           Visit the page to open the editor. From there you can:
           - Start editing the built-in starter deck
